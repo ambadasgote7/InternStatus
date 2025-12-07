@@ -1,11 +1,14 @@
 import express from "express";
 const app = express();
 
-app.use(express.json());
+import cookieParser from "cookie-parser";
+import authRouter from "./routes/auth.js";
 
-app.use('/test', (req, res) => {
-    res.send("Test Route");
-});
+
+app.use(express.json());
+app.use(cookieParser());
+
+app.use('/', authRouter);
 
 
 export default app;
