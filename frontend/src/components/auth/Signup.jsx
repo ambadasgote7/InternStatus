@@ -4,6 +4,7 @@ import { BASE_URL } from "../../utils/constants";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { addUser } from "../../utils/userSlice";
+import { Link } from "react-router-dom";
 
 const Signup = () => {
     const [email, setEmail] = useState("");
@@ -96,6 +97,14 @@ const Signup = () => {
             <button className="btn btn-neutral mt-4 w-full" onClick={handleSignup}>
                 Signup
             </button>
+
+            <Link to={'/login'}>
+                <p className="flex justify-center my-3 cursor-pointer">
+                    Already have account ? Login Here
+                </p>
+            </Link>
+
+            
         </fieldset>
     );
 };
