@@ -4,6 +4,7 @@ import { BASE_URL } from "../../utils/constants";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addUser } from "../../utils/userSlice";
+import { Link } from "react-router-dom";
 
 const Login = () => {
 
@@ -35,6 +36,13 @@ const Login = () => {
         <input type="password" className="input" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)}/>
 
         <button className="btn btn-neutral mt-4" onClick={handleLogin}>Login</button>
+
+        <Link to={'/signup'}>
+            <p className="flex justify-center my-3 cursor-pointer">
+                Already have account ? Login Here
+            </p>
+        </Link>
+
         </fieldset>
     )
 }
