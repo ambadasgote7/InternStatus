@@ -39,7 +39,7 @@ const Login = () => {
 
         <Link to={'/signup'}>
             <p className="flex justify-center my-3 cursor-pointer">
-                Already have account ? Login Here
+                Already have account? Login Here
             </p>
         </Link>
 
