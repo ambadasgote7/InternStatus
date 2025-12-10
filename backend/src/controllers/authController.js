@@ -1,4 +1,4 @@
-// controllers/authController.js
+
 import validateSignupData from "../utils/validation.js";
 import bcrypt from "bcrypt";
 import User from "../models/user.js";
@@ -27,18 +27,20 @@ export const signup = async (req, res) => {
 
     const token = savedUser.getJWT();
 
+    // Set httpOnly cookie (for backend auth)
     res.cookie("token", token, {
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
       httpOnly: true,
       sameSite: "lax",
     });
 
-    const userObj = user.toObject();
+    const userObj = savedUser.toObject();
     delete userObj.password;
 
     return res.status(201).json({
       message: "User added successfully",
-      data: userObj,
+      data: userObj,    // includes role
+      token,            // for frontend (Redux) if you want to store it
     });
   } catch (err) {
     return res.status(400).json({
@@ -67,25 +69,27 @@ export const login = async (req, res) => {
     }
 
     const isValidPassword = await user.validatePassword(password);
-    if (isValidPassword) {
-      const token = user.getJWT();
-
-      res.cookie("token", token, {
-        expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
-        httpOnly: true,
-        sameSite: "lax",
-      });
-
-      const userObj = user.toObject();
-      delete userObj.password;
-
-      return res.status(200).json({
-        message: "Login successful",
-        data: userObj,
-      });
-    } else {
+    if (!isValidPassword) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
+
+    const token = user.getJWT();
+
+    // Set httpOnly cookie
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
+      httpOnly: true,
+      sameSite: "lax",
+    });
+
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    return res.status(200).json({
+      message: "Login successful",
+      data: userObj,   // includes role
+      token,           // for frontend (Redux)
+    });
   } catch (err) {
     return res.status(400).json({
       message: err.message || "Something went wrong",
