@@ -2,15 +2,36 @@
 import express from "express";
 import userAuth from "../middlewares/auth.js";
 import authorizeRoles from "../middlewares/role.js";
-import { getStudentDashboard } from "../controllers/studentController.js";
+import {
+  getStudentDashboard,
+  getMyStudentProfile,
+  submitStudentProfile,
+} from "../controllers/studentController.js";
 
 const studentRouter = express.Router();
 
+// Student dashboard (only verified should normally reach this in UI)
 studentRouter.get(
   "/api/student/dashboard",
   userAuth,
   authorizeRoles("Student"),
   getStudentDashboard
+);
+
+// Get logged-in student's profile (draft/pending/verified/rejected)
+studentRouter.get(
+  "/api/student/profile",
+  userAuth,
+  authorizeRoles("Student"),
+  getMyStudentProfile
+);
+
+// Create or update student's profile and mark it pending for faculty verification
+studentRouter.post(
+  "/api/student/profile",
+  userAuth,
+  authorizeRoles("Student"),
+  submitStudentProfile
 );
 
 export default studentRouter;
