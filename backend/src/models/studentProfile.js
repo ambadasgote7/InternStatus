@@ -10,14 +10,19 @@ const studentProfileSchema = new mongoose.Schema(
       unique: true, // one profile per user
     },
 
-    // Basic personal info
+    // Identity / college info (used for initial verification)
     fullName: {
       type: String,
       required: true,
       trim: true,
     },
-    phone: {
-      type: String,
+    prn: {
+      type: String,          // Permanent Registration Number
+      required: true,
+      trim: true,
+    },
+    collegeId: {
+      type: String,          // College ID number on the card
       required: true,
       trim: true,
     },
@@ -37,14 +42,27 @@ const studentProfileSchema = new mongoose.Schema(
       trim: true,
     },
 
-    // Skills & resume
+    // Contact
+    phone: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    // Files / uploads (store URLs or filenames here)
+    collegeIdImageUrl: {
+      type: String,          // URL/path of ID card photo
+      default: "",
+    },
+    resumeFileUrl: {
+      type: String,          // URL/path of resume file/photo/PDF
+      default: "",
+    },
+
+    // Extra profile info
     skills: {
       type: [String],
       default: [],
-    },
-    resumeUrl: {
-      type: String,
-      default: "",
     },
     bio: {
       type: String,
@@ -52,7 +70,7 @@ const studentProfileSchema = new mongoose.Schema(
       trim: true,
     },
 
-    // Verification & status
+    // Verification & status (for initial identity check)
     status: {
       type: String,
       enum: ["draft", "pending", "verified", "rejected"],
@@ -60,7 +78,7 @@ const studentProfileSchema = new mongoose.Schema(
     },
     verifiedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // faculty (or admin) who verified
+      ref: "User", // faculty who verified
       default: null,
     },
     verifiedAt: {
