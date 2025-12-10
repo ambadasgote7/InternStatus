@@ -113,3 +113,26 @@ export const logout = async (req, res) => {
     });
   }
 };
+
+
+export const getMe = async (req, res) => {
+  try {
+    // userAuth middleware already attached the user document to req.user
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    return res.status(200).json({
+      message: "User fetched successfully",
+      data: userObj,
+    });
+  } catch (err) {
+    return res.status(400).json({
+      message: err.message || "Something went wrong",
+    });
+  }
+};
