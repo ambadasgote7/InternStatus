@@ -8,8 +8,8 @@ import { addUser } from "../../store/userSlice";
 import roleConfig from "../../config/roleConfig";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("ambadas@gmail.com");
+  const [password, setPassword] = useState("Ambadas@123");
 
   const navigate = useNavigate();
   const dispatch = useDispatch();

@@ -1,26 +1,28 @@
-// src/components/NavBar.jsx
+// File: src/components/NavBar.jsx
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+
 
 const NavBar = () => {
-  const user = useSelector((state) => state.user);
-
-  return (
-    <nav className="w-full p-4 bg-base-300 flex justify-between items-center">
-      <Link to="/" className="font-bold text-lg">InternStatus</Link>
-
-      <div className="flex gap-4">
-        {!user && (
-          <>
-            <Link to="/login" className="btn btn-sm">Login</Link>
-            <Link to="/signup" className="btn btn-sm">Signup</Link>
-          </>
-        )}
-
-        {user && <span className="opacity-60">Role: {user.role}</span>}
-      </div>
-    </nav>
-  );
+return (
+<nav className="shadow">
+<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div className="flex justify-between h-16 items-center">
+<Link to="/" className="font-bold text-xl">
+InternStatus
+</Link>
+<div className="flex items-center gap-4">
+<Link to="/login" className="text-sm hover:underline">
+Login
+</Link>
+<Link to="/signup" className="text-sm hover:underline">
+Signup
+</Link>
+</div>
+</div>
+</div>
+</nav>
+);
 };
+
 
 export default NavBar;
