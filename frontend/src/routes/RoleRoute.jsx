@@ -1,16 +1,16 @@
 // src/routes/RoleRoute.jsx
 import React from "react";
 import { useSelector } from "react-redux";
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import roleConfig from "../config/roleConfig";
 
 /**
  * Props:
- * - allowed: string or array of strings (role names, e.g. "Student" or ["Faculty","Admin"])
+ * - allowed: string or array of strings (role names)
  *
- * Usage examples:
- * <Route path="/student" element={<RoleRoute allowed="Student"><StudentDashboard/></RoleRoute>} />
- * or for nested: <Route element={<RoleRoute allowed={["Faculty","Admin"]} />}><Route ... /></Route>
+ * Usage:
+ * - for single-route wrapper: <RoleRoute allowed="Student"><StudentPage/></RoleRoute>
+ * - for nested usage: <Route element={<RoleRoute allowed="Student" />}><Route ... /></Route>
  */
 const RoleRoute = ({ allowed, children }) => {
   const user = useSelector((state) => state.user);
@@ -28,7 +28,8 @@ const RoleRoute = ({ allowed, children }) => {
     return <Navigate to={redirectTo} replace />;
   }
 
-  return children ? children : null;
+  // support both direct children and nested <Outlet/>
+  return children ? children : <Outlet />;
 };
 
 export default RoleRoute;
