@@ -8,6 +8,7 @@ import CompanyLayout from "./layouts/CompanyLayout";
 
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
+import PendingVerification from "./pages/PendingVerification";
 
 import StudentDashboard from "./pages/students/StudentDashboard";
 import StudentProfile from "./pages/students/StudentProfile";
@@ -120,9 +121,15 @@ function App() {
             ------------------------------------------------------------------ */}
           </Route>
 
+
           {/* -------------------- FALLBACK / 404 -------------------- */}
           {/* If you want a dedicated 404 page, create one and replace the Navigate below */}
           <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route
+            path="/pending-verification"
+            element={<PendingVerification />}
+          />
+
 
         </Routes>
       </BrowserRouter>
