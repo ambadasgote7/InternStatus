@@ -2,6 +2,7 @@
 import express from "express";
 import userAuth from "../middlewares/auth.js";
 import authorizeRoles from "../middlewares/role.js";
+import { upload } from "../middlewares/upload.js";
 import {
   getStudentDashboard,
   getMyStudentProfile,
@@ -31,6 +32,10 @@ studentRouter.post(
   "/api/student/profile",
   userAuth,
   authorizeRoles("Student"),
+  upload.fields([
+    { name: "collegeIdFile", maxCount: 1 },
+    { name: "resumeFile", maxCount: 1 },
+  ]),
   submitStudentProfile
 );
 

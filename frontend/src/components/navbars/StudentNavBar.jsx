@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { removeUser } from "../../store/userSlice";
 import axios from "axios";
 import { BASE_URL } from "../../utils/constants";
+import { clearStudentProfile } from "../../store/studentProfileSlice";
 
 const StudentNavBar = () => {
   const dispatch = useDispatch();
@@ -14,6 +15,7 @@ const handleLogout = async () => {
     try {
       await axios.post(BASE_URL + "/api/auth/logout", {}, { withCredentials: true });
       dispatch(removeUser());
+      dispatch(clearStudentProfile());
       navigate("/login");
     } catch (err) {
       console.error(err);

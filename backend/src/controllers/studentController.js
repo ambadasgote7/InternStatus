@@ -43,125 +43,97 @@ export const getMyStudentProfile = async (req, res) => {
 // controllers/studentController.js
 export const submitStudentProfile = async (req, res) => {
   try {
-    const userId = req.user._id;
+    if (req.user.role !== "Student") {
+      return res.status(403).json({ message: "Only students allowed" });
+    }
 
     const {
       fullName,
-      phone,
-      collegeName,
-      collegeId,
       prn,
+      collegeName,
+      phone,
       course,
       year,
-      skills,
-      collegeIdImageUrl,
-      resumeFileUrl,
       bio,
     } = req.body;
 
-    // Basic required fields for identity verification
-    if (
-      !fullName ||
-      !phone ||
-      !collegeName ||
-      !collegeId ||
-      !prn ||
-      !course ||
-      !year
-    ) {
-      return res
-        .status(400)
-        .json({ message: "All required fields must be filled" });
+    const skills = req.body.skills ? JSON.parse(req.body.skills) : [];
+
+    if (!fullName || !prn || !collegeName || !phone || !course || !year) {
+      return res.status(400).json({ message: "All required fields must be filled" });
     }
 
-    if (req.user.role !== "Student") {
-      return res
-        .status(403)
-        .json({ message: "Only students can submit a student profile" });
-    }
+    const collegeIdFile = req.files?.collegeIdFile?.[0];
+    const resumeFile = req.files?.resumeFile?.[0];
 
-    let profile = await StudentProfile.findOne({ userId });
+    let profile = await StudentProfile.findOne({ userId: req.user._id });
 
+    /* ================= FIRST TIME SUBMISSION ================= */
     if (!profile) {
-      // First-time profile creation
       profile = new StudentProfile({
-        userId,
+        userId: req.user._id,
         fullName,
-        phone,
-        collegeName,
-        collegeId,
         prn,
+        collegeName,
+        phone,
         course,
         year,
-        skills: Array.isArray(skills) ? skills : [],
-        collegeIdImageUrl: collegeIdImageUrl || "",
-        resumeFileUrl: resumeFileUrl || "",
         bio: bio || "",
-        status: req.user.isVerified ? "verified" : "pending",
+        skills,
+        collegeIdImageUrl: collegeIdFile
+          ? `/uploads/${collegeIdFile.originalname}`
+          : "",
+        resumeFileUrl: resumeFile
+          ? `/uploads/${resumeFile.originalname}`
+          : "",
+        status: "pending",
       });
-    } else {
+
+      req.user.isRegistered = true;   // 🔒 permanent
+      req.user.isVerified = false;    // until faculty approves
+      await req.user.save();
+    } 
+    /* ================= RE-SUBMISSION / UPDATE ================= */
+    else {
+      // 🔒 identity locked AFTER verification
       if (!req.user.isVerified) {
-        // NOT VERIFIED YET → faculty uses this for identity check
         profile.fullName = fullName;
-        profile.phone = phone;
-        profile.collegeName = collegeName;
-        profile.collegeId = collegeId;
         profile.prn = prn;
-        profile.course = course;
-        profile.year = year;
-        profile.skills = Array.isArray(skills) ? skills : [];
-        profile.collegeIdImageUrl = collegeIdImageUrl || profile.collegeIdImageUrl;
-        profile.resumeFileUrl = resumeFileUrl || profile.resumeFileUrl;
-        profile.bio = bio || "";
+        profile.collegeName = collegeName;
+      }
 
+      profile.phone = phone;
+      profile.course = course;
+      profile.year = year;
+      profile.skills = skills;
+      profile.bio = bio || "";
+
+      if (!req.user.isVerified && collegeIdFile) {
+        profile.collegeIdImageUrl = `/uploads/${collegeIdFile.originalname}`;
+      }
+
+      if (resumeFile) {
+        profile.resumeFileUrl = `/uploads/${resumeFile.originalname}`;
+      }
+
+      // 🔁 resubmission always goes back to pending
+      if (!req.user.isVerified) {
         profile.status = "pending";
-        profile.rejectionReason = "";
-        profile.verifiedBy = null;
-        profile.verifiedAt = null;
-      } else {
-        // ALREADY VERIFIED → free to update profile (no re-verification)
-        profile.fullName = fullName || profile.fullName;
-        profile.phone = phone || profile.phone;
-
-        // Identity fields we keep stable by default
-        // comment/uncomment if you want them editable
-        // profile.collegeName = collegeName || profile.collegeName;
-        // profile.collegeId = collegeId || profile.collegeId;
-        // profile.prn = prn || profile.prn;
-        // profile.course = course || profile.course;
-        // profile.year = year || profile.year;
-
-        if (Array.isArray(skills)) {
-          profile.skills = skills;
-        }
-
-        if (typeof collegeIdImageUrl === "string" && collegeIdImageUrl) {
-          profile.collegeIdImageUrl = collegeIdImageUrl;
-        }
-
-        if (typeof resumeFileUrl === "string" && resumeFileUrl) {
-          profile.resumeFileUrl = resumeFileUrl;
-        }
-
-        if (typeof bio === "string") {
-          profile.bio = bio;
-        }
-
-        // Do NOT touch status or user.isVerified here
       }
     }
 
-    const savedProfile = await profile.save();
+    await profile.save();
 
     return res.status(200).json({
-      message: req.user.isVerified
-        ? "Profile updated successfully"
-        : "Profile submitted successfully and pending verification",
-      data: savedProfile,
+      message: "Profile saved successfully",
+      profile,
+      user: {
+        isRegistered: req.user.isRegistered,
+        isVerified: req.user.isVerified,
+      },
     });
+
   } catch (err) {
-    return res.status(500).json({
-      message: err.message || "Something went wrong while submitting profile",
-    });
+    return res.status(500).json({ message: err.message });
   }
 };

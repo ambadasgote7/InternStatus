@@ -1,23 +1,12 @@
-// src/routes/ProtectedRoute.jsx
 import { useSelector, useDispatch } from "react-redux";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
 import { addUser } from "../store/userSlice";
+import { setStudentProfile } from "../store/studentProfileSlice";
 import { BASE_URL } from "../utils/constants";
 
-/**
- * Behavior:
- * - unauthenticated -> /login
- * - authenticated && !isRegistered -> forced to role-specific register page:
- *     - Student -> /student/profile
- *     - others  -> /<role>/register
- * - authenticated && isRegistered && !isVerified -> forced to /pending-verification (global)
- * - authenticated && isRegistered && isVerified -> allowed
- *
- * Keeps your /api/auth/me restore logic and the "checking" loading state.
- */
 const ProtectedRoute = ({ children }) => {
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
@@ -26,30 +15,53 @@ const ProtectedRoute = ({ children }) => {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    const restoreUser = async () => {
-      if (user) {
-        setChecking(false);
-        return;
-      }
-
+    const restoreSession = async () => {
       try {
-        const res = await axios.get(BASE_URL + "/api/auth/me", {
+        /* ========== AUTH RESTORE (ALWAYS) ========== */
+        const res = await axios.get(`${BASE_URL}/api/auth/me`, {
           withCredentials: true,
         });
+
         const userData = res.data?.data;
-        if (userData) {
-          dispatch(addUser(userData));
+        if (!userData) {
+          setChecking(false);
+          return;
+        }
+
+        dispatch(addUser(userData));
+
+        /* ========== STUDENT PROFILE PRELOAD ========== */
+        if (String(userData.role).toLowerCase() === "student") {
+          try {
+            const profileRes = await axios.get(
+              `${BASE_URL}/api/student/profile`,
+              { withCredentials: true }
+            );
+
+            if (profileRes.data?.data) {
+              dispatch(setStudentProfile(profileRes.data.data));
+            }
+          } catch (err) {
+            // 404 = profile not created yet (valid state)
+            if (err.response?.status !== 404) {
+              console.error("Profile preload failed:", err);
+            }
+          }
         }
       } catch (err) {
-        console.error("Error restoring user:", err?.response?.data || err.message);
+        console.error(
+          "Error restoring session:",
+          err?.response?.data || err.message
+        );
       } finally {
         setChecking(false);
       }
     };
 
-    restoreUser();
-  }, [user, dispatch]);
+    restoreSession();
+  }, [dispatch]);
 
+  /* ========== LOADING ========== */
   if (checking) {
     return (
       <div className="flex justify-center items-center p-8">
@@ -58,6 +70,7 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
+  /* ========== NOT AUTHENTICATED ========== */
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
@@ -65,14 +78,12 @@ const ProtectedRoute = ({ children }) => {
   const role = String(user.role || "").toLowerCase();
   const pathname = location.pathname;
 
-  // STUDENT uses /student/profile as registration page
   const studentRegisterPath = "/student/profile";
-  // default register path for other roles
   const defaultRegisterPath = `/${role}/register`;
-  // choose register path based on role
-  const registerPath = role === "student" ? studentRegisterPath : defaultRegisterPath;
+  const registerPath =
+    role === "student" ? studentRegisterPath : defaultRegisterPath;
 
-  // 1) Not registered -> allow only registerPath
+  /* ========== NOT REGISTERED ========== */
   if (!user.isRegistered) {
     if (pathname === registerPath) {
       return children ? children : <Outlet />;
@@ -80,16 +91,16 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to={registerPath} state={{ from: location }} replace />;
   }
 
-  // 2) Registered but not verified -> allow only /pending-verification
+  /* ========== REGISTERED BUT NOT VERIFIED ========== */
   const pendingPath = "/pending-verification";
-  if (user.isRegistered && !user.isVerified) {
+  if (!user.isVerified) {
     if (pathname === pendingPath) {
       return children ? children : <Outlet />;
     }
     return <Navigate to={pendingPath} state={{ from: location }} replace />;
   }
 
-  // 3) Registered & verified => allow
+  /* ========== REGISTERED & VERIFIED ========== */
   return children ? children : <Outlet />;
 };
 
