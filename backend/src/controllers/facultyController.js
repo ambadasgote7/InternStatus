@@ -28,12 +28,13 @@ export const facultyRegister = async (req, res) => {
 
     const { 
       requesterName, 
-      requesterEmail, 
       collegeName, 
       collegeWebsite, 
       verificationDocumentUrl, 
       requestedFaculties = []
     } = req.body;
+
+    const requesterEmail = req.user.email;
 
     if (!requesterName || !requesterEmail || !collegeName || !verificationDocumentUrl) {
       return res.status(400).json({
@@ -74,7 +75,7 @@ export const facultyRegister = async (req, res) => {
 
        if (!validator.isEmail(facultyEmail)) {
         return res.status(400).json({
-          message: `Invalid faculty email: ${f.facultyEmail}`,
+          message: `Invalid faculty email: ${facultyEmail}`,
         });
       }
 
