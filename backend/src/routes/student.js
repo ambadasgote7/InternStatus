@@ -29,7 +29,7 @@ studentRouter.get(
 
 // Create or update student's profile and mark it pending for faculty verification
 studentRouter.post(
-  "/api/student/profile",
+  "/profile",
   userAuth,
   authorizeRoles("Student"),
   upload.fields([

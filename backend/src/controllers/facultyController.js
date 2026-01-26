@@ -3,6 +3,7 @@
 import FacultyRegister from "../models/facultyRegister.js";
 import validator from "validator";
 import User from "../models/user.js";
+import { uploadToCloudinary } from "../services/cloudinary.js";
 
 export const getFacultyDashboard = async (req, res) => {
   try {
@@ -25,55 +26,87 @@ export const getFacultyDashboard = async (req, res) => {
 export const facultyRegister = async (req, res) => {
   try {
 
+    console.log("BODY:", req.body);
+console.log("FILE:", req.file);
+console.log("USER:", req.user);
 
-    const { 
-      requesterName, 
-      collegeName, 
-      collegeWebsite, 
-      verificationDocumentUrl, 
-      requestedFaculties = []
+    const {
+      requesterName,
+      collegeName,
+      collegeWebsite,
+      requestedFaculties,
     } = req.body;
 
     const requesterEmail = req.user.email;
+    const userId = req.user._id;
 
-    if (!requesterName || !requesterEmail || !collegeName || !verificationDocumentUrl) {
+
+
+    /* --------------------------------------------------
+       1️⃣ Basic validation
+    -------------------------------------------------- */
+    if (!requesterName || !collegeName) {
       return res.status(400).json({
         message: "Missing required fields",
       });
     }
 
-    const normalizeRequesterEmail = requesterEmail.toLowerCase().trim();
+    /* --------------------------------------------------
+       2️⃣ Prevent duplicate request by same user
+    -------------------------------------------------- */
+    const existingRequestByUser = await FacultyRegister.findOne({
+      userId,
+      status: { $in: ["pending", "approved"] },
+    });
 
-    const existingCollege = await FacultyRegister.findOne({
-      collegeName : collegeName.trim(),
-      status : {$in : ["pending", "approved"]}
-    })
-
-    if (existingCollege) {
+    if (existingRequestByUser) {
       return res.status(400).json({
-        message: "College already registered",
-        data: existingCollege
+        message: "You have already submitted a registration request",
       });
     }
 
-    if (!Array.isArray(requestedFaculties)) {
+    /* --------------------------------------------------
+       3️⃣ File validation
+    -------------------------------------------------- */
+    if (!req.file) {
+      return res.status(400).json({
+        message: "Verification document required",
+      });
+    }
+
+    /* --------------------------------------------------
+       4️⃣ Parse requestedFaculties
+    -------------------------------------------------- */
+    let parsedFaculties = [];
+    try {
+      parsedFaculties = JSON.parse(requestedFaculties || "[]");
+    } catch {
+      return res.status(400).json({
+        message: "Invalid requestedFaculties format",
+      });
+    }
+
+    if (!Array.isArray(parsedFaculties)) {
       return res.status(400).json({
         message: "Requested faculties must be an array",
       });
     }
 
+    /* --------------------------------------------------
+       5️⃣ Validate faculty emails
+    -------------------------------------------------- */
     const emailSet = new Set();
 
-    for (const faculty of requestedFaculties) {
+    for (const faculty of parsedFaculties) {
       if (!faculty.facultyName || !faculty.facultyEmail) {
         return res.status(400).json({
-          message: "Missing required fields",
+          message: "Faculty name and email are required",
         });
       }
 
       const facultyEmail = faculty.facultyEmail.toLowerCase().trim();
 
-       if (!validator.isEmail(facultyEmail)) {
+      if (!validator.isEmail(facultyEmail)) {
         return res.status(400).json({
           message: `Invalid faculty email: ${facultyEmail}`,
         });
@@ -81,45 +114,60 @@ export const facultyRegister = async (req, res) => {
 
       if (emailSet.has(facultyEmail)) {
         return res.status(400).json({
-          message : `Duplicate faculty email found : ${facultyEmail}`,
+          message: `Duplicate faculty email found: ${facultyEmail}`,
         });
       }
 
       emailSet.add(facultyEmail);
-
       faculty.facultyEmail = facultyEmail;
     }
 
+    /* --------------------------------------------------
+       6️⃣ Upload verification document to Cloudinary
+    -------------------------------------------------- */
+    let uploadResult;
+    try {
+      uploadResult = await uploadToCloudinary(
+        req.file,
+        "faculty-verification"
+      );
+    } catch (err) {
+      return res.status(500).json({
+        message: "Verification document upload failed",
+      });
+    }
 
+    /* --------------------------------------------------
+       7️⃣ Save FacultyRegister
+    -------------------------------------------------- */
     const facultyRegister = new FacultyRegister({
-      requesterName, 
-      requesterEmail, 
-      collegeName, 
-      collegeWebsite, 
-      verificationDocumentUrl, 
-      requestedFaculties, 
+      userId, // 🔥 THIS FIXES YOUR DUPLICATE KEY ERROR
+      requesterName,
+      requesterEmail,
+      collegeName,
+      collegeWebsite,
+      verificationDocumentUrl: uploadResult.secure_url,
+      requestedFaculties: parsedFaculties,
       status: "pending",
-      verifiedBy: null,
-      verifiedAt: null,
-      rejectionReason: ""
     });
 
     await facultyRegister.save();
 
-    await User.findByIdAndUpdate(
-      req.user._id,
-      { isRegistered: true },
-      { new: true }
-    );
+    /* --------------------------------------------------
+       8️⃣ Mark user as registered
+    -------------------------------------------------- */
+    await User.findByIdAndUpdate(userId, {
+      isRegistered: true,
+    });
 
     return res.status(201).json({
-      message: "Faculty register submitted successfully",
+      message: "Faculty registration submitted successfully",
       data: facultyRegister,
-    });    
-
+    });
   } catch (err) {
     return res.status(500).json({
-      message: err.message || "Something went wrong while loading faculty register",
+      message: err.message || "Something went wrong",
     });
   }
-}
+};
+
