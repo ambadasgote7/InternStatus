@@ -13,7 +13,7 @@ const studentRouter = express.Router();
 
 // Student dashboard (only verified should normally reach this in UI)
 studentRouter.get(
-  "/api/student/dashboard",
+  "/dashboard",
   userAuth,
   authorizeRoles("Student"),
   getStudentDashboard
@@ -21,7 +21,7 @@ studentRouter.get(
 
 // Get logged-in student's profile (draft/pending/verified/rejected)
 studentRouter.get(
-  "/api/student/profile",
+  "/profile",
   userAuth,
   authorizeRoles("Student"),
   getMyStudentProfile
