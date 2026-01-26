@@ -7,7 +7,7 @@ import validator from "validator";
 export const signup = async (req, res) => {
   try {
     validateSignupData(req.body);
-
+  
     const { email, password, role } = req.body;
 
     const existingUser = await User.findOne({ email });
