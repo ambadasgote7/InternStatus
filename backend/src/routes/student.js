@@ -1,7 +1,7 @@
 // routes/student.js
 import express from "express";
 import userAuth from "../middlewares/auth.js";
-import authorizeRoles from "../middlewares/role.js";
+import {authorizeRoles} from "../middlewares/role.js";
 import { upload } from "../middlewares/upload.js";
 import {
   getStudentDashboard,

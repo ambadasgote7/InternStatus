@@ -44,6 +44,16 @@ const Login = () => {
       // Save user to Redux immediately
       dispatch(addUser(userData));
 
+      const roleStatus = userData.roleStatus;
+
+      // 🚫 ROLE REVOKED → STOP EVERYTHING ELSE
+      if (roleStatus === "revoked") {
+        navigate("/access-revoked");
+        setLoading(false);
+        return;
+      }
+
+
       const role = userData.role;
       const isVerified = !!userData.isVerified;
 

@@ -24,6 +24,7 @@ import RoleRoute from "./routes/RoleRoute";
 
 import { Provider } from "react-redux";
 import appStore from "./store/appStore";
+import AccessRevoke from "./pages/AccessRevoked";
 
 function App() {
   return (
@@ -128,6 +129,10 @@ function App() {
           <Route
             path="/pending-verification"
             element={<PendingVerification />}
+          />
+          <Route
+            path="/access-revoked"
+            element={<AccessRevoke />}
           />
 
 

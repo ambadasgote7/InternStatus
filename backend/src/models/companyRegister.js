@@ -1,14 +1,13 @@
 import mongoose from "mongoose";
 import validator from "validator";
 
-const facultyRegisterSchema = new mongoose.Schema(
+const companyRegisterSchema = new mongoose.Schema(
   {
-    // 🔑 Requesting user (logged-in faculty)
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      unique: true, // one registration per user
+      unique: true,
     },
 
     requesterName: {
@@ -22,6 +21,7 @@ const facultyRegisterSchema = new mongoose.Schema(
       required: true,
       lowercase: true,
       trim: true,
+      immutable: true,
       validate(value) {
         if (!validator.isEmail(value)) {
           throw new Error("Invalid requester email");
@@ -29,16 +29,20 @@ const facultyRegisterSchema = new mongoose.Schema(
       },
     },
 
-    // College details
-    collegeName: {
+    companyName: {
       type: String,
       required: true,
       trim: true,
     },
 
-    collegeWebsite: {
+    companyWebsite: {
       type: String,
       trim: true,
+      validate(value) {
+        if (value && !validator.isURL(value, { require_protocol: true })) {
+          throw new Error("Invalid company website URL");
+        }
+      },
     },
 
     verificationDocumentUrl: {
@@ -46,27 +50,6 @@ const facultyRegisterSchema = new mongoose.Schema(
       required: true,
     },
 
-    // Requested faculty users (OPTIONAL)
-    requestedFaculties: {
-      type: [
-        {
-          facultyName: { type: String, trim: true },
-          facultyEmail: {
-            type: String,
-            lowercase: true,
-            trim: true,
-            validate(value) {
-              if (!validator.isEmail(value)) {
-                throw new Error("Invalid faculty email");
-              }
-            },
-          },
-        },
-      ],
-      default: [],
-    },
-
-    // Admin verification
     status: {
       type: String,
       enum: ["pending", "approved", "rejected"],
@@ -92,8 +75,8 @@ const facultyRegisterSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const FacultyRegister =
-  mongoose.models.FacultyRegister ||
-  mongoose.model("FacultyRegister", facultyRegisterSchema);
+const CompanyRegister =
+  mongoose.models.CompanyRegister ||
+  mongoose.model("CompanyRegister", companyRegisterSchema);
 
-export default FacultyRegister;
+export default CompanyRegister;

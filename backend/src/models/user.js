@@ -32,6 +32,12 @@ const userSchema = new mongoose.Schema(
       },
     },
 
+    roleStatus: {
+      type: String,
+      enum: ["active", "revoked"],
+      default: "active"
+    },
+
     isVerified: {
       type: Boolean,
       default: false,

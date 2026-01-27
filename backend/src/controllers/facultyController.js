@@ -26,10 +26,6 @@ export const getFacultyDashboard = async (req, res) => {
 export const facultyRegister = async (req, res) => {
   try {
 
-    console.log("BODY:", req.body);
-console.log("FILE:", req.file);
-console.log("USER:", req.user);
-
     const {
       requesterName,
       collegeName,

@@ -1,16 +1,25 @@
 // routes/company.js
 import express from "express";
 import userAuth from "../middlewares/auth.js";
-import authorizeRoles from "../middlewares/role.js";
-import { getCompanyDashboard } from "../controllers/companyController.js";
+import {authorizeRoles} from "../middlewares/role.js";
+import { getCompanyDashboard, companyRegister} from "../controllers/companyController.js";
+import { upload } from "../middlewares/upload.js";
 
 const companyRouter = express.Router();
 
 companyRouter.get(
-  "/api/company/dashboard",
+  "/dashboard",
   userAuth,
   authorizeRoles("Company"),
   getCompanyDashboard
 );
+
+companyRouter.post(
+  "/register",
+  userAuth,
+  authorizeRoles("Company"),
+  upload.single("verificationDocument"),
+  companyRegister
+)
 
 export default companyRouter;

@@ -1,6 +1,6 @@
 // middlewares/roleMiddleware.js
 
-const authorizeRole = (...allowedRoles) => {
+export const authorizeRoles = (...allowedRoles) => {
   return (req, res, next) => {
     try {
       const userRole = req.user.role;
@@ -20,4 +20,13 @@ const authorizeRole = (...allowedRoles) => {
   };
 };
 
-export default authorizeRole;
+export const requireActiveRole = (req, res, next) => {
+  if (req.user.roleStatus === "revoked") {
+    return res.status(403).json({
+      message: "Role access revoked"
+    });
+  }
+  next();
+};
+
+

@@ -27,8 +27,6 @@ export const uploadToCloudinary = (file, folder) =>
       })
     };
 
-    console.log(`Uploading ${file.originalname} as ${uploadOptions.resource_type} to ${folder}`);
-
     const stream = cloudinary.uploader.upload_stream(
       uploadOptions,
       (err, result) => {
