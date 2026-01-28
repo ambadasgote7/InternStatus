@@ -3,6 +3,7 @@ import validateSignupData from "../utils/validation.js";
 import bcrypt from "bcrypt";
 import User from "../models/user.js";
 import validator from "validator";
+import jwt from "jsonwebtoken";
 
 export const signup = async (req, res) => {
   try {
@@ -96,6 +97,7 @@ export const login = async (req, res) => {
     });
   }
 };
+
 
 export const logout = async (req, res) => {
   try {

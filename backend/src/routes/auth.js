@@ -10,5 +10,6 @@ authRouter.post("/login", login);
 authRouter.post("/logout", userAuth, logout);
 authRouter.get("/me", userAuth, getMe);
 
+
 export default authRouter;
 

@@ -25,6 +25,9 @@ import RoleRoute from "./routes/RoleRoute";
 import { Provider } from "react-redux";
 import appStore from "./store/appStore";
 import AccessRevoke from "./pages/AccessRevoked";
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminRoute from "./routes/AdminRoute";
 
 function App() {
   return (
@@ -121,6 +124,19 @@ function App() {
                  <Route path="interns" element={<CompanyInterns />} />
             ------------------------------------------------------------------ */}
           </Route>
+
+          {/* -------------------- ADMIN ROUTES (isolated) -------------------- */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+
+          <Route
+            path="/admin"
+            element={<AdminRoute />}
+          >
+            <Route path="dashboard" element={<AdminDashboard />} />
+          </Route>
+
+
+          
 
 
           {/* -------------------- FALLBACK / 404 -------------------- */}

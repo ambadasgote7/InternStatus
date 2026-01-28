@@ -145,15 +145,30 @@ const Login = () => {
   };
 
   return (
-    <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
+  <div className="min-h-screen relative flex items-center justify-center bg-base-200">
+
+    {/* Admin Login — top right */}
+    <p
+      className="absolute top-4 right-6 text-xs text-gray-500 cursor-pointer hover:underline"
+      onClick={() => navigate("/admin/login")}
+    >
+      Admin Login
+    </p>
+
+    {/* Login Card */}
+    <fieldset className="fieldset bg-base-100 border-base-300 rounded-box w-xs border p-4 shadow">
       <legend className="fieldset-legend">Login</legend>
 
-      {error && <p className="text-red-500 text-sm mb-2 text-center">{error}</p>}
+      {error && (
+        <p className="text-red-500 text-sm mb-2 text-center">
+          {error}
+        </p>
+      )}
 
       <label className="label">Email</label>
       <input
         type="email"
-        className="input"
+        className="input input-bordered"
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
@@ -163,7 +178,7 @@ const Login = () => {
       <label className="label">Password</label>
       <input
         type="password"
-        className="input"
+        className="input input-bordered"
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
@@ -171,20 +186,21 @@ const Login = () => {
       />
 
       <button
-        className="btn btn-neutral mt-4"
+        className="btn btn-neutral mt-4 w-full"
         onClick={handleLogin}
         disabled={loading}
       >
         {loading ? "Logging in..." : "Login"}
       </button>
 
-      <Link to={"/signup"}>
-        <p className="flex justify-center my-3 cursor-pointer">
+      <Link to="/signup">
+        <p className="flex justify-center my-3 cursor-pointer text-sm">
           Don&apos;t have an account? Signup here
         </p>
       </Link>
     </fieldset>
-  );
+  </div>
+);
 };
 
 export default Login;
