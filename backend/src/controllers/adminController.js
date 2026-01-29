@@ -2,6 +2,9 @@ import jwt from "jsonwebtoken";
 import FacultyRegister from "../models/facultyRegister.js";
 import User from "../models/user.js";
 import CompanyRegister from "../models/companyRegister.js";
+import { generatePasswordSetupToken } from "../utils/generateToken.js";
+import { sendEmail } from "../utils/sendEmail.js";
+
 
 export const adminLogin = async (req, res) => {
   try {
@@ -105,54 +108,102 @@ export const updateFacultyRequestStatus = async (req, res) => {
   try {
     const { id, status } = req.params;
 
-    // 1. Validate status strictly
-    const allowedStatuses = ["approved", "rejected"];
-    if (!allowedStatuses.includes(status)) {
+    if (!["approved", "rejected"].includes(status)) {
       return res.status(400).json({ message: "Invalid status" });
     }
 
-    // 2. Find request
     const request = await FacultyRegister.findById(id);
     if (!request) {
       return res.status(404).json({ message: "Request not found" });
     }
 
     if (request.status !== "pending") {
-      return res.status(400).json({
-        message: `Request already ${request.status}`,
-      });
+      return res
+        .status(400)
+        .json({ message: `Request already ${request.status}` });
     }
 
-    // 3. Find linked user
-    const user = await User.findById(request.userId);
-    if (!user) {
+    const requesterUser = await User.findById(request.userId);
+    if (!requesterUser) {
       return res.status(404).json({ message: "Linked user not found" });
     }
 
-    // 4. Update user verification
-    const isVerified = status === "approved";
+    // APPROVAL FLOW
+    if (status === "approved") {
+      requesterUser.isVerified = true;
+      await requesterUser.save();
 
-    await User.findByIdAndUpdate(request.userId, {
-      isVerified,
-    });
+      if (Array.isArray(request.requestedFaculties)) {
+        for (const faculty of request.requestedFaculties) {
+          let user = await User.findOne({ email: faculty.facultyEmail });
 
-    // 5. Update faculty request
+          if (!user) {
+            const { rawToken, hashedToken } =
+              generatePasswordSetupToken();
+
+            user = await User.create({
+              name: faculty.facultyName,
+              email: faculty.facultyEmail,
+              role: "Faculty",
+              isVerified: true,
+              isRegistered: true,
+              passwordSetupToken: hashedToken,
+              passwordSetupExpires: Date.now() + 1000 * 60 * 60 * 24, // 24h
+            });
+
+            const setupLink = `${process.env.FRONTEND_URL}/set-password?token=${rawToken}`
+
+            // Email (best effort)
+            try {
+              await sendEmail({
+                to: faculty.facultyEmail,
+                subject: "Set Your Faculty Account Password",
+                html: `
+                  <p>Hello ${faculty.facultyName},</p>
+                  <p>Your faculty account has been created.</p>
+                  <p>Please set your password using the link below:</p>
+                  <p>
+                    <a href="${setupLink}">
+                      Set Password
+                    </a>
+                  </p>
+                  <p>This link will expire in 24 hours.</p>
+                  <p>— InternStatus Team</p>
+                `,
+              });
+            } catch (mailErr) {
+              console.error("Email failed:", mailErr.message);
+            }
+          }
+
+          faculty.status = "approved";
+          faculty.verifiedAt = new Date();
+        }
+      }
+    }
+
+    // REJECTION
+    if (status === "rejected") {
+      request.rejectionReason = req.body?.reason || "";
+    }
+
     request.status = status;
-    request.verifiedAt = new Date();
     request.verifiedBy = req.user._id;
+    request.verifiedAt = new Date();
 
     await request.save();
 
     return res.status(200).json({
       message: `Request ${status} successfully`,
     });
-
   } catch (err) {
+    console.error(err);
     return res.status(500).json({
       message: err.message || "Something went wrong",
     });
   }
 };
+
 
 export const verifiedFacultyRequests = async (req, res) => {
   try {

@@ -66,10 +66,24 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const isValidPassword = await user.validatePassword(password);
-    if (!isValidPassword) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
+    if (user.passwordSetupToken) {
+  return res.status(400).json({
+    message: "Please complete password setup first",
+  });
+}
+
+    if (!user.password) {
+  return res.status(400).json({
+    message: "Password not set. Please set your password first.",
+  });
+}
+
+
+    const isMatch = await user.validatePassword(password);
+if (!isMatch) {
+  return res.status(401).json({ message: "Invalid credentials" });
+}
+
 
     const token = user.getJWT();
 
@@ -111,6 +125,63 @@ export const logout = async (req, res) => {
     });
   }
 };
+
+export const setPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    // 1. Basic validation
+    if (!token || !password) {
+      return res.status(400).json({
+        message: "Token and password are required",
+      });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        message: "Password must be at least 8 characters long",
+      });
+    }
+
+    // 2. Hash incoming token
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+
+    // 3. Find user with valid token
+    const user = await User.findOne({
+      passwordSetupToken: hashedToken,
+      passwordSetupExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid or expired password setup link",
+      });
+    }
+
+    // 4. Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // 5. Set password & clear token
+    user.password = hashedPassword;
+    user.passwordSetupToken = undefined;
+    user.passwordSetupExpires = undefined;
+
+    await user.save();
+
+    return res.status(200).json({
+      message: "Password set successfully. You can now log in.",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      message: "Failed to set password",
+    });
+  }
+};
+
 
 export const getMe = async (req, res) => {
   try {

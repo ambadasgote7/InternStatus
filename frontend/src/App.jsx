@@ -32,6 +32,7 @@ import FacultyRequests from "./pages/admin/FacultyRequests";
 import VerifiedFacultyRequests from "./pages/admin/VerifiedFacultyRequests";
 import CompanyRequests from "./pages/admin/CompanyRequests";
 import VerifiedCompanyRequests from "./pages/admin/VerifiedCompanyRequests";
+import SetPassword from "./pages/SetPassword";
 
 function App() {
   return (
@@ -158,7 +159,10 @@ function App() {
             path="/access-revoked"
             element={<AccessRevoke />}
           />
-
+          <Route 
+            path="/set-password" 
+            element={<SetPassword />} 
+          />
 
         </Routes>
       </BrowserRouter>
