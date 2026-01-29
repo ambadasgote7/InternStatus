@@ -3,25 +3,26 @@ import axios from "axios";
 import { BASE_URL } from "../../utils/constants";
 import AdminNavBar from "../../components/navbars/AdminNavBar";
 
-const FacultyRequests = () => {
+const CompanyRequests = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState(null);
 
-  const fetchPendingRequests = async () => {
+  const fetchPendingCompanyRequests = async () => {
     try {
       setLoading(true);
 
       const res = await axios.get(
-        `${BASE_URL}/api/admin/pending-faculty-requests`,
+        `${BASE_URL}/api/admin/pending-company-requests`,
         { withCredentials: true }
       );
 
       setRequests(res.data.pendingRequests || []);
     } catch (err) {
       setError(
-        err.response?.data?.message || "Failed to fetch faculty requests"
+        err.response?.data?.message ||
+          "Failed to fetch company requests"
       );
     } finally {
       setLoading(false);
@@ -29,7 +30,7 @@ const FacultyRequests = () => {
   };
 
   useEffect(() => {
-    fetchPendingRequests();
+    fetchPendingCompanyRequests();
   }, []);
 
   const updateRequestStatus = async (id, status) => {
@@ -37,7 +38,7 @@ const FacultyRequests = () => {
       setActionLoading(id);
 
       await axios.post(
-        `${BASE_URL}/api/admin/faculty/${id}/${status}`,
+        `${BASE_URL}/api/admin/company/${id}/${status}`,
         {},
         { withCredentials: true }
       );
@@ -59,17 +60,17 @@ const FacultyRequests = () => {
           {/* Header */}
           <div className="mb-6">
             <h2 className="text-3xl font-bold text-slate-800">
-              Pending Faculty Requests
+              Pending Company Requests
             </h2>
             <p className="text-slate-500 mt-1">
-              Review and approve faculty verification requests
+              Review and approve company verification requests
             </p>
           </div>
 
           {/* Loading */}
           {loading && (
             <div className="bg-white rounded-xl shadow p-6 text-center text-slate-600">
-              Loading faculty requests…
+              Loading company requests…
             </div>
           )}
 
@@ -84,7 +85,7 @@ const FacultyRequests = () => {
           {!loading && !error && requests.length === 0 && (
             <div className="bg-white rounded-xl shadow p-10 text-center">
               <p className="text-slate-500 text-lg">
-                No pending faculty requests 🎉
+                No pending company requests 🎉
               </p>
             </div>
           )}
@@ -97,8 +98,7 @@ const FacultyRequests = () => {
                   <thead className="bg-slate-200 sticky top-0 z-10">
                     <tr className="text-slate-700 font-semibold">
                       <th className="px-4 py-3">Requester</th>
-                      <th className="px-4 py-3">College</th>
-                      <th className="px-4 py-3">Requested Faculties</th>
+                      <th className="px-4 py-3">Company</th>
                       <th className="px-4 py-3">Document</th>
                       <th className="px-4 py-3">Requested At</th>
                       <th className="px-4 py-3 text-center">Actions</th>
@@ -121,38 +121,9 @@ const FacultyRequests = () => {
                           </div>
                         </td>
 
-                        {/* College */}
+                        {/* Company */}
                         <td className="px-4 py-3 text-slate-600">
-                          {req.collegeName}
-                        </td>
-
-                        {/* Faculties (OPTIONAL + SAFE) */}
-                        <td className="px-4 py-3 text-slate-600">
-                          {Array.isArray(req.requestedFaculties) &&
-                          req.requestedFaculties.length > 0 ? (
-                            <ul className="space-y-2">
-                              {req.requestedFaculties.map((fac) => (
-                                <li
-                                  key={fac._id}
-                                  className="border rounded-md p-2 bg-slate-50"
-                                >
-                                  <div className="font-medium text-slate-800">
-                                    {fac.facultyName}
-                                  </div>
-                                  <div className="text-xs text-slate-500">
-                                    {fac.facultyEmail}
-                                  </div>
-                                  <div className="text-xs text-slate-400">
-                                    Status: {fac.status}
-                                  </div>
-                                </li>
-                              ))}
-                            </ul>
-                          ) : (
-                            <span className="italic text-slate-400">
-                              No faculty list provided
-                            </span>
-                          )}
+                          {req.companyName}
                         </td>
 
                         {/* Document */}
@@ -215,4 +186,4 @@ const FacultyRequests = () => {
   );
 };
 
-export default FacultyRequests;
+export default CompanyRequests;

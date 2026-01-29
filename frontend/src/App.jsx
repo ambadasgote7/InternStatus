@@ -29,6 +29,9 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminRoute from "./routes/AdminRoute";
 import FacultyRequests from "./pages/admin/FacultyRequests";
+import VerifiedFacultyRequests from "./pages/admin/VerifiedFacultyRequests";
+import CompanyRequests from "./pages/admin/CompanyRequests";
+import VerifiedCompanyRequests from "./pages/admin/VerifiedCompanyRequests";
 
 function App() {
   return (
@@ -135,6 +138,9 @@ function App() {
           >
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="faculty-requests" element={<FacultyRequests />} />
+            <Route path="verified-faculty-requests" element={<VerifiedFacultyRequests />} />
+            <Route path="company-requests" element={<CompanyRequests />} />
+            <Route path="verified-company-requests" element={<VerifiedCompanyRequests />} />
           </Route>
 
 

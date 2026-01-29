@@ -35,7 +35,7 @@ const AdminNavBar = () => {
           Faculty Requests
         </Link>
 
-        <Link to="/admin/verified-faculty" className="hover:text-gray-300">
+        <Link to="/admin/verified-faculty-requests" className="hover:text-gray-300">
           Verified Faculty
         </Link>
 
@@ -43,7 +43,7 @@ const AdminNavBar = () => {
           Company Requests
         </Link>
 
-        <Link to="/admin/verified-companies" className="hover:text-gray-300">
+        <Link to="/admin/verified-company-requests" className="hover:text-gray-300">
           Verified Companies
         </Link>
 
