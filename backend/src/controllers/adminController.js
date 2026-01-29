@@ -18,7 +18,6 @@ export const adminLogin = async (req, res) => {
 
     // 1️⃣ Find admin in DB
     const admin = await User.findOne({ email });
-    console.log("Admin found?", admin);
 
     if (!admin) {
       return res.status(401).json({
@@ -34,15 +33,12 @@ export const adminLogin = async (req, res) => {
     }
     // 3️⃣ Validate password
     const isPasswordValid = await admin.validatePassword(password);
-console.log("Password valid?", isPasswordValid);
 
     if (!isPasswordValid) {
       return res.status(401).json({
         message: "Invalid credentials",
       });
     }
-
-    console.log(email, password, admin.validatePassword(password));
 
     // 4️⃣ Generate JWT (same system as users)
     const token = admin.getJWT();
@@ -64,7 +60,6 @@ console.log("Password valid?", isPasswordValid);
       },
     });
   } catch (error) {
-    console.error("Admin login error:", error);
     return res.status(500).json({
       message: "Admin login failed",
     });
@@ -86,6 +81,154 @@ export const adminLogout = async (req, res) => {
     });
   }
 };
+
+export const getAdminDashboard = async (req, res) => {
+  try {
+    const now = new Date();
+    const last7Days = new Date(now - 7 * 24 * 60 * 60 * 1000);
+    const last30Days = new Date(now - 30 * 24 * 60 * 60 * 1000);
+
+    /* ================= USERS ================= */
+
+    const totalUsers = await User.countDocuments();
+
+    const usersByRole = {
+      faculty: await User.countDocuments({ role: "Faculty" }),
+      students: await User.countDocuments({ role: "Student" }),
+      companies: await User.countDocuments({ role: "Company" }),
+    };
+
+    const unverifiedUsers = await User.countDocuments({
+      isVerified: false,
+    });
+
+    const revokedUsers = await User.countDocuments({
+      roleStatus: "revoked",
+    });
+
+    const newUsers = {
+      last7Days: await User.countDocuments({
+        createdAt: { $gte: last7Days },
+      }),
+      last30Days: await User.countDocuments({
+        createdAt: { $gte: last30Days },
+      }),
+    };
+
+    /* ================= FACULTY REQUESTS ================= */
+
+    const facultyRequestStats = {
+      pending: await FacultyRegister.countDocuments({ status: "pending" }),
+      approved: await FacultyRegister.countDocuments({ status: "approved" }),
+      rejected: await FacultyRegister.countDocuments({ status: "rejected" }),
+    };
+
+    const totalFacultyRequests =
+      facultyRequestStats.pending +
+      facultyRequestStats.approved +
+      facultyRequestStats.rejected;
+
+    const approvalRate =
+      totalFacultyRequests === 0
+        ? 0
+        : Math.round(
+            (facultyRequestStats.approved / totalFacultyRequests) * 100
+          );
+
+    const pendingTooLong = await FacultyRegister.countDocuments({
+      status: "pending",
+      createdAt: { $lt: last7Days },
+    });
+
+    const facultyRequestsThisMonth = await FacultyRegister.countDocuments({
+      createdAt: { $gte: last30Days },
+    });
+
+    /* ================= RECENT ACTIVITY ================= */
+
+    const recentFacultyRequests = await FacultyRegister.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select(
+        "requesterName requesterEmail collegeName status createdAt"
+      );
+
+    const recentUsers = await User.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select("email role isVerified createdAt");
+
+    /* ================= RESPONSE ================= */
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        users: {
+          total: totalUsers,
+          byRole: usersByRole,
+          unverified: unverifiedUsers,
+          revoked: revokedUsers,
+          new: newUsers,
+        },
+
+        facultyRequests: {
+          ...facultyRequestStats,
+          total: totalFacultyRequests,
+          approvalRate, // %
+          pendingTooLong,
+          thisMonth: facultyRequestsThisMonth,
+        },
+
+        recentActivity: {
+          facultyRequests: recentFacultyRequests,
+          users: recentUsers,
+        },
+
+        alerts: {
+          pendingFacultyRequestsOver7Days: pendingTooLong,
+          unverifiedUsersOver7Days: await User.countDocuments({
+            isVerified: false,
+            createdAt: { $lt: last7Days },
+          }),
+        },
+      },
+    });
+  } catch (err) {
+    console.error("Admin dashboard error:", err);
+    return res.status(500).json({
+      message: err.message || "Failed to load admin dashboard",
+    });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    // Optional query params (future-proof)
+    const { role, verified } = req.query;
+
+    const filter = {};
+
+    if (role) filter.role = role;
+    if (verified === "true") filter.isVerified = true;
+    if (verified === "false") filter.isVerified = false;
+
+    const users = await User.find(filter)
+      .select("-password -passwordSetupToken -passwordSetupExpires")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: users.length,
+      data: users,
+    });
+  } catch (err) {
+    console.error("Get all users error:", err);
+    return res.status(500).json({
+      message: err.message || "Failed to fetch users",
+    });
+  }
+};
+
 
 export const pendingFacultyRequests = async (req, res) => {
   try {

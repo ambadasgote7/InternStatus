@@ -31,6 +31,10 @@ const AdminNavBar = () => {
           Dashboard
         </Link>
 
+        <Link to="/admin/users" className="hover:text-gray-300">
+          Users
+        </Link>
+
         <Link to="/admin/faculty-requests" className="hover:text-gray-300">
           Faculty Requests
         </Link>

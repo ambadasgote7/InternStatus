@@ -33,6 +33,7 @@ import VerifiedFacultyRequests from "./pages/admin/VerifiedFacultyRequests";
 import CompanyRequests from "./pages/admin/CompanyRequests";
 import VerifiedCompanyRequests from "./pages/admin/VerifiedCompanyRequests";
 import SetPassword from "./pages/SetPassword";
+import Users from "./pages/admin/Users";
 
 function App() {
   return (
@@ -138,6 +139,7 @@ function App() {
             element={<AdminRoute />}
           >
             <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="users" element={<Users />} />
             <Route path="faculty-requests" element={<FacultyRequests />} />
             <Route path="verified-faculty-requests" element={<VerifiedFacultyRequests />} />
             <Route path="company-requests" element={<CompanyRequests />} />
