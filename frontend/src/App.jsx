@@ -28,6 +28,7 @@ import AccessRevoke from "./pages/AccessRevoked";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminRoute from "./routes/AdminRoute";
+import FacultyRequests from "./pages/admin/FacultyRequests";
 
 function App() {
   return (
@@ -133,6 +134,7 @@ function App() {
             element={<AdminRoute />}
           >
             <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="faculty-requests" element={<FacultyRequests />} />
           </Route>
 
 

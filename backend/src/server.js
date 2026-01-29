@@ -3,8 +3,6 @@ import connectDB from "./config/database.js";
 import dotenv from "dotenv";
 dotenv.config();
 
-
-
 const PORT = process.env.PORT;
 
 connectDB()
@@ -17,7 +15,5 @@ connectDB()
     .catch ((err) =>  {
         console.log("ERROR : " + err.message);
     });
-
-
 
 

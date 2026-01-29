@@ -1,11 +1,9 @@
 import validator from "validator";
 
-const ALLOWED_ROLES = ["Student", "Faculty", "Company"];
+export const validateSignupData = (body) => {
+  const { email, password } = body;
 
-const validateSignupData = (body) => {
-  const { email, password, role } = body;
-
-  if (!email || !password || !role) {
+  if (!email || !password) {
     throw new Error("All fields required");
   }
 
@@ -13,13 +11,7 @@ const validateSignupData = (body) => {
     throw new Error("Invalid email");
   }
 
-  if (!ALLOWED_ROLES.includes(role)) {
-    throw new Error("Invalid role");
-  }
-
   if (!validator.isStrongPassword(password)) {
     throw new Error("Enter strong password");
   }
 };
-
-export default validateSignupData;

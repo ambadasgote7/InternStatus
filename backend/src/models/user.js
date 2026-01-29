@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: {
-        values: ["Student", "Faculty", "Company"],
+        values: ["Admin", "Student", "Faculty", "Company"],
         message: "{VALUE} is not a valid role",
       },
     },
@@ -61,6 +61,12 @@ userSchema.methods.getJWT = function () {
 userSchema.methods.validatePassword = async function (userInputPassword) {
   return bcrypt.compare(userInputPassword, this.password);
 };
+
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
+  this.password = await bcrypt.hash(this.password, 10);
+});
+
 
 const User = mongoose.model("User", userSchema);
 

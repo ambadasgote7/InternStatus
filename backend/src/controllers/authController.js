@@ -1,49 +1,50 @@
-
-import validateSignupData from "../utils/validation.js";
-import bcrypt from "bcrypt";
+import { validateSignupData } from "../utils/validation.js";
 import User from "../models/user.js";
-import validator from "validator";
-import jwt from "jsonwebtoken";
 
-export const signup = async (req, res) => {
+export const signup = (role) => async (req, res) => {
   try {
+    if (req.body.role) {
+      return res.status(400).json({
+        message: "Role cannot be set manually",
+      });
+    }
+
+    // Validate the signup data
     validateSignupData(req.body);
-  
-    const { email, password, role } = req.body;
+
+    const { email, password } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ message: "User already exists" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = new User({
+    const user = await User.create({
       email,
-      password: hashedPassword,
+      password,
       role,
     });
 
-    const savedUser = await user.save();
+    const token = user.getJWT();
 
-    const token = savedUser.getJWT();
-
-    // Set httpOnly cookie (for backend auth)
     res.cookie("token", token, {
-      expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
       httpOnly: true,
       sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
-    const userObj = savedUser.toObject();
+    const userObj = user.toObject();
     delete userObj.password;
 
     return res.status(201).json({
-      message: "User added successfully",
-      data: userObj,    // includes role
-      token,            // for frontend (Redux) if you want to store it
+      message: `${role} signup successful`,
+      data: userObj,
+      token,
     });
+    
   } catch (err) {
+    console.error("Signup error:", err);
+    console.error("Error stack:", err.stack);
     return res.status(400).json({
       message: err.message || "Something went wrong",
     });
@@ -58,10 +59,6 @@ export const login = async (req, res) => {
       return res
         .status(400)
         .json({ message: "Email and password are required" });
-    }
-
-    if (!validator.isEmail(email)) {
-      throw new Error("Enter valid email");
     }
 
     const user = await User.findOne({ email });
@@ -98,7 +95,6 @@ export const login = async (req, res) => {
   }
 };
 
-
 export const logout = async (req, res) => {
   try {
     res.clearCookie("token", {
@@ -115,7 +111,6 @@ export const logout = async (req, res) => {
     });
   }
 };
-
 
 export const getMe = async (req, res) => {
   try {
