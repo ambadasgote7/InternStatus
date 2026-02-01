@@ -25,11 +25,11 @@ const studentProfileSchema = new mongoose.Schema(
       trim: true,
     },
 
-    collegeName: {
-      type: String,
+    college: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "College",
       required: true,
-      trim: true,
-    },
+  },
 
     phone: {
       type: String,
@@ -108,4 +108,6 @@ const studentProfileSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("StudentProfile", studentProfileSchema);
+const StudentProfile = mongoose.models.StudentProfile || mongoose.model("StudentProfile", studentProfileSchema);
+
+export default StudentProfile;

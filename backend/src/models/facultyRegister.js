@@ -30,10 +30,10 @@ const facultyRegisterSchema = new mongoose.Schema(
     },
 
     // College details
-    collegeName: {
-      type: String,
+    college: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "College",
       required: true,
-      trim: true,
     },
 
     collegeWebsite: {

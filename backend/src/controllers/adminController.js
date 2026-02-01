@@ -233,7 +233,7 @@ export const getAllUsers = async (req, res) => {
 export const pendingFacultyRequests = async (req, res) => {
   try {
 
-    const pendingRequests = await FacultyRegister.find({ status : "pending"});
+    const pendingRequests = await FacultyRegister.find({ status : "pending"}).populate("college", "name");
     return res.status(200).json({
       message: "Pending faculty requests",
       pendingRequests,
@@ -354,6 +354,7 @@ export const verifiedFacultyRequests = async (req, res) => {
       status: "approved",
     })
       .populate("verifiedBy", "name email")
+      .populate("college", "name")
       .sort({ verifiedAt: -1 });
 
     return res.status(200).json({

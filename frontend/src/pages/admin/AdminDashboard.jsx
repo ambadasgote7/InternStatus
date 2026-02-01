@@ -7,7 +7,7 @@ import { BASE_URL } from "../../utils/constants";
 const StatCard = ({ title, value, subtitle, color }) => {
   return (
     <div
-      className={`rounded-xl shadow p-6 border bg-gradient-to-br ${color}`}
+      className={`rounded-xl shadow p-6 border bg-linear-to-br ${color}`}
     >
       <p className="text-sm text-white/80">{title}</p>
       <h2 className="text-3xl font-bold text-white mt-2">

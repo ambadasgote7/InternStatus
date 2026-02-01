@@ -4,6 +4,8 @@ import FacultyRegister from "../models/facultyRegister.js";
 import validator from "validator";
 import User from "../models/user.js";
 import { uploadToCloudinary } from "../services/cloudinary.js";
+import StudentProfile from "../models/studentProfile.js";
+import College from "../models/college.js";
 
 export const getFacultyDashboard = async (req, res) => {
   try {
@@ -25,10 +27,9 @@ export const getFacultyDashboard = async (req, res) => {
 
 export const facultyRegister = async (req, res) => {
   try {
-
     const {
       requesterName,
-      collegeName,
+      college,               // 🔥 ObjectId from frontend
       collegeWebsite,
       requestedFaculties,
     } = req.body;
@@ -36,19 +37,27 @@ export const facultyRegister = async (req, res) => {
     const requesterEmail = req.user.email;
     const userId = req.user._id;
 
-
-
     /* --------------------------------------------------
        1️⃣ Basic validation
     -------------------------------------------------- */
-    if (!requesterName || !collegeName) {
+    if (!requesterName || !college) {
       return res.status(400).json({
-        message: "Missing required fields",
+        message: "Requester name and college are required",
       });
     }
 
     /* --------------------------------------------------
-       2️⃣ Prevent duplicate request by same user
+       2️⃣ Validate college exists
+    -------------------------------------------------- */
+    const collegeExists = await College.findById(college);
+    if (!collegeExists) {
+      return res.status(400).json({
+        message: "Invalid college selected",
+      });
+    }
+
+    /* --------------------------------------------------
+       3️⃣ Prevent duplicate request by same user
     -------------------------------------------------- */
     const existingRequestByUser = await FacultyRegister.findOne({
       userId,
@@ -62,7 +71,7 @@ export const facultyRegister = async (req, res) => {
     }
 
     /* --------------------------------------------------
-       3️⃣ File validation
+       4️⃣ File validation
     -------------------------------------------------- */
     if (!req.file) {
       return res.status(400).json({
@@ -71,7 +80,7 @@ export const facultyRegister = async (req, res) => {
     }
 
     /* --------------------------------------------------
-       4️⃣ Parse requestedFaculties
+       5️⃣ Parse requestedFaculties
     -------------------------------------------------- */
     let parsedFaculties = [];
     try {
@@ -89,7 +98,7 @@ export const facultyRegister = async (req, res) => {
     }
 
     /* --------------------------------------------------
-       5️⃣ Validate faculty emails
+       6️⃣ Validate faculty emails
     -------------------------------------------------- */
     const emailSet = new Set();
 
@@ -119,7 +128,7 @@ export const facultyRegister = async (req, res) => {
     }
 
     /* --------------------------------------------------
-       6️⃣ Upload verification document to Cloudinary
+       7️⃣ Upload verification document
     -------------------------------------------------- */
     let uploadResult;
     try {
@@ -127,20 +136,20 @@ export const facultyRegister = async (req, res) => {
         req.file,
         "faculty-verification"
       );
-    } catch (err) {
+    } catch {
       return res.status(500).json({
         message: "Verification document upload failed",
       });
     }
 
     /* --------------------------------------------------
-       7️⃣ Save FacultyRegister
+       8️⃣ Save FacultyRegister
     -------------------------------------------------- */
     const facultyRegister = new FacultyRegister({
-      userId, // 🔥 THIS FIXES YOUR DUPLICATE KEY ERROR
+      userId,
       requesterName,
       requesterEmail,
-      collegeName,
+      college, // ✅ ObjectId reference
       collegeWebsite,
       verificationDocumentUrl: uploadResult.secure_url,
       requestedFaculties: parsedFaculties,
@@ -150,7 +159,7 @@ export const facultyRegister = async (req, res) => {
     await facultyRegister.save();
 
     /* --------------------------------------------------
-       8️⃣ Mark user as registered
+       9️⃣ Mark user as registered
     -------------------------------------------------- */
     await User.findByIdAndUpdate(userId, {
       isRegistered: true,
@@ -160,6 +169,7 @@ export const facultyRegister = async (req, res) => {
       message: "Faculty registration submitted successfully",
       data: facultyRegister,
     });
+
   } catch (err) {
     return res.status(500).json({
       message: err.message || "Something went wrong",
@@ -167,3 +177,21 @@ export const facultyRegister = async (req, res) => {
   }
 };
 
+export const getPendingStudentRequests = async (req, res) => {
+  try {
+    const pendingRequests = await StudentProfile.find({ status: "pending" });
+    const yourCollegeStudents = pendingRequests.filter((students) => (
+       FacultyRegister.collegeName.equals(StudentProfile.collegeName)
+    ))
+
+    res.status(200).json({
+      message : "Studnet Profiles Fetched",
+      yourCollegeStudents
+    })
+
+  } catch (err) {
+    return res.status(500).json({
+      message: err.message || "Something went wrong",
+    });
+  }
+}

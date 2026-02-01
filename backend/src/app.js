@@ -7,6 +7,7 @@ import studentRouter from "./routes/student.js";
 import companyRouter from "./routes/company.js";
 import facultyRouter from "./routes/faculty.js";
 import adminRouter from "./routes/admin.js";
+import collegeRouter from "./routes/college.js";
 
 const app = express();
 
@@ -30,5 +31,6 @@ app.use("/api/admin", adminRouter);
 app.use("/api/student", studentRouter);
 app.use("/api/company", companyRouter);
 app.use("/api/faculty", facultyRouter);
+app.use("/api/college", collegeRouter);
 
 export default app;

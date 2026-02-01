@@ -102,7 +102,7 @@ const VerifiedFacultyRequests = () => {
                         </td>
 
                         <td className="px-4 py-3 text-slate-600">
-                          {req.collegeName}
+                          {req.college?.name}
                         </td>
 
                         <td className="px-4 py-3">

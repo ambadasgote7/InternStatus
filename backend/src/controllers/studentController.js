@@ -2,6 +2,7 @@
 import StudentProfile from "../models/studentProfile.js";
 import User from "../models/user.js";
 import { uploadToCloudinary } from "../services/cloudinary.js";
+import College from "../models/college.js";
 
 // Existing: simple dashboard placeholder
 export const getStudentDashboard = async (req, res) => {
@@ -51,7 +52,7 @@ export const submitStudentProfile = async (req, res) => {
     const {
       fullName,
       prn,
-      collegeName,
+      college,          // 🔥 ObjectId, not name
       phone,
       course,
       year,
@@ -60,9 +61,22 @@ export const submitStudentProfile = async (req, res) => {
 
     const skills = req.body.skills ? JSON.parse(req.body.skills) : [];
 
-    if (!fullName || !prn || !collegeName || !phone || !course || !year) {
+    /* --------------------------------------------------
+       1️⃣ Basic validation
+    -------------------------------------------------- */
+    if (!fullName || !prn || !college || !phone || !course || !year) {
       return res.status(400).json({
         message: "All required fields must be filled",
+      });
+    }
+
+    /* --------------------------------------------------
+       2️⃣ Validate college exists
+    -------------------------------------------------- */
+    const collegeExists = await College.findById(college);
+    if (!collegeExists) {
+      return res.status(400).json({
+        message: "Invalid college selected",
       });
     }
 
@@ -79,7 +93,6 @@ export const submitStudentProfile = async (req, res) => {
         });
       }
 
-      console.log("Uploading college ID file:", collegeIdFile.originalname);
       const collegeIdUpload = await uploadToCloudinary(
         collegeIdFile,
         "student/college-id"
@@ -87,7 +100,6 @@ export const submitStudentProfile = async (req, res) => {
 
       let resumeUpload = null;
       if (resumeFile) {
-        console.log("Uploading resume file:", resumeFile.originalname);
         resumeUpload = await uploadToCloudinary(
           resumeFile,
           "student/resume"
@@ -98,7 +110,7 @@ export const submitStudentProfile = async (req, res) => {
         userId: req.user._id,
         fullName,
         prn,
-        collegeName,
+        college,                 // ✅ ObjectId reference
         phone,
         course,
         year,
@@ -124,7 +136,7 @@ export const submitStudentProfile = async (req, res) => {
       if (!req.user.isVerified) {
         profile.fullName = fullName;
         profile.prn = prn;
-        profile.collegeName = collegeName;
+        profile.college = college;     // 🔥 still ObjectId
         profile.status = "pending";
       }
 
@@ -135,7 +147,6 @@ export const submitStudentProfile = async (req, res) => {
       profile.bio = bio || "";
 
       if (!req.user.isVerified && collegeIdFile) {
-        console.log("Updating college ID file:", collegeIdFile.originalname);
         const collegeIdUpload = await uploadToCloudinary(
           collegeIdFile,
           "student/college-id"
@@ -146,7 +157,6 @@ export const submitStudentProfile = async (req, res) => {
       }
 
       if (resumeFile) {
-        console.log("Updating resume file:", resumeFile.originalname);
         const resumeUpload = await uploadToCloudinary(
           resumeFile,
           "student/resume"
@@ -161,22 +171,17 @@ export const submitStudentProfile = async (req, res) => {
 
     return res.status(200).json({
       message: "Profile saved successfully",
-      profile: {
-        ...profile._doc,
-        // Add direct download URLs for files
-        collegeIdDownloadUrl: profile.collegeIdImageUrl,
-        resumeDownloadUrl: profile.resumeFileUrl,
-      },
+      profile,
       user: {
         isRegistered: req.user.isRegistered,
         isVerified: req.user.isVerified,
       },
     });
+
   } catch (err) {
     console.error("Profile submission error:", err);
-    return res.status(500).json({ 
-      message: err.message,
-      error: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    return res.status(500).json({
+      message: err.message || "Something went wrong",
     });
   }
 };

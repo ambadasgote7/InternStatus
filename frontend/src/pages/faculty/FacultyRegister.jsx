@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import {
   Plus,
@@ -22,11 +22,15 @@ const FacultyRegister = () => {
   const requesterEmail = user?.email || "";
   const navigate = useNavigate();
 
+  /* ---------------- state ---------------- */
+
   const [form, setForm] = useState({
     requesterName: "",
-    collegeName: "",
+    college: "", // 🔥 ObjectId
     collegeWebsite: "",
   });
+
+  const [colleges, setColleges] = useState([]);
 
   const [faculties, setFaculties] = useState([
     { facultyName: "", facultyEmail: "" },
@@ -37,15 +41,31 @@ const FacultyRegister = () => {
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
 
+  /* ---------------- fetch colleges ---------------- */
+
+  useEffect(() => {
+    const fetchColleges = async () => {
+      try {
+        const res = await axios.get(`${BASE_URL}/api/college`);
+        setColleges(res.data || []);
+      } catch (err) {
+        console.error("Failed to fetch colleges", err);
+        setMessage("Unable to load colleges");
+      }
+    };
+
+    fetchColleges();
+  }, []);
+
   /* ---------------- handlers ---------------- */
 
   const handleFormChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleFacultyChange = (i, field, value) => {
+  const handleFacultyChange = (index, field, value) => {
     const updated = [...faculties];
-    updated[i][field] = value;
+    updated[index][field] = value;
     setFaculties(updated);
   };
 
@@ -53,66 +73,66 @@ const FacultyRegister = () => {
     setFaculties([...faculties, { facultyName: "", facultyEmail: "" }]);
   };
 
-  const removeFaculty = (i) => {
+  const removeFaculty = (index) => {
     if (faculties.length === 1) return;
-    setFaculties(faculties.filter((_, index) => index !== i));
+    setFaculties(faculties.filter((_, i) => i !== index));
   };
 
   /* ---------------- submit ---------------- */
 
   const handleSubmit = async () => {
-  setMessage("");
+    setMessage("");
+    setSuccess(false);
 
-  if (!form.requesterName.trim()) {
-    setMessage("Requester name is required");
-    return;
-  }
-
-  if (!form.collegeName.trim()) {
-    setMessage("College / University name is required");
-    return;
-  }
-
-  if (!verificationFile) {
-    setMessage("Verification document is required");
-    return;
-  }
-
-  setLoading(true);
-
-  try {
-    const formData = new FormData();
-    formData.append("requesterName", form.requesterName.trim());
-    formData.append("collegeName", form.collegeName.trim());
-
-    // ✅ OPTIONAL FIELD
-    if (form.collegeWebsite.trim()) {
-      formData.append("collegeWebsite", form.collegeWebsite.trim());
+    if (!form.requesterName.trim()) {
+      setMessage("Requester name is required");
+      return;
     }
 
-    formData.append(
-      "requestedFaculties",
-      JSON.stringify(
-        faculties.filter(
-          (f) => f.facultyName.trim() && f.facultyEmail.trim()
+    if (!form.college) {
+      setMessage("College selection is required");
+      return;
+    }
+
+    if (!verificationFile) {
+      setMessage("Verification document is required");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("requesterName", form.requesterName.trim());
+      formData.append("college", form.college); // 🔥 ObjectId
+
+      if (form.collegeWebsite.trim()) {
+        formData.append("collegeWebsite", form.collegeWebsite.trim());
+      }
+
+      formData.append(
+        "requestedFaculties",
+        JSON.stringify(
+          faculties.filter(
+            (f) => f.facultyName.trim() && f.facultyEmail.trim()
+          )
         )
-      )
-    );
+      );
 
-    formData.append("verificationDocument", verificationFile);
+      formData.append("verificationDocument", verificationFile);
 
-    await axios.post(`${BASE_URL}/api/faculty/register`, formData, {
-      withCredentials: true,
-    });
+      await axios.post(`${BASE_URL}/api/faculty/register`, formData, {
+        withCredentials: true,
+      });
 
-    setSuccess(true);
-    setTimeout(() => navigate("/pending-verification"), 1500);
-  } catch (err) {
-    setMessage(err.response?.data?.message || "Submission failed");
-  } finally {
-    setLoading(false);
-  }
-};
+      setSuccess(true);
+      setTimeout(() => navigate("/pending-verification"), 1500);
+    } catch (err) {
+      setMessage(err.response?.data?.message || "Submission failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   /* ---------------- UI ---------------- */
 
@@ -170,13 +190,21 @@ const FacultyRegister = () => {
           </h2>
 
           <div className="space-y-5">
-            <input
-              name="collegeName"
-              placeholder="College / University Name"
-              value={form.collegeName}
+            {/* 🔥 College Dropdown */}
+            <select
+              name="college"
+              value={form.college}
               onChange={handleFormChange}
-              className="w-full px-4 py-3 border rounded-xl"
-            />
+              className="w-full px-4 py-3 border rounded-xl bg-white"
+            >
+              <option value="">Select College / University</option>
+              {colleges.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+
             <input
               name="collegeWebsite"
               placeholder="Official Website"
@@ -244,7 +272,9 @@ const FacultyRegister = () => {
           <label className="flex flex-col items-center justify-center h-40 border-2 border-dashed rounded-2xl cursor-pointer bg-slate-50">
             <Upload className="w-8 h-8 text-slate-400 mb-2" />
             <p className="text-sm font-semibold">
-              {verificationFile ? verificationFile.name : "Click to upload document"}
+              {verificationFile
+                ? verificationFile.name
+                : "Click to upload document"}
             </p>
             <input
               type="file"
@@ -275,7 +305,7 @@ const FacultyRegister = () => {
           type="button"
           onClick={handleSubmit}
           disabled={loading}
-          className="w-full cursor-pointer py-5 rounded-2xl bg-slate-900 text-white font-bold disabled:opacity-50"
+          className="w-full py-5 rounded-2xl bg-slate-900 text-white font-bold disabled:opacity-50"
         >
           {loading ? "Submitting…" : "Submit for Approval"}
         </button>
