@@ -34,6 +34,9 @@ import CompanyRequests from "./pages/admin/CompanyRequests";
 import VerifiedCompanyRequests from "./pages/admin/VerifiedCompanyRequests";
 import SetPassword from "./pages/SetPassword";
 import Users from "./pages/admin/Users";
+import StudentNavBar from "./components/navbars/StudentNavBar";
+import StudentRequests from "./pages/faculty/StudentRequests";
+import VerifiedStudentRequests from "./pages/faculty/VerifiedStudentRequests";
 
 function App() {
   return (
@@ -97,6 +100,8 @@ function App() {
 
             {/* faculty register -> /faculty/register (nested like student profile) */}
             <Route path="register" element={<FacultyRegister />} />
+            <Route path="student-requests" element={<StudentRequests />} />
+            <Route path="verified-student-requests" element={<VerifiedStudentRequests />} />
 
             {/* -------------------- FUTURE FACULTY ROUTES --------------------
                Add faculty-specific pages here:

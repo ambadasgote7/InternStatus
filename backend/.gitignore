@@ -1,3 +1,4 @@
 node_modules
 .env
 seedColleges.js
+createAdmin.js

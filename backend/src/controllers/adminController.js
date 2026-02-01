@@ -255,6 +255,7 @@ export const updateFacultyRequestStatus = async (req, res) => {
       return res.status(400).json({ message: "Invalid status" });
     }
 
+    // 1️⃣ Get faculty request
     const request = await FacultyRegister.findById(id);
     if (!request) {
       return res.status(404).json({ message: "Request not found" });
@@ -266,16 +267,28 @@ export const updateFacultyRequestStatus = async (req, res) => {
         .json({ message: `Request already ${request.status}` });
     }
 
+    // 2️⃣ Get requester user
     const requesterUser = await User.findById(request.userId);
     if (!requesterUser) {
       return res.status(404).json({ message: "Linked user not found" });
     }
 
-    // APPROVAL FLOW
+    /* ================= APPROVAL ================= */
     if (status === "approved") {
-      requesterUser.isVerified = true;
-      await requesterUser.save();
+      // 🔥 CRITICAL: use $set so nothing gets wiped later
+      await User.findByIdAndUpdate(
+        requesterUser._id,
+        {
+          $set: {
+            college: request.college, // ✅ ObjectId
+            isVerified: true,
+            isRegistered: true,
+          },
+        },
+        { new: true }
+      );
 
+      // Handle additional requested faculty
       if (Array.isArray(request.requestedFaculties)) {
         for (const faculty of request.requestedFaculties) {
           let user = await User.findOne({ email: faculty.facultyEmail });
@@ -288,29 +301,26 @@ export const updateFacultyRequestStatus = async (req, res) => {
               name: faculty.facultyName,
               email: faculty.facultyEmail,
               role: "Faculty",
+              college: request.college, // ✅ MUST SET HERE TOO
               isVerified: true,
               isRegistered: true,
               passwordSetupToken: hashedToken,
-              passwordSetupExpires: Date.now() + 1000 * 60 * 60 * 24, // 24h
+              passwordSetupExpires: Date.now() + 1000 * 60 * 60 * 24,
             });
 
-            const setupLink = `${process.env.FRONTEND_URL}/set-password?token=${rawToken}`
+            const setupLink = `${process.env.FRONTEND_URL}/set-password?token=${rawToken}`;
 
-            // Email (best effort)
             try {
               await sendEmail({
                 to: faculty.facultyEmail,
                 subject: "Set Your Faculty Account Password",
                 html: `
                   <p>Hello ${faculty.facultyName},</p>
-                  <p>Your faculty account has been created.</p>
-                  <p>Please set your password using the link below:</p>
+                  <p>Your faculty account has been approved.</p>
                   <p>
-                    <a href="${setupLink}">
-                      Set Password
-                    </a>
+                    <a href="${setupLink}">Set Password</a>
                   </p>
-                  <p>This link will expire in 24 hours.</p>
+                  <p>This link expires in 24 hours.</p>
                   <p>— InternStatus Team</p>
                 `,
               });
@@ -325,11 +335,12 @@ export const updateFacultyRequestStatus = async (req, res) => {
       }
     }
 
-    // REJECTION
+    /* ================= REJECTION ================= */
     if (status === "rejected") {
       request.rejectionReason = req.body?.reason || "";
     }
 
+    // 3️⃣ Finalize request
     request.status = status;
     request.verifiedBy = req.user._id;
     request.verifiedAt = new Date();
@@ -340,7 +351,7 @@ export const updateFacultyRequestStatus = async (req, res) => {
       message: `Request ${status} successfully`,
     });
   } catch (err) {
-    console.error(err);
+    console.error("Faculty approval error:", err);
     return res.status(500).json({
       message: err.message || "Something went wrong",
     });

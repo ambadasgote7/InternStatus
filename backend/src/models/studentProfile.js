@@ -84,7 +84,7 @@ const studentProfileSchema = new mongoose.Schema(
     ========================= */
     status: {
       type: String,
-      enum: ["pending", "verified", "rejected"],
+      enum: ["pending", "approved", "rejected"],
       default: "pending",
     },
 

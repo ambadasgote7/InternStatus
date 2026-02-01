@@ -172,10 +172,10 @@ export const submitStudentProfile = async (req, res) => {
     return res.status(200).json({
       message: "Profile saved successfully",
       profile,
-      user: {
+      flags: {
         isRegistered: req.user.isRegistered,
         isVerified: req.user.isVerified,
-      },
+      }
     });
 
   } catch (err) {

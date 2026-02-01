@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import { BASE_URL } from "../../utils/constants";
-import { addUser } from "../../store/userSlice";
 import { setStudentProfile } from "../../store/studentProfileSlice";
 import {
   User,
@@ -121,7 +120,6 @@ const StudentProfile = () => {
         }
       );
 
-      dispatch(addUser(res.data.user));
       dispatch(setStudentProfile(res.data.profile));
 
       window.alert(res.data.message || "Profile saved successfully!");

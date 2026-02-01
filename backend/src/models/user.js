@@ -26,16 +26,23 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       required: true,
-      enum: {
-        values: ["Admin", "Student", "Faculty", "Company"],
-        message: "{VALUE} is not a valid role",
-      },
+      enum: ["Admin", "Student", "Faculty", "Company"],
+    },
+
+    // 🔥 ADD THIS
+    college: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "College",
+      required: function () {
+        if (!this.isRegistered) return false;
+        return this.role === "Faculty" || this.role === "Student";
+      }
     },
 
     roleStatus: {
       type: String,
       enum: ["active", "revoked"],
-      default: "active"
+      default: "active",
     },
 
     isVerified: {
@@ -47,15 +54,13 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    passwordSetupToken: {
-      type : String
-    },
-  passwordSetupExpires: {
-    type : Date
+
+    passwordSetupToken: String,
+    passwordSetupExpires: Date,
   },
-},
   { timestamps: true }
 );
+
 
 userSchema.methods.getJWT = function () {
   return jwt.sign(

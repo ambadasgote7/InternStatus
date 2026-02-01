@@ -179,19 +179,115 @@ export const facultyRegister = async (req, res) => {
 
 export const getPendingStudentRequests = async (req, res) => {
   try {
-    const pendingRequests = await StudentProfile.find({ status: "pending" });
-    const yourCollegeStudents = pendingRequests.filter((students) => (
-       FacultyRegister.collegeName.equals(StudentProfile.collegeName)
-    ))
+    // safety check
+    if (!req.user.college) {
+      return res.status(400).json({
+        message: "Faculty college not assigned",
+      });
+    }
 
-    res.status(200).json({
-      message : "Studnet Profiles Fetched",
-      yourCollegeStudents
-    })
+    const pendingRequests = await StudentProfile.find({
+      status: "pending",
+      college: req.user.college,
+    }).populate("college", "name"); 
+
+    return res.status(200).json({
+      message: "Student profiles fetched",
+      pendingRequests,
+    });
 
   } catch (err) {
     return res.status(500).json({
       message: err.message || "Something went wrong",
     });
   }
-}
+};
+
+export const updateStudentRequestStatus = async (req, res) => {
+  try {
+    const { id, status } = req.params;
+
+    if (!["approved", "rejected"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+
+    const request = await StudentProfile.findById(id);
+    if (!request) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+
+    if (request.status !== "pending") {
+      return res.status(400).json({
+        message: `Request already ${request.status}`,
+      });
+    }
+
+    if (!req.user.college) {
+      return res.status(403).json({
+        message: "Faculty college not assigned",
+      });
+    }
+
+    if (request.college.toString() !== req.user.college.toString()) {
+      return res.status(403).json({
+        message: "You are not authorized to review this student",
+      });
+    }
+
+    const studentUser = await User.findById(request.userId);
+    if (!studentUser) {
+      return res.status(404).json({ message: "Linked user not found" });
+    }
+
+    // 🔥 SYNC COLLEGE INTO USER
+    studentUser.college = request.college;
+    studentUser.isVerified = status === "approved";
+
+    await studentUser.save();
+
+    request.status = status;
+    request.verifiedAt = new Date();
+    request.verifiedBy = req.user._id;
+
+    await request.save();
+
+    return res.status(200).json({
+      message: `Request ${status} successfully`,
+    });
+  } catch (err) {
+    console.error("Student request update error:", err);
+    return res.status(500).json({
+      message: err.message || "Something went wrong",
+    });
+  }
+};
+
+export const getVerifiedStudentRequests = async (req, res) => {
+  try {
+    // 1️⃣ Enforce faculty-only access
+    if (req.user.role !== "Faculty") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // 2️⃣ Ensure faculty is mapped to a college
+    if (!req.user.college) {
+      return res.status(400).json({ message: "Faculty college not assigned" });
+    }
+
+    // 3️⃣ Fetch only approved students of faculty’s college
+    const verifiedRequests = await StudentProfile.find({
+      status: "approved",
+      college: req.user.college,
+    })
+      .populate("college", "name")
+      .sort({ verifiedAt: -1 });
+
+    return res.status(200).json({ verifiedRequests });
+
+  } catch (err) {
+    return res.status(500).json({
+      message: err.message || "Something went wrong",
+    });
+  }
+};
+

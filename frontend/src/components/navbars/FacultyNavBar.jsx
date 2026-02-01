@@ -39,11 +39,11 @@ const FacultyNavBar = () => {
                 <Link to="/faculty/dashboard" className="text-sm hover:underline">
                   Dashboard
                 </Link>
-                <Link to="/faculty/students" className="text-sm hover:underline">
-                  Students
+                <Link to="/faculty/verified-student-requests" className="text-sm hover:underline">
+                  Verified Students
                 </Link>
-                <Link to="/faculty/approvals" className="text-sm hover:underline">
-                  Approvals
+                <Link to="/faculty/student-requests" className="text-sm hover:underline">
+                  Studnet Approvals
                 </Link>
               </>
             )}
