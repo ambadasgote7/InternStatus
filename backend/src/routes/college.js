@@ -5,7 +5,7 @@ import { requireAdmin } from "../middlewares/adminAuth.js";
 
 const collegeRouter = express.Router();
 
-collegeRouter.post("/", requireAdmin, addCollege);   // Admin only
+collegeRouter.post("/add-college", requireAdmin, addCollege);   // Admin only
 collegeRouter.get("/", getAllColleges);               // Public (for dropdown)
 
 export default collegeRouter;

@@ -51,6 +51,14 @@ const AdminNavBar = () => {
           Verified Companies
         </Link>
 
+        <Link to="/admin/add-college" className="hover:text-gray-300">
+        Add College
+        </Link>
+
+        <Link to="/admin/colleges-list" className="hover:text-gray-300">
+        Colleges List
+        </Link>
+
        <button
               onClick={handleLogout}
               className="px-3 py-1 border rounded-md text-sm cursor-pointer"

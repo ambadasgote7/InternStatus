@@ -37,6 +37,8 @@ import Users from "./pages/admin/Users";
 import StudentNavBar from "./components/navbars/StudentNavBar";
 import StudentRequests from "./pages/faculty/StudentRequests";
 import VerifiedStudentRequests from "./pages/faculty/VerifiedStudentRequests";
+import AddCollege from "./pages/admin/AddCollege";
+import Colleges from "./pages/admin/Colleges";
 
 function App() {
   return (
@@ -149,6 +151,8 @@ function App() {
             <Route path="verified-faculty-requests" element={<VerifiedFacultyRequests />} />
             <Route path="company-requests" element={<CompanyRequests />} />
             <Route path="verified-company-requests" element={<VerifiedCompanyRequests />} />
+            <Route path="add-college" element={<AddCollege />} />
+            <Route path="colleges-list" element={<Colleges />} />
           </Route>
 
 

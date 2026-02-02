@@ -9,6 +9,12 @@ const collegeSchema = new mongoose.Schema(
       trim: true,
       unique: true,
     },
+    location : {
+      type : String,
+      required : true,
+      trim : true,
+    },
+    
   },
   { timestamps: true }
 );
