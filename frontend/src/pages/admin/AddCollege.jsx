@@ -48,7 +48,7 @@ const AddCollege = () => {
                 />
                 <button 
                     onClick={handleAddCollege}
-                    className="px-3 py-1 border rounded-md text-sm cursor-pointer"
+                    className="px-3 py-1 border rounded-md text-sm cursor-pointer bg-blue-500 text-white"
                 >Add College</button>
              </div>
         </div>
