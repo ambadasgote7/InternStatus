@@ -46,7 +46,8 @@ const StudentProfile = () => {
           axios.get(`${BASE_URL}/api/college`),
         ]);
 
-        setColleges(collegeRes.data || []);
+        setColleges(collegeRes.data?.data || []);
+
 
         const p = profileRes.data?.data;
         if (p) {

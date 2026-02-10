@@ -39,6 +39,7 @@ import StudentRequests from "./pages/faculty/StudentRequests";
 import VerifiedStudentRequests from "./pages/faculty/VerifiedStudentRequests";
 import AddCollege from "./pages/admin/AddCollege";
 import Colleges from "./pages/admin/Colleges";
+import PostInternships from "./pages/company/PostInternships";
 
 function App() {
   return (
@@ -129,6 +130,7 @@ function App() {
 
             {/* company register -> /company/register (nested like student profile) */}
             <Route path="register" element={<CompanyRegister />} />
+            <Route path="internships" element={<PostInternships />} />
 
             {/* -------------------- FUTURE COMPANY ROUTES --------------------
                Add company-specific pages here:

@@ -93,8 +93,6 @@ export const postInternships = async (req, res) => {
       });
     }
 
-    
-
     const {
       title,
       description,

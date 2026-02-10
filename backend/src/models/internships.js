@@ -6,14 +6,14 @@ const internshipSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      minlength: 5,
+      minlength: 2,
       maxlength: 100,
     },
 
     description: {
       type: String,
       required: true,
-      minlength: 20,
+      minlength: 15,
     },
 
     company: {

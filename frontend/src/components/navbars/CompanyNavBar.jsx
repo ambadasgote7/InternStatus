@@ -39,8 +39,11 @@ const CompanyNavBar = () => {
                 <Link to="/company/dashboard" className="text-sm hover:underline">
                   Dashboard
                 </Link>
+                <Link to="/company/internships" className="text-sm hover:underline">
+                Post Internships
+                </Link>
                 <Link to="/company/postings" className="text-sm hover:underline">
-                  Postings
+                 View Postings
                 </Link>
                 <Link to="/company/interns" className="text-sm hover:underline">
                   Interns
