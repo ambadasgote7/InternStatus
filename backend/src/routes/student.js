@@ -39,4 +39,5 @@ studentRouter.post(
   submitStudentProfile
 );
 
+
 export default studentRouter;

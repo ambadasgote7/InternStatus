@@ -18,7 +18,7 @@ const internshipSchema = new mongoose.Schema(
 
     company: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Company",
+      ref: "CompanyRegister",
       required: true,
       index: true,
     },
@@ -68,7 +68,7 @@ const internshipSchema = new mongoose.Schema(
 
     applicants: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Student",
+      ref: "StudentProfile",
     }],
 
     maxApplicants: {

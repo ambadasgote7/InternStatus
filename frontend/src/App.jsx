@@ -40,6 +40,7 @@ import VerifiedStudentRequests from "./pages/faculty/VerifiedStudentRequests";
 import AddCollege from "./pages/admin/AddCollege";
 import Colleges from "./pages/admin/Colleges";
 import PostInternships from "./pages/company/PostInternships";
+import Internships from "./pages/students/Internships";
 
 function App() {
   return (
@@ -74,6 +75,7 @@ function App() {
 
             {/* student profile -> /student/profile */}
             <Route path="profile" element={<StudentProfile />} />
+            <Route path="internships" element={<Internships />} />
 
             {/* -------------------- FUTURE STUDENT ROUTES --------------------
                Add new student pages as nested routes here so they inherit:

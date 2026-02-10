@@ -57,7 +57,7 @@ const PostInternships = () => {
     try {
       setLoading(true);
 
-      const response = await axios.post(`${BASE_URL}/api/company/internships`, {
+      const response = await axios.post(`${BASE_URL}/api/internships`, {
         title: formData.title.trim(),
         description: formData.description.trim(),
         startDate: formData.startDate,

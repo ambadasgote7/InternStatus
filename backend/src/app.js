@@ -8,6 +8,7 @@ import companyRouter from "./routes/company.js";
 import facultyRouter from "./routes/faculty.js";
 import adminRouter from "./routes/admin.js";
 import collegeRouter from "./routes/college.js";
+import internshipRouter from "./routes/internshipRoutes.js";
 
 const app = express();
 
@@ -30,5 +31,6 @@ app.use("/api/student", studentRouter);
 app.use("/api/company", companyRouter);
 app.use("/api/faculty", facultyRouter);
 app.use("/api/college", collegeRouter);
+app.use("/api/internships", internshipRouter);
 
 export default app;
