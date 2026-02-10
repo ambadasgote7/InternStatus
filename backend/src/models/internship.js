@@ -66,11 +66,6 @@ const internshipSchema = new mongoose.Schema(
       trim: true,
     }],
 
-    applicants: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "StudentProfile",
-    }],
-
     maxApplicants: {
       type: Number,
       min: 1,

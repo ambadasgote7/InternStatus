@@ -138,9 +138,6 @@ export const postInternship = async (req, res) => {
 };
 
 export const applyInternship = async (req, res) => {
-    
-
-  console.log(await mongoose.connection.db.admin().command({ replSetGetStatus: 1 }));
   const session = await mongoose.startSession();
   session.startTransaction();
 
