@@ -66,8 +66,6 @@ export const getInternships = async (req, res) => {
   }
 };
 
-
-
 export const postInternship = async (req, res) => {
   try {
     if (req.user.role !== "Company") {
@@ -194,7 +192,6 @@ export const postInternship = async (req, res) => {
   }
 };
 
-
 export const applyInternship = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -310,7 +307,6 @@ export const applyInternship = async (req, res) => {
   }
 };
 
-
 export const getCompanyInternships = async (req, res) => {
   try {
     const { page = 1, limit = 10, status, search } = req.query;
@@ -359,7 +355,6 @@ export const getCompanyInternships = async (req, res) => {
     });
   }
 };
-
 
 export const updateInternshipStatus = async (req, res) => {
   try {

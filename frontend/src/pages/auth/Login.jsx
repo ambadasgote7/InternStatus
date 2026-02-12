@@ -147,14 +147,6 @@ const Login = () => {
   return (
   <div className="min-h-screen relative flex items-center justify-center bg-base-200">
 
-    {/* Admin Login — top right */}
-    <p
-      className="absolute top-4 right-6 text-xs text-gray-500 cursor-pointer hover:underline"
-      onClick={() => navigate("/admin/login")}
-    >
-      Admin Login
-    </p>
-
     {/* Login Card */}
     <fieldset className="fieldset bg-base-100 border-base-300 rounded-box w-xs border p-4 shadow">
       <legend className="fieldset-legend">Login</legend>

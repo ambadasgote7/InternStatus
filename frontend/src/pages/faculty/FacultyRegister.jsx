@@ -47,7 +47,7 @@ const FacultyRegister = () => {
     const fetchColleges = async () => {
       try {
         const res = await axios.get(`${BASE_URL}/api/college`);
-        setColleges(res.data || []);
+        setColleges(res.data?.colleges || []);
       } catch (err) {
         console.error("Failed to fetch colleges", err);
         setMessage("Unable to load colleges");
@@ -137,7 +137,7 @@ const FacultyRegister = () => {
   /* ---------------- UI ---------------- */
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] py-12 px-4">
+    <div className="min-h-screen bg-[#f8fafc] py-12 px-4 text-black">
       <div className="max-w-3xl mx-auto space-y-10">
 
         {/* Header */}
