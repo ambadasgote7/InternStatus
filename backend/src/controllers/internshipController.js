@@ -5,50 +5,68 @@ import StudentProfile from "../models/studentProfile.js";
 
 export const getInternships = async (req, res) => {
   try {
-    const { page = 1, limit = 10, mode, search, skill } = req.query;
+    let { page = 1, limit = 10, mode, search, skill } = req.query;
+
+    page = parseInt(page);
+    limit = parseInt(limit);
+
+    if (page < 1) page = 1;
+    if (limit < 1) limit = 10;
 
     const query = {
       status: "open",
       applicationDeadline: { $gte: new Date() },
     };
 
-    // Filter by mode (remote / onsite / hybrid)
-    if (mode) {
+    // Mode filter
+    if (mode && ["remote", "onsite", "hybrid"].includes(mode)) {
       query.mode = mode;
     }
 
-    // Search by title (case-insensitive)
-    if (search) {
-      query.title = { $regex: search, $options: "i" };
+    // Title search
+    if (search && search.trim() !== "") {
+      query.title = {
+        $regex: search.trim(),
+        $options: "i",
+      };
     }
 
-    // Filter by skill
-    if (skill) {
-      query.skillsRequired = { $in: [skill] };
+    // Skill filter
+    if (skill && skill.trim() !== "") {
+      query.skillsRequired = {
+        $regex: skill.trim(),
+        $options: "i",
+      };
     }
 
-    const internships = await Internship.find(query)
-      .populate("company", "email") // show company email only
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(Number(limit));
-
-    const total = await Internship.countDocuments(query);
+    const [internships, total] = await Promise.all([
+      Internship.find(query)
+        .populate({
+          path: "company",
+          select: "companyName companyWebsite status",
+        })
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
+      Internship.countDocuments(query),
+    ]);
 
     return res.status(200).json({
       message: "Internships fetched successfully",
       total,
-      page: Number(page),
+      page,
       pages: Math.ceil(total / limit),
       data: internships,
     });
-
   } catch (err) {
-    return res.status(400).json({
+    return res.status(500).json({
       message: err.message || "Something went wrong",
     });
   }
 };
+
+
 
 export const postInternship = async (req, res) => {
   try {
@@ -67,23 +85,58 @@ export const postInternship = async (req, res) => {
       mode,
       skillsRequired,
       maxApplicants,
+      positions,
+      stipendType,
+      stipendAmount,
     } = req.body;
 
-    // 1. Required fields
-    if (!title || !description || !startDate || !endDate || !applicationDeadline || !mode) {
-      return res.status(400).json({ message: "Required fields missing" });
+    // Basic Required Validation
+    if (
+      !title ||
+      !description ||
+      !startDate ||
+      !endDate ||
+      !applicationDeadline ||
+      !mode ||
+      !positions ||
+      !maxApplicants ||
+      !stipendType
+    ) {
+      return res.status(400).json({
+        message: "Required fields missing",
+      });
     }
 
-    // 2. Type checks
+    // Mode validation
+    if (!["remote", "onsite", "hybrid"].includes(mode)) {
+      return res.status(400).json({
+        message: "Invalid mode selected",
+      });
+    }
+
+    // Stipend validation
+    if (!["paid", "unpaid", "not_disclosed"].includes(stipendType)) {
+      return res.status(400).json({
+        message: "Invalid stipend type",
+      });
+    }
+
+    if (stipendType === "paid") {
+      if (!stipendAmount || stipendAmount < 0) {
+        return res.status(400).json({
+          message: "Stipend amount must be provided for paid internships",
+        });
+      }
+    }
+
+    // Skills validation
     if (!Array.isArray(skillsRequired) || skillsRequired.length === 0) {
-      return res.status(400).json({ message: "skillsRequired must be a non-empty array" });
+      return res.status(400).json({
+        message: "At least one skill is required",
+      });
     }
 
-    if (typeof maxApplicants !== "number") {
-      return res.status(400).json({ message: "maxApplicants must be a number" });
-    }
-
-    // 3. Date logic
+    // Date validation
     const start = new Date(startDate);
     const end = new Date(endDate);
     const deadline = new Date(applicationDeadline);
@@ -95,34 +148,38 @@ export const postInternship = async (req, res) => {
       });
     }
 
-    if (deadline < now) {
-      return res.status(400).json({
-        message: "Application deadline cannot be in the past",
-      });
-    }
-
     if (deadline >= start) {
       return res.status(400).json({
         message: "Application deadline must be before start date",
       });
     }
 
-    if (maxApplicants < 1) {
+    if (deadline < now) {
       return res.status(400).json({
-        message: "Max applicants must be at least 1",
+        message: "Application deadline cannot be in the past",
       });
     }
 
-    const internship = await Internships.create({
+    if (positions < 1 || maxApplicants < 1) {
+      return res.status(400).json({
+        message: "Positions and maxApplicants must be at least 1",
+      });
+    }
+
+    const internship = await Internship.create({
       title: title.trim(),
-      description,
+      description: description.trim(),
       company: req.user._id,
       startDate: start,
       endDate: end,
       applicationDeadline: deadline,
       mode,
       skillsRequired,
-      maxApplicants,
+      maxApplicants: Number(maxApplicants),
+      positions: Number(positions),
+      stipendType,
+      stipendAmount:
+        stipendType === "paid" ? Number(stipendAmount) : null,
       status: "open",
     });
 
@@ -136,6 +193,7 @@ export const postInternship = async (req, res) => {
     });
   }
 };
+
 
 export const applyInternship = async (req, res) => {
   const session = await mongoose.startSession();
@@ -251,3 +309,118 @@ export const applyInternship = async (req, res) => {
     });
   }
 };
+
+
+export const getCompanyInternships = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, status, search } = req.query;
+
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(50, parseInt(limit, 10) || 10);
+
+    const query = {
+      company: req.user._id,
+    };
+
+    // Optional filter by status
+    if (status) {
+      query.status = status;
+    }
+
+    // Optional search by title
+    if (search) {
+      query.title = { $regex: search, $options: "i" };
+    }
+
+    const [internships, total] = await Promise.all([
+      Internship.find(query)
+        .sort({ createdAt: -1 })
+        .skip((pageNum - 1) * limitNum)
+        .limit(limitNum)
+        .lean(),
+
+      Internship.countDocuments(query),
+    ]);
+
+    return res.status(200).json({
+      message: "Internships fetched successfully",
+      meta: {
+        total,
+        page: pageNum,
+        pages: Math.ceil(total / limitNum),
+      },
+      data: internships,
+    });
+
+  } catch (err) {
+    console.error("Get company internships error:", err);
+    return res.status(500).json({
+      message: "Failed to fetch internships",
+    });
+  }
+};
+
+
+export const updateInternshipStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    const allowedStatuses = ["draft", "open", "closed", "completed"];
+
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        message: "Invalid status value",
+      });
+    }
+
+    const internship = await Internship.findOne({
+      _id: req.params.id,
+      company: req.user._id,
+    });
+
+    if (!internship) {
+      return res.status(404).json({
+        message: "Internship not found or unauthorized",
+      });
+    }
+
+    const currentStatus = internship.status;
+
+    const validTransitions = {
+      draft: ["open"],
+      open: ["closed"],
+      closed: ["completed"],
+      completed: [],
+    };
+
+    if (!validTransitions[currentStatus].includes(status)) {
+      return res.status(400).json({
+        message: `Cannot change status from ${currentStatus} to ${status}`,
+      });
+    }
+
+    // Business Rule:
+    // Cannot open if deadline already passed
+    if (status === "open" && internship.applicationDeadline < new Date()) {
+      return res.status(400).json({
+        message: "Cannot open internship after application deadline",
+      });
+    }
+
+    internship.status = status;
+
+    await internship.save();
+
+    return res.status(200).json({
+      message: "Internship status updated successfully",
+      data: internship,
+    });
+
+  } catch (err) {
+    console.error("Update internship status error:", err);
+    return res.status(500).json({
+      message: "Failed to update internship status",
+    });
+  }
+};
+

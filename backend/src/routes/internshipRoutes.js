@@ -1,7 +1,7 @@
 import express from "express";
 import userAuth from "../middlewares/auth.js";
 import { authorizeRoles } from "../middlewares/role.js";
-import { postInternship, applyInternship, getInternships } from "../controllers/internshipController.js";
+import { postInternship, applyInternship, getInternships, getCompanyInternships, updateInternshipStatus } from "../controllers/internshipController.js";
 import { getInternshipApplicants, getStudentAppliedInternships } from "../controllers/applicationController.js";
 const internshipRouter = express.Router();
 
@@ -34,12 +34,17 @@ internshipRouter.get(
 );
 
 internshipRouter.get(
-  "/:internshipId/applicants",
+  "/company/internships",
   userAuth,
   authorizeRoles("Company"),
-  getInternshipApplicants
+  getCompanyInternships
 );
 
-
+internshipRouter.patch(
+  "/company/internships/:id/status",
+  userAuth,
+  authorizeRoles("Company"),
+  updateInternshipStatus
+);
 
 export default internshipRouter;

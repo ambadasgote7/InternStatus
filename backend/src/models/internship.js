@@ -50,9 +50,31 @@ const internshipSchema = new mongoose.Schema(
       default: "draft",
     },
 
-    stipend: {
+    stipendType: {
+      type: String,
+      enum: ["paid", "unpaid", "not_disclosed"],
+      default: "not_disclosed",
+      required: true,
+    },
+
+    stipendAmount: {
       type: Number,
       min: 0,
+      validate: {
+        validator: function (value) {
+          if (this.stipendType === "paid") {
+            return value != null;
+          }
+          return true;
+        },
+        message: "Stipend amount is required when stipendType is paid",
+      },
+    },
+
+    positions: {
+      type: Number,
+      required: true,
+      min: 1,
     },
 
     mode: {
@@ -61,13 +83,16 @@ const internshipSchema = new mongoose.Schema(
       required: true,
     },
 
-    skillsRequired: [{
-      type: String,
-      trim: true,
-    }],
+    skillsRequired: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
 
     maxApplicants: {
       type: Number,
+      required: true,
       min: 1,
     },
   },
@@ -76,6 +101,10 @@ const internshipSchema = new mongoose.Schema(
     versionKey: false,
   }
 );
+
+internshipSchema.index({ company: 1, createdAt: -1 });
+internshipSchema.index({ status: 1 });
+
 
 export default mongoose.models.Internship ||
   mongoose.model("Internship", internshipSchema);

@@ -16,10 +16,40 @@ const applicationSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["applied", "accepted", "rejected", "withdrawn"],
+      enum: [
+  "applied",
+  "shortlisted",
+  "interview",
+  "accepted",
+  "rejected",
+  "withdrawn"
+],
       default: "applied",
       index: true,
     },
+    statusHistory: [
+  {
+    status: {
+      type: String,
+      enum: [
+        "applied",
+        "shortlisted",
+        "interview",
+        "accepted",
+        "rejected",
+        "withdrawn"
+      ],
+    },
+    changedAt: {
+      type: Date,
+      default: Date.now,
+    },
+    changedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // adjust to your company model
+    }
+  }
+],
   },
   { timestamps: true }
 );
