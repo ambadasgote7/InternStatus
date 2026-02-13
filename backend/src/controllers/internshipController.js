@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Internship from "../models/internship.js";
 import Application from "../models/application.js";
 import StudentProfile from "../models/studentProfile.js";
+import CompanyRegister from "../models/companyRegister.js";
 
 export const getInternships = async (req, res) => {
   try {
@@ -164,10 +165,22 @@ export const postInternship = async (req, res) => {
       });
     }
 
+    const companyProfile = await CompanyRegister.findOne({
+      userId: req.user._id,
+      status: "approved",
+    });
+
+    if (!companyProfile) {
+      return res.status(403).json({
+        message: "Company profile not found or not approved",
+      });
+    }
+
+
     const internship = await Internship.create({
       title: title.trim(),
       description: description.trim(),
-      company: req.user._id,
+      company: companyProfile._id,
       startDate: start,
       endDate: end,
       applicationDeadline: deadline,
@@ -314,16 +327,26 @@ export const getCompanyInternships = async (req, res) => {
     const pageNum = Math.max(1, parseInt(page, 10) || 1);
     const limitNum = Math.min(50, parseInt(limit, 10) || 10);
 
+    // 🔥 Get company profile first
+    const companyProfile = await CompanyRegister.findOne({
+      userId: req.user._id,
+      status: "approved",
+    });
+
+    if (!companyProfile) {
+      return res.status(403).json({
+        message: "Company profile not found or not approved",
+      });
+    }
+
     const query = {
-      company: req.user._id,
+      company: companyProfile._id,  // ✅ FIXED
     };
 
-    // Optional filter by status
     if (status) {
       query.status = status;
     }
 
-    // Optional search by title
     if (search) {
       query.title = { $regex: search, $options: "i" };
     }
@@ -355,6 +378,7 @@ export const getCompanyInternships = async (req, res) => {
     });
   }
 };
+
 
 export const updateInternshipStatus = async (req, res) => {
   try {

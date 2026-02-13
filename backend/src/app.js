@@ -12,7 +12,6 @@ import internshipRouter from "./routes/internshipRoutes.js";
 import applicationRouter from "./routes/applicationRoutes.js";
 
 const app = express();
-
 app.use(cors({
   origin: "http://localhost:5173",
   credentials: true

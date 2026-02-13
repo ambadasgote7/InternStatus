@@ -128,7 +128,7 @@ const PostInternships = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 py-12 text-black">
       <div className="w-full max-w-3xl bg-white shadow-xl rounded-2xl p-8">
 
         <h2 className="text-3xl font-bold mb-6 text-center">

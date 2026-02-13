@@ -2,15 +2,15 @@ import Internship from "../models/internship.js";
 import Application from "../models/application.js";
 import StudentProfile from "../models/studentProfile.js";
 import CompanyRegister from "../models/companyRegister.js";
-import User from "../models/user.js";
 import mongoose from "mongoose";
+import { sendEmail } from "../utils/sendEmail.js";
 
 export const getInternshipApplicants = async (req, res) => {
   try {
     const { id } = req.params;
     const { page = 1, limit = 10, status, search } = req.query;
 
-    // 1️⃣ Validate internship id
+    // 1️⃣ Validate internship ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         message: "Invalid internship ID",
@@ -20,10 +20,22 @@ export const getInternshipApplicants = async (req, res) => {
     const pageNum = Math.max(1, parseInt(page, 10) || 1);
     const limitNum = Math.min(50, parseInt(limit, 10) || 10);
 
-    // 2️⃣ Ownership check
+    // 2️⃣ Get company profile using logged-in user
+    const companyProfile = await CompanyRegister.findOne({
+      userId: req.user._id,
+      status: "approved",
+    });
+
+    if (!companyProfile) {
+      return res.status(403).json({
+        message: "Company profile not found or not approved",
+      });
+    }
+
+    // 3️⃣ Ownership check (IMPORTANT FIX)
     const internship = await Internship.findOne({
       _id: id,
-      company: req.user._id,
+      company: companyProfile._id,
     }).select("_id title status positions");
 
     if (!internship) {
@@ -32,21 +44,23 @@ export const getInternshipApplicants = async (req, res) => {
       });
     }
 
-    // 3️⃣ Build base query
-    const query = {
-      internship: id,
-    };
+    // 4️⃣ Build query for applications
+    const query = { internship: id };
 
     if (status) {
       query.status = status;
     }
 
-    // 4️⃣ Execute DB queries in parallel
+    // 5️⃣ Fetch applications + count in parallel
     const [applications, total] = await Promise.all([
       Application.find(query)
         .populate({
           path: "student",
-          select: "fullName course year skills resumeFileUrl email",
+          populate: {
+            path: "userId",
+            select: "email fullName",
+          },
+          select: "course year skills resumeFileUrl userId",
         })
         .sort({ createdAt: -1 })
         .skip((pageNum - 1) * limitNum)
@@ -56,16 +70,20 @@ export const getInternshipApplicants = async (req, res) => {
       Application.countDocuments(query),
     ]);
 
-    // 5️⃣ Search by student name (optional)
+    // 6️⃣ Optional name search
     let filteredApplications = applications;
 
     if (search) {
       const lowerSearch = search.toLowerCase();
+
       filteredApplications = applications.filter((app) =>
-        app.student?.fullName?.toLowerCase().includes(lowerSearch)
+        app.student?.userId?.fullName
+          ?.toLowerCase()
+          .includes(lowerSearch)
       );
     }
 
+    // 7️⃣ Return clean structured response
     return res.status(200).json({
       message: "Applicants fetched successfully",
       internship: {
@@ -111,7 +129,11 @@ export const getStudentAppliedInternships = async (req, res) => {
 
     const applications = await Application.find({
       student: studentProfile._id,
-      status: { $in: ["applied", "accepted"] },
+      status: { $in: ["applied",
+          "shortlisted",
+          "interview",
+          "accepted",
+          "rejected",] },
     }).select("internship");
 
     const appliedInternshipIds = applications.map(app =>
@@ -134,7 +156,12 @@ export const updateApplicationStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-    console.log("Update application status:", status);
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "Invalid application ID",
+      });
+    }
 
     const allowedStatuses = [
       "shortlisted",
@@ -149,20 +176,12 @@ export const updateApplicationStatus = async (req, res) => {
       });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        message: "Invalid application ID",
-      });
-    }
-
-    // 🔥 Nested populate to get student user
     const application = await Application.findById(id)
       .populate("internship")
       .populate({
         path: "student",
         populate: {
           path: "userId",
-          model: "User",
           select: "email fullName",
         },
       });
@@ -175,18 +194,14 @@ export const updateApplicationStatus = async (req, res) => {
 
     const internship = application.internship;
 
-    // 🔥 Correct ownership check
     const companyProfile = await CompanyRegister.findOne({
       userId: req.user._id,
     });
 
-    if (!companyProfile) {
-      return res.status(403).json({
-        message: "Company profile not found",
-      });
-    }
-
-    if (internship.company.toString() !== companyProfile._id.toString()) {
+    if (
+      !companyProfile ||
+      internship.company.toString() !== companyProfile._id.toString()
+    ) {
       return res.status(403).json({
         message: "Unauthorized",
       });
@@ -198,13 +213,6 @@ export const updateApplicationStatus = async (req, res) => {
       });
     }
 
-    if (application.status === status) {
-      return res.status(400).json({
-        message: "Application already in this status",
-      });
-    }
-
-    // 🔥 Strict transitions
     const validTransitions = {
       applied: ["shortlisted", "rejected"],
       shortlisted: ["interview", "rejected"],
@@ -213,14 +221,14 @@ export const updateApplicationStatus = async (req, res) => {
       rejected: [],
     };
 
-    if (!validTransitions[application.status].includes(status)) {
+    if (!validTransitions[application.status]?.includes(status)) {
       return res.status(400).json({
         message: `Cannot change status from ${application.status} to ${status}`,
       });
     }
 
-    // Position limit check
-    if (status === "accepted") {
+    // Position limit
+    if (status === "accepted" && internship.positions) {
       const acceptedCount = await Application.countDocuments({
         internship: internship._id,
         status: "accepted",
@@ -233,31 +241,22 @@ export const updateApplicationStatus = async (req, res) => {
       }
     }
 
-    // Update
+    // Safe statusHistory push
+    if (!application.statusHistory) {
+      application.statusHistory = [];
+    }
+
     application.status = status;
 
     application.statusHistory.push({
       status,
+      changedBy: req.user._id,
       changedAt: new Date(),
-      changedBy: req.user._id, // User reference
     });
 
     await application.save();
 
-    // Auto complete internship
-    if (status === "accepted") {
-      const acceptedAfter = await Application.countDocuments({
-        internship: internship._id,
-        status: "accepted",
-      });
-
-      if (acceptedAfter >= internship.positions) {
-        internship.status = "completed";
-        await internship.save();
-      }
-    }
-
-    // 🔥 Send email using User.email
+    // Send email (safe)
     const studentUser = application.student?.userId;
 
     if (studentUser?.email) {
@@ -266,12 +265,11 @@ export const updateApplicationStatus = async (req, res) => {
         subject: "Application Status Update",
         html: `
           <p>Hello ${studentUser.fullName || "Student"},</p>
-          <p>Your application status has been updated to <b>${status}</b>.</p>
-          <p>Regards,<br/>InternStatus Team</p>
+          <p>Your application status is now <b>${status}</b>.</p>
         `,
-      }).catch((err) => {
-        console.error("Email failed:", err.message);
-      });
+      }).catch((err) =>
+        console.error("Email failed:", err.message)
+      );
     }
 
     return res.status(200).json({
@@ -280,7 +278,7 @@ export const updateApplicationStatus = async (req, res) => {
     });
 
   } catch (err) {
-    console.error("Update application status error:", err);
+    console.error("🔥 REAL ERROR:", err);
     return res.status(500).json({
       message: "Failed to update application status",
     });
