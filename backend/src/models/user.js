@@ -26,17 +26,28 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       required: true,
-      enum: ["Admin", "Student", "Faculty", "Company"],
+      enum: ["Admin", "Student", "Faculty", "Company", "Mentor"],
     },
 
-    // 🔥 ADD THIS
+    // College reference (only for student & faculty)
     college: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "College",
       required: function () {
-        if (!this.isRegistered) return false;
-        return this.role === "Faculty" || this.role === "Student";
-      }
+        return (
+          this.isRegistered &&
+          (this.role === "faculty" || this.role === "student")
+        );
+      },
+    },
+
+    // Company reference (only for mentor)
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // referencing company user
+      required: function () {
+        return this.role === "mentor";
+      },
     },
 
     roleStatus: {
@@ -61,7 +72,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-
+// 🔐 Generate JWT
 userSchema.methods.getJWT = function () {
   return jwt.sign(
     { _id: this._id, role: this.role },
@@ -69,15 +80,17 @@ userSchema.methods.getJWT = function () {
     { expiresIn: "7d" }
   );
 };
+
+// 🔑 Validate Password
 userSchema.methods.validatePassword = async function (userInputPassword) {
   return bcrypt.compare(userInputPassword, this.password);
 };
 
+// 🔒 Hash password before save
 userSchema.pre("save", async function () {
   if (!this.isModified("password") || !this.password) return;
   this.password = await bcrypt.hash(this.password, 10);
 });
-
 
 const User = mongoose.model("User", userSchema);
 

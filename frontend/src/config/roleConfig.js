@@ -4,6 +4,8 @@ const roleConfig = {
   Student: "/student",
   Faculty: "/faculty",
   Company: "/company",
+  Mentor: "/mentor",
 };
 
 export default roleConfig;
+

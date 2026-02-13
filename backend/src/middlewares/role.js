@@ -1,5 +1,4 @@
-// middlewares/roleMiddleware.js
-
+// 🔒 Authorize Based On Role
 export const authorizeRoles = (...allowedRoles) => {
   return (req, res, next) => {
     try {
@@ -20,13 +19,12 @@ export const authorizeRoles = (...allowedRoles) => {
   };
 };
 
+// 🚫 Extra Safety Layer (optional but clean)
 export const requireActiveRole = (req, res, next) => {
   if (req.user.roleStatus === "revoked") {
     return res.status(403).json({
-      message: "Role access revoked"
+      message: "Role access revoked",
     });
   }
   next();
 };
-
-

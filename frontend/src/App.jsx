@@ -43,6 +43,7 @@ import PostInternships from "./pages/company/PostInternships";
 import Internships from "./pages/students/Internships";
 import ViewPostings from "./pages/company/ViewPostings";
 import InternshipHiringPage from "./pages/company/InternshipHiringPage";
+import MentorDashboard from "./pages/mentor/MentorDashboard";
 
 function App() {
   return (
@@ -145,6 +146,22 @@ function App() {
                  <Route path="interns" element={<CompanyInterns />} />
             ------------------------------------------------------------------ */}
           </Route>
+
+
+            {/* -------------------- COMPANY ROUTES (protected + role-guarded) -------------------- */}
+          <Route
+            path="/mentor"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowed="Mentor">
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<MentorDashboard />} />
+
+            </Route>
+              
 
           {/* -------------------- ADMIN ROUTES (isolated) -------------------- */}
           <Route path="/admin/login" element={<AdminLogin />} />
