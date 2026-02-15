@@ -148,7 +148,7 @@ function App() {
           </Route>
 
 
-            {/* -------------------- COMPANY ROUTES (protected + role-guarded) -------------------- */}
+            {/* -------------------- MENTOR ROUTES (protected + role-guarded) -------------------- */}
           <Route
             path="/mentor"
             element={
@@ -159,6 +159,8 @@ function App() {
             }
           >
             <Route index element={<MentorDashboard />} />
+
+            {/* -------------------- FUTURE MENTOR ROUTES --------------------*/}
 
             </Route>
               
