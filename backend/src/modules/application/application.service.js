@@ -3,6 +3,7 @@ import Application from "../../models/Application.js";
 import Internship from "../../models/Internship.js";
 import StudentProfile from "../../models/StudentProfile.js";
 import User from "../../models/User.js";
+import InternshipReport from "../../models/InternshipReport.js";
 
 /*
 PRODUCTION APPLY
@@ -234,34 +235,7 @@ export const getApplicationsForInternshipService = async (
     .sort({ createdAt: -1 })
     .lean();
 
-    // 🔥 MANUALLY ATTACH REPORT
-  const appIds = applications.map(app => app._id);
-
-  const reports = await InternshipReport.find({
-    application: { $in: appIds }
-  }).lean();
-
-  const reportMap = {};
-  reports.forEach(r => {
-    reportMap[r.application.toString()] = r;
-  });
-
-  const finalData = applications.map(app => {
-  const appId = app._id.toString();
-  const report = reportMap[appId] || null;
-
-  console.log({
-    appId,
-    reportExists: !!report,
-    reportStatus: report?.status
-  });
-
-  return {
-    ...app,
-    applicationId: appId, // 🔥 IMPORTANT
-    report
-  };
-});
+  return applications;
 
 };
 

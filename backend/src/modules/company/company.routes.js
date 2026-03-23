@@ -5,7 +5,7 @@ import {
   getCompanyInterns,
   getCompanyMentors,
   getCompanyProfile,
-  getInternProgressController,
+  getInternProgress,
   issueCertificate,
   removeMentorFromCompany,
   updateCompanyMentor,
@@ -72,7 +72,7 @@ router.get(
   "/interns/:id/progress",
   authenticate,
   authorizeRoles("company"),
-  getInternProgressController
+  getInternProgress
 );
 
 router.post(

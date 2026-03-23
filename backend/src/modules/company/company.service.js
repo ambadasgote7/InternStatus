@@ -296,13 +296,31 @@ export const assignMentorService = async (
     throw new Error("Application not found");
   }
 
-  // 🔒 Allow only before internship starts
-  if (application.status !== "offer_accepted") {
+  // ✅ allow before + during internship
+  if (!["offer_accepted", "ongoing"].includes(application.status)) {
     throw new Error(
-      "Mentor can only be assigned before internship starts"
+      "Mentor can only be assigned before or during internship"
     );
   }
 
+  // ❌ prevent same mentor reassign
+  if (
+    application.mentor &&
+    application.mentor.toString() === mentorId
+  ) {
+    throw new Error("Mentor already assigned");
+  }
+
+  // ✅ store previous mentor in history
+  if (application.mentor) {
+    application.mentorHistory.push({
+      mentor: application.mentor,
+      assignedAt: application.updatedAt,
+      removedAt: new Date()
+    });
+  }
+
+  // ✅ assign new mentor
   application.mentor = mentorId;
 
   await application.save();

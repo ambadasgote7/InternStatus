@@ -22,11 +22,16 @@ export const getCourses = async (req, res) => {
 
 export const addCourse = async (req, res) => {
   try {
+
+    console.log("RAW BODY:", req.body); // 🔥 DEBUG
+
     const data = await addCourseService(req.user, req.body);
+
     res.status(201).json({
       message: "Course added",
       data
     });
+
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -34,18 +39,24 @@ export const addCourse = async (req, res) => {
 
 export const updateCourse = async (req, res) => {
   try {
+
     const data = await updateCourseService(
       req.user,
-      req.params.courseName,
+      req.params.courseId,
       req.body
     );
 
     res.json({
+      success: true,
       message: "Course updated",
       data
     });
+
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    res.status(400).json({
+      success: false,
+      message: err.message
+    });
   }
 };
 

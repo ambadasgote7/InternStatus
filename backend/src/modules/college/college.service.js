@@ -4,6 +4,7 @@ import FacultyProfile from "../../models/FacultyProfile.js";
 import User from "../../models/User.js";
 import createUserWithToken from "../../utils/createUser.js";
 
+
 /* ======================================
    GET COURSES
 ====================================== */
@@ -25,18 +26,58 @@ export const getCoursesService = async (user) => {
 
 export const addCourseService = async (user, body) => {
 
-  const { name, durationYears, specializations } = body;
+  if (user.role !== "college") {
+    throw new Error("Unauthorized");
+  }
 
-  if (!name || !durationYears) {
-    throw new Error("Course name and duration required");
+  if (!body || typeof body !== "object") {
+    throw new Error("Invalid request body");
+  }
+
+  // 🔥 NORMALIZE BODY (CRITICAL FIX)
+  let payload = body;
+
+  if (body.data) {
+    if (Array.isArray(body.data)) {
+      payload = body.data[0] || {};
+    } else {
+      payload = body.data;
+    }
+  }
+
+  let { name, durationYears, specializations, credits } = payload;
+
+  // 🔥 FORCE TYPE CONVERSION
+  durationYears = Number(durationYears);
+  credits = Number(credits);
+
+  // ================= VALIDATION =================
+  if (!name || !name.trim()) {
+    throw new Error("Course name is required");
+  }
+
+  if (!durationYears || durationYears <= 0) {
+    throw new Error("Valid duration is required");
+  }
+
+  if (
+    credits === undefined ||
+    credits === null ||
+    isNaN(credits) ||
+    credits < 0
+  ) {
+    throw new Error("Valid credits required");
   }
 
   const collegeId = user.referenceId;
 
   const college = await College.findById(collegeId);
 
-  if (!college) throw new Error("College not found");
+  if (!college) {
+    throw new Error("College not found");
+  }
 
+  // ================= DUPLICATE CHECK =================
   const exists = college.courses.find(
     c => c.name.toLowerCase() === name.toLowerCase()
   );
@@ -45,10 +86,17 @@ export const addCourseService = async (user, body) => {
     throw new Error("Course already exists");
   }
 
+  // ================= CLEAN DATA =================
+  const cleanSpecializations = Array.isArray(specializations)
+    ? specializations.map(s => s.trim()).filter(Boolean)
+    : [];
+
+  // ================= ADD COURSE =================
   college.courses.push({
-    name,
+    name: name.trim(),
     durationYears,
-    specializations: specializations || []
+    credits,
+    specializations: cleanSpecializations
   });
 
   await college.save();
@@ -56,32 +104,69 @@ export const addCourseService = async (user, body) => {
   return college.courses;
 };
 
-
 /* ======================================
    UPDATE COURSE
 ====================================== */
 
 export const updateCourseService = async (
   user,
-  courseName,
+  courseId,
   body
 ) => {
+
+  if (user.role !== "college") {
+    throw new Error("Unauthorized");
+  }
 
   const collegeId = user.referenceId;
 
   const college = await College.findById(collegeId);
 
-  if (!college) throw new Error("College not found");
+  if (!college) {
+    throw new Error("College not found");
+  }
 
-  const course = college.courses.find(
-    c => c.name === courseName
-  );
+  const course = college.courses.id(courseId);
 
-  if (!course) throw new Error("Course not found");
+  if (!course) {
+    throw new Error("Course not found");
+  }
 
-  if (body.name) course.name = body.name;
-  if (body.durationYears) course.durationYears = body.durationYears;
-  if (body.specializations) course.specializations = body.specializations;
+  // ================= UPDATE FIELDS =================
+
+  if (body.name) {
+    const nameExists = college.courses.find(
+      c =>
+        c.name.toLowerCase() === body.name.toLowerCase() &&
+        c._id.toString() !== courseId
+    );
+
+    if (nameExists) {
+      throw new Error("Course with this name already exists");
+    }
+
+    course.name = body.name.trim();
+  }
+
+  if (body.durationYears !== undefined) {
+    if (body.durationYears <= 0) {
+      throw new Error("Invalid duration");
+    }
+    course.durationYears = Number(body.durationYears);
+  }
+
+  if (body.credits !== undefined) {
+    if (body.credits < 0) {
+      throw new Error("Invalid credits");
+    }
+    course.credits = Number(body.credits);
+  }
+
+  if (body.specializations) {
+    course.specializations = Array.isArray(body.specializations)
+      ? body.specializations.map(s => s.trim()).filter(Boolean)
+      : [];
+  }
 
   await college.save();
 

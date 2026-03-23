@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Application from "../../models/Application.js";
 import Task from "../../models/Task.js";
 import StudentProfile from "../../models/StudentProfile.js";
+import InternshipReport from "../../models/InternshipReport.js";
 
 export const getStudentInternshipTrackService = async (user, applicationId) => {
 
@@ -145,4 +146,58 @@ export const getStudentInternshipsService = async (studentId) => {
     .lean();
 
   return internships;
+};
+
+
+/*
+  ================= GET STUDENT CREDITS =================
+*/
+export const getStudentCreditsService = async (user) => {
+
+  if (user.role !== "student") {
+    throw new Error("Only students allowed");
+  }
+
+  // 🔥 ALWAYS FETCH STUDENT FROM USER ID
+  const student = await StudentProfile.findOne({
+    user: user._id
+  });
+
+  if (!student) {
+    throw new Error("Student profile not found");
+  }
+
+  const studentId = student._id;
+
+  const reports = await InternshipReport.find({
+    student: studentId,
+    facultyStatus: "approved"
+  })
+    .populate({
+      path: "application",
+      populate: {
+        path: "internship",
+        select: "title"
+      }
+    })
+    .lean();
+
+  let totalCredits = 0;
+
+  const internships = reports.map((r) => {
+    const credits = r.creditsEarned || 0;
+    totalCredits += credits;
+
+    return {
+      internshipTitle: r.application?.internship?.title || "N/A",
+      facultyScore: r.facultyScore,
+      creditsEarned: credits,
+      completionRate: r.completionRate
+    };
+  });
+
+  return {
+    totalCredits,
+    internships
+  };
 };

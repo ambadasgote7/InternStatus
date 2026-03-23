@@ -74,6 +74,13 @@ const CollegeNavBar = () => {
               >
                 Courses
               </Link>
+
+              <Link
+                to="/credits"
+                className="px-3 py-2.5 rounded-xl text-white/70 font-bold hover:text-fuchsia-300 hover:bg-white/5 transition-all duration-300 no-underline tracking-wide"
+              >
+                Assign Credits
+              </Link>
             </div>
           )}
 

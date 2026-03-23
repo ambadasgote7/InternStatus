@@ -79,39 +79,53 @@ import StudentDetails from "./pages/college/StudentDetails";
 import InternProgress from "./pages/company/InternProgress";
 import AcademicInternshipTrack from "./pages/college/AcademicInternshipTrack";
 import StudentInternships from "./pages/college/StudentInternship";
+import StudentCredits from "./pages/students/StudentCredits";
+import CreditManagement from "./pages/college/CreditManagement";
 
 function AppContent() {
 
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+useEffect(() => {
 
-    const initAuth = async () => {
+  const initAuth = async () => {
 
-      try {
+    try {
 
-        // ✅ Check if session exists via API (rely on cookie)
-        const res = await API.get("/users/profile");
+      const path = window.location.pathname;
 
-        dispatch(addUser({
-          user: res.data.user,
-          profile: res.data.profile,
-          token: null // Token is in httpOnly cookie
-        }));
+      // 🔥 SKIP AUTH CHECK FOR PUBLIC TOKEN PAGES
+      const isPublic =
+        path.startsWith("/setup-account") ||
+        path.startsWith("/reset-password");
 
-      } catch (err) {
-
-        dispatch(removeUser());
-
-      } finally {
+      if (isPublic) {
         setLoading(false);
+        return;
       }
-    };
+
+      const res = await API.get("/users/profile");
+
+      dispatch(addUser({
+        user: res.data.user,
+        profile: res.data.profile,
+        token: null
+      }));
+
+    } catch (err) {
+
+      dispatch(removeUser());
+
+    } finally {
+      setLoading(false);
+    }
+  };
 
   initAuth();
 
 }, [dispatch]);
+
 
 useEffect(() => {
 
@@ -175,19 +189,21 @@ if (loading) {
        </Route>
 
        <Route element={<ProtectedRoute role={["faculty","college"]} />}>
-
-  <Route
-    path="/academic-internship-track/:applicationId"
-    element={<AcademicInternshipTrack />}
-  />
-
-
-  <Route
-  path="/student/internships"
-  element={<StudentInternships />}
+          <Route
+            path="/academic-internship-track/:applicationId"
+            element={<AcademicInternshipTrack />}
+          />
+          <Route
+          path="/student/internships"
+          element={<StudentInternships />}
+        />
+        <Route
+  path="/credits"
+  element={<CreditManagement />}
 />
 
-</Route>
+
+        </Route>
 
 
         <Route element={<ProtectedRoute role="mentor" />}>
@@ -226,6 +242,7 @@ if (loading) {
           <Route path="/student/browse-internships" element={<BrowseInternships />} />
           <Route path="/student/internships/:id" element={<InternshipDetails />} />
           <Route path="/student/my-applications" element={<MyApplications />} />
+          <Route path="/student/credits" element={<StudentCredits />} />
            
            <Route
   path="/student/intern/:applicationId/track"

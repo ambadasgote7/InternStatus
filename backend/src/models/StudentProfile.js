@@ -33,6 +33,11 @@ const studentProfileSchema = new mongoose.Schema(
       index: true
     },
 
+    courseId: {
+  type: mongoose.Schema.Types.ObjectId,
+  required: true
+},
+
     courseName: {
       type: String,
       required: true

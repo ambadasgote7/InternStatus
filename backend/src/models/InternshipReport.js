@@ -123,14 +123,6 @@ const internshipReportSchema = new mongoose.Schema(
     type: String
   },
 
-  logbookUrl: {
-    type: String
-  },
-
-  certificateUrl: {
-    type: String
-  },
-
   weeklyData: [
   {
     weekNumber: Number,

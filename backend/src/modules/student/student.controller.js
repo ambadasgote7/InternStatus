@@ -1,8 +1,9 @@
 import { getStudentInternshipTrackService, getStudentDetailsService,
   getStudentInternshipStatsService,
-  getStudentInternshipsService } from "./student.service.js";
+  getStudentInternshipsService, 
+  getStudentCreditsService} from "./student.service.js";
 
-export const getStudentInternshipTrackController = async (req, res) => {
+export const getStudentInternshipTrack = async (req, res) => {
   try {
 
     const data = await getStudentInternshipTrackService(
@@ -55,4 +56,23 @@ export const getStudentInternships = async (req, res) => {
   );
 
   res.json({ data });
+};
+
+
+export const getStudentCredits = async (req, res) => {
+  try {
+
+    const data = await getStudentCreditsService(req.user);
+
+    res.status(200).json({
+      success: true,
+      data
+    });
+
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message
+    });
+  }
 };

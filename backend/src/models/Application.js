@@ -65,6 +65,22 @@ const applicationSchema = new mongoose.Schema(
       specialization: String
     },
 
+    // ADD THIS FIELD inside applicationSchema
+
+mentorHistory: [
+  {
+    mentor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "MentorProfile"
+    },
+    assignedAt: {
+      type: Date,
+      default: Date.now
+    },
+    removedAt: Date
+  }
+],
+
     appliedAt: {
       type: Date,
       default: Date.now

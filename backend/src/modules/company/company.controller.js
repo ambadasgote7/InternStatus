@@ -117,29 +117,36 @@ export const getCompanyInterns = async (req, res) => {
 export const assignMentor = async (req, res) => {
   try {
 
+    const { id } = req.params;
+    const { mentorId } = req.body;
+
     const data = await assignMentorService(
       req.user,
-      req.params.id,
-      req.body.mentorId
+      id,
+      mentorId
     );
 
-    res.json({
+    res.status(200).json({
       success: true,
-      message: "Mentor assigned",
+      message: "Mentor assigned successfully",
       data
     });
 
   } catch (err) {
 
-    res.status(400).json({
+    const statusCode =
+      err.message.includes("not found") ? 404 :
+      err.message.includes("allowed") ? 403 :
+      400;
+
+    res.status(statusCode).json({
       success: false,
       message: err.message
     });
-
   }
 };
 
-export const getInternProgressController = async (req, res) => {
+export const getInternProgress = async (req, res) => {
   try {
 
     const companyId = req.user.referenceId; // ✅ correct

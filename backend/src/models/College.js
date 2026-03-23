@@ -16,9 +16,13 @@
         {
           type: String
         }
-      ]
-    },
-    { _id: false }
+      ],
+
+      credits: {
+  type: Number,
+  required: true
+},
+    }
   );
 
   const collegeSchema = new mongoose.Schema(

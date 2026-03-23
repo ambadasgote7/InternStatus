@@ -5,6 +5,7 @@ import User from "../../models/User.js";
 import StudentProfile from "../../models/StudentProfile.js";
 import FacultyProfile from "../../models/FacultyProfile.js";
 import MentorProfile from "../../models/MentorProfile.js";
+import College from "../../models/College.js";
 
 import createUserWithToken from "../../utils/createUser.js";
 import sendEmail from "../../utils/sendEmail.js";
@@ -68,6 +69,23 @@ const inviteOneStudent = async (body, creator, session) => {
     throw new Error("College not resolved");
   }
 
+  // 🔥 GET COLLEGE + COURSE (CRITICAL FIX)
+  const college = await College.findById(collegeId).session(session);
+
+  if (!college) {
+    throw new Error("College not found");
+  }
+
+  const course = college.courses.find(
+    c => c.name === courseName
+  );
+
+  if (!course) {
+    throw new Error(`Course not found: ${courseName}`);
+  }
+
+  const courseId = course._id; // ✅ REQUIRED
+
   let user;
   let studentProfile;
   let rawToken;
@@ -78,7 +96,6 @@ const inviteOneStudent = async (body, creator, session) => {
   // =====================================================
   // EXISTING USER
   // =====================================================
-
   if (user) {
 
     if (user.role !== "student") {
@@ -104,7 +121,7 @@ const inviteOneStudent = async (body, creator, session) => {
         .session(session);
     }
 
-    // SELF HEAL
+    // 🔥 SELF HEAL CREATE
     if (!studentProfile) {
 
       const profile = await StudentProfile.create(
@@ -112,11 +129,15 @@ const inviteOneStudent = async (body, creator, session) => {
           user: user._id,
           fullName,
           college: collegeId,
+
+          courseId,              // ✅ FIXED
           courseName,
           specialization,
+
           courseStartYear,
           courseEndYear,
           Year,
+
           status: "active",
           profileStatus: "pending",
           createdBy: creator._id
@@ -131,10 +152,13 @@ const inviteOneStudent = async (body, creator, session) => {
 
     } else {
 
-      // REASSIGN / UPDATE
+      // 🔥 UPDATE EXISTING PROFILE
       studentProfile.fullName = fullName;
       studentProfile.college = collegeId;
+
+      studentProfile.courseId = courseId;   // ✅ FIXED
       studentProfile.courseName = courseName;
+
       studentProfile.specialization = specialization;
       studentProfile.courseStartYear = courseStartYear;
       studentProfile.courseEndYear = courseEndYear;
@@ -143,13 +167,11 @@ const inviteOneStudent = async (body, creator, session) => {
 
       await studentProfile.save({ session });
     }
-
   }
 
   // =====================================================
   // NEW USER
   // =====================================================
-
   else {
 
     isNewUser = true;
@@ -172,11 +194,15 @@ const inviteOneStudent = async (body, creator, session) => {
         user: user._id,
         fullName,
         college: collegeId,
+
+        courseId,              // ✅ FIXED
         courseName,
         specialization,
+
         courseStartYear,
         courseEndYear,
         Year,
+
         status: "active",
         profileStatus: "pending",
         createdBy: creator._id
@@ -193,7 +219,6 @@ const inviteOneStudent = async (body, creator, session) => {
   // =====================================================
   // ACADEMIC HISTORY
   // =====================================================
-
   await StudentAcademicHistory.create(
     [{
       student: studentProfile._id,
@@ -211,12 +236,10 @@ const inviteOneStudent = async (body, creator, session) => {
   // =====================================================
   // EMAIL
   // =====================================================
-
   const setupLink =
     `${process.env.FRONTEND_URL}/setup-account?token=${rawToken}`;
 
   if (rawToken) {
-
     await sendEmail({
       to: email,
       subject: isNewUser
@@ -228,12 +251,10 @@ const inviteOneStudent = async (body, creator, session) => {
         <a href="${setupLink}">${setupLink}</a>
       `
     });
-
   }
 
   return studentProfile;
 };
-
 
 
 // =====================================================

@@ -189,48 +189,48 @@ const handleViewCertificate = () => {
           </button>
         )}
 
-        {/* 🔵 COMPLETED */}
-        {type === "completed" && (
-          <>
-            {/* 🔵 VIEW REPORT */}
-            {report?.reportUrl && (
-              <button
-                onClick={handleViewReport}
-                className="px-3 py-1 bg-blue-600 text-white rounded text-sm"
-              >
-                View Report
-              </button>
-            )}
+       {type === "completed" && (
+  <>
 
-            {/* 🟢 APPROVE */}
-            {report?.status === "faculty_pending" && (
-              <button
-                onClick={handleApprove}
-                className="px-3 py-1 bg-green-600 text-white rounded text-sm"
-              >
-                Approve
-              </button>
-            )}
+    {/* 🔵 VIEW REPORT */}
+    {report?.reportUrl && (
+      <button
+        onClick={handleViewReport}
+        className="px-3 py-1 bg-blue-600 text-white rounded text-sm"
+      >
+        View Report
+      </button>
+    )}
 
-            {/* 🟡 APPROVED */}
-            {report?.status === "faculty_approved" && (
-              <span className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm">
-                Approved
-              </span>
-            )}
+    {/* 🟠 ASSIGN CREDITS */}
+    {report?.status !== "faculty_approved" && (
+      <button
+        onClick={() => navigate(`/credits?reportId=${report._id}`)}
+        className="px-3 py-1 bg-orange-600 text-white rounded text-sm"
+      >
+        Assign Credits
+      </button>
+    )}
 
-            {/* 🟣 CERTIFICATE */}
-            {app?.certificateUrl && (
-  <button
-    onClick={handleViewCertificate}
-    className="px-3 py-1 bg-purple-600 text-white rounded text-sm"
-  >
-    View Certificate
-  </button>
+    {/* 🟡 APPROVED */}
+    {report?.status === "faculty_approved" && (
+      <span className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm">
+        Approved
+      </span>
+    )}
+
+    {/* 🟣 CERTIFICATE */}
+    {app?.certificateUrl && (
+      <button
+        onClick={handleViewCertificate}
+        className="px-3 py-1 bg-purple-600 text-white rounded text-sm"
+      >
+        View Certificate
+      </button>
+    )}
+
+  </>
 )}
-          </>
-        )}
-
       </div>
 
     </div>

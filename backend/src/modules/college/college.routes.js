@@ -9,27 +9,31 @@ import {
   getCollegeList,
   getCollegeFaculty,
   updateCollegeFaculty,
-  removeFacultyFromCollege
+  removeFacultyFromCollege,
 } from "./college.controller.js";
 
 import { authenticate } from "../../middleware/auth.js";
 import { authorizeRoles } from "../../middleware/role.js";
-import { getCollegeStudents, removeStudentFromCollege, updateCollegeStudent } from "./college.student.controller.js";
+
+import {
+  assignCredits,
+  getCollegeStudents,
+  getStudentReports,
+  removeStudentFromCollege,
+  searchStudent,
+  updateCollegeStudent
+} from "./college.student.controller.js";
 
 const router = express.Router();
 
-// public list endpoint (used by registration form)
+/*
+  ================= PUBLIC =================
+*/
 router.get("/list", getCollegeList);
 
-// all other college routes require authenticated college users
-
-router.get("/courses", authenticate, authorizeRoles("college"), getCourses);
-router.post("/courses", authenticate, authorizeRoles("college"), addCourse);
-router.patch("/courses/:courseName", authenticate, authorizeRoles("college"), updateCourse);
-router.delete("/courses/:courseName", authenticate, authorizeRoles("college"), deleteCourse);
-
-// ================= COLLEGE SELF =================
-
+/*
+  ================= COLLEGE PROFILE =================
+*/
 router.get(
   "/profile",
   authenticate,
@@ -44,7 +48,22 @@ router.patch(
   updateCollegeProfile
 );
 
+/*
+  ================= COURSES =================
+*/
+router.get("/courses", authenticate, authorizeRoles("college"), getCourses);
+router.post("/courses", authenticate, authorizeRoles("college"), addCourse);
+router.patch(
+  "/courses/:courseId",
+  authenticate,
+  authorizeRoles("college"),
+  updateCourse
+);
+router.delete("/courses/:courseName", authenticate, authorizeRoles("college"), deleteCourse);
 
+/*
+  ================= FACULTY =================
+*/
 router.get(
   "/faculty",
   authenticate,
@@ -66,6 +85,30 @@ router.delete(
   removeFacultyFromCollege
 );
 
+/*
+  ================= STUDENT SEARCH (STATIC FIRST) =================
+*/
+router.get(
+  "/students/search",
+  authenticate,
+  authorizeRoles("college", "faculty"),
+  searchStudent
+);
+
+
+/*
+  ================= STUDENT REPORTS =================
+*/
+router.get(
+  "/students/:studentId/reports",
+  authenticate,
+  authorizeRoles("college", "faculty"),
+  getStudentReports
+);
+
+/*
+  ================= STUDENT MANAGEMENT =================
+*/
 router.get(
   "/students",
   authenticate,
@@ -87,8 +130,21 @@ router.delete(
   removeStudentFromCollege
 );
 
-// ================= ADMIN ACCESS ANY =================
+/*
+  ================= CREDIT SYSTEM =================
+  */
 
+
+router.post(
+  "/reports/:reportId/credits",
+  authenticate,
+  authorizeRoles("college", "faculty"),
+  assignCredits
+);
+
+/*
+  ================= ADMIN ACCESS =================
+*/
 router.get(
   "/:id",
   authenticate,
