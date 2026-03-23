@@ -17,8 +17,12 @@ import StudentAcademicHistory from "../../../models/StudentAcademicHistory.js";
 import FacultyEmploymentHistory from "../../../models/FacultyEmploymentHistory.js";
 import MentorEmploymentHistory from "../../../models/MentorEmploymentHistory.js";
 import Internship from "../../../models/Internship.js";
-import  sendEmail  from "../../../utils/sendEmail.js"; // your existing email util
-// your existing email util
+import  sendEmail  from "../../../utils/sendEmail.js"; 
+import InternshipReport from "../../../models/InternshipReport.js";
+import Task from "../../../models/Task.js";
+import TaskSubmission from "../../../models/TaskSubmission.js";
+import ProgressLog from "../../../models/ProgressLog.js";
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. GET ALL USERS (paginated, filtered, searchable)
@@ -76,278 +80,312 @@ export const getAllUsers = async (filters) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // 2. GET USER FULL DETAILS (role-specific deep fetch)
 // ─────────────────────────────────────────────────────────────────────────────
+
 export const getUserDetails = async (userId) => {
-  const user = await User.findById(userId)
-    .select("-password -passwordSetupToken -passwordSetupExpires")
-    .lean();
-
-  if (!user) return null;
-
-  let profile = null;
-  let organization = null;
-  let analytics = null;
-  let applications = [];
-  let history = [];
-  let related = {};
-
-  // ─── STUDENT ───────────────────────────────────────────────────────────────
-  if (user.role === "student") {
-    profile = await StudentProfile.findOne({ user: userId })
-      .populate("college", "name address website emailDomain logoUrl courses")
+  try {
+    // ─────────────────────────────────────────────
+    // FETCH USER BASE DATA
+    // ─────────────────────────────────────────────
+    const user = await User.findById(userId)
+      .select("-password -passwordSetupToken -passwordSetupExpires")
       .lean();
 
-    if (profile) {
-      organization = profile.college || null;
-
-      // Academic history with college populated
-      history = await StudentAcademicHistory.find({ student: profile._id })
-        .populate("college", "name address")
-        .populate("addedBy", "email role")
-        .populate("endedBy", "email role")
-        .sort({ startDate: -1 })
-        .lean();
-
-      // All applications with full details
-      applications = await Application.find({ student: profile._id })
-        .populate({
-          path: "internship",
-          select: "title mode locations durationMonths stipendType stipendAmount startDate applicationDeadline status skillsRequired",
-          populate: { path: "company", select: "name logoUrl industry" },
-        })
-        .populate("company", "name logoUrl industry")
-        .populate("mentor", "fullName designation")
-        .populate("faculty", "fullName designation")
-        .sort({ appliedAt: -1 })
-        .lean();
-
-      // Analytics aggregation
-      const agg = await Application.aggregate([
-        { $match: { student: profile._id } },
-        {
-          $group: {
-            _id: "$status",
-            count: { $sum: 1 },
-          },
-        },
-      ]);
-
-      const countMap = {};
-      agg.forEach((a) => (countMap[a._id] = a.count));
-
-      analytics = {
-        totalApplications: applications.length,
-        applied: countMap["applied"] || 0,
-        shortlisted: countMap["shortlisted"] || 0,
-        selected: countMap["selected"] || 0,
-        offer_accepted: countMap["offer_accepted"] || 0,
-        rejected: countMap["rejected"] || 0,
-        withdrawn: countMap["withdrawn"] || 0,
-        ongoing: countMap["ongoing"] || 0,
-        completed: countMap["completed"] || 0,
-        terminated: countMap["terminated"] || 0,
+    if (!user) {
+      return {
+        success: false,
+        message: "User not found",
+        data: null
       };
     }
-  }
 
-  // ─── FACULTY ────────────────────────────────────────────────────────────────
-  else if (user.role === "faculty") {
-    profile = await FacultyProfile.findOne({ user: userId })
-      .populate("college", "name address website emailDomain logoUrl courses")
-      .lean();
+    let profile = null;
+    let organization = null;
+    let analytics = null;
+    let applications = [];
+    let history = [];
+    let related = {};
 
-    if (profile) {
-      organization = profile.college || null;
-
-      // Employment history
-      history = await FacultyEmploymentHistory.find({ faculty: profile._id })
-        .populate("college", "name address")
-        .populate("addedBy", "email role")
-        .populate("endedBy", "email role")
-        .sort({ startDate: -1 })
+    // ─────────────────────────────────────────────
+    // STUDENT
+    // ─────────────────────────────────────────────
+    if (user.role === "student") {
+      profile = await StudentProfile.findOne({ user: userId })
+        .populate("college", "name address website emailDomain logoUrl courses")
         .lean();
 
-      if (profile.college) {
-        const [studentCount, facultyCount] = await Promise.all([
-          StudentProfile.countDocuments({ college: profile.college._id }),
-          FacultyProfile.countDocuments({ college: profile.college._id }),
-        ]);
+      if (profile) {
+        organization = profile.college || null;
 
-        analytics = {
-          studentsInCollege: studentCount,
-          facultyInCollege: facultyCount,
-        };
-      }
-    }
-  }
+        // HISTORY
+        history = await StudentAcademicHistory.find({ student: profile._id })
+          .populate("college", "name address")
+          .sort({ startDate: -1 })
+          .lean()
+          .catch(err => {
+            console.error("Error fetching student academic history:", err);
+            return [];
+          });
 
-  // ─── MENTOR ────────────────────────────────────────────────────────────────
-  else if (user.role === "mentor") {
-    profile = await MentorProfile.findOne({ user: userId })
-      .populate("company", "name logoUrl industry website locations")
-      .lean();
-
-    if (profile) {
-      organization = profile.company || null;
-
-      // Employment history
-      history = await MentorEmploymentHistory.find({ mentor: profile._id })
-        .populate("company", "name logoUrl")
-        .populate("addedBy", "email role")
-        .populate("endedBy", "email role")
-        .sort({ startDate: -1 })
-        .lean();
-
-      if (profile.company) {
-        // Interns this mentor is managing
-        const [ongoingCount, completedCount] = await Promise.all([
-          Application.countDocuments({
-            mentor: profile._id,
-            status: "ongoing",
-          }),
-          Application.countDocuments({
-            mentor: profile._id,
-            status: "completed",
-          }),
-        ]);
-
-        // Recent applications under this mentor
-        applications = await Application.find({ mentor: profile._id })
+        // APPLICATIONS
+        applications = await Application.find({ student: profile._id })
           .populate({
             path: "internship",
-            select: "title mode durationMonths status",
+            select:
+              "title mode locations durationMonths stipendType stipendAmount startDate applicationDeadline status skillsRequired",
+            populate: { path: "company", select: "name logoUrl industry" },
           })
-          .populate("student", "fullName prn")
+          .populate("company", "name logoUrl industry")
+          .populate("mentor", "fullName designation")
+          .populate("faculty", "fullName designation")
           .sort({ appliedAt: -1 })
-          .limit(20)
-          .lean();
+          .lean()
+          .catch(err => {
+            console.error("Error fetching student applications:", err);
+            return [];
+          });
+
+        const appIds = applications.map((a) => a._id);
+
+        if (appIds.length > 0) {
+          // EXTRA DATA
+          const [reports, submissions, logs] = await Promise.all([
+            InternshipReport.find({ application: { $in: appIds } }).lean().catch(() => []),
+            TaskSubmission.find({ application: { $in: appIds } }).lean().catch(() => []),
+            ProgressLog.aggregate([
+              { $match: { application: { $in: appIds } } },
+              { $group: { _id: "$application", count: { $sum: 1 } } },
+            ]).catch(() => []),
+          ]);
+
+          const reportMap = {};
+          reports.forEach((r) => {
+            reportMap[r.application.toString()] = r;
+          });
+
+          const submissionMap = {};
+          submissions.forEach((s) => {
+            const key = s.application.toString();
+            if (!submissionMap[key]) submissionMap[key] = [];
+            submissionMap[key].push(s);
+          });
+
+          const logMap = {};
+          logs.forEach((l) => {
+            logMap[l._id.toString()] = l.count;
+          });
+
+          // ENRICH APPLICATIONS
+          applications = applications.map((app) => {
+            const id = app._id.toString();
+            return {
+              ...app,
+              report: reportMap[id] || null,
+              certificate: app.certificateUrl || null,
+              submissions: submissionMap[id] || [],
+              progressLogsCount: logMap[id] || 0,
+            };
+          });
+        }
+
+        // ANALYTICS
+        const agg = await Application.aggregate([
+          { $match: { student: profile._id } },
+          { $group: { _id: "$status", count: { $sum: 1 } } },
+        ]).catch(() => []);
+
+        const map = {};
+        agg.forEach((a) => (map[a._id] = a.count));
 
         analytics = {
-          ongoingInterns: ongoingCount,
-          completedInterns: completedCount,
-          totalInterns: ongoingCount + completedCount,
+          totalApplications: applications.length,
+          applied: map.applied || 0,
+          shortlisted: map.shortlisted || 0,
+          selected: map.selected || 0,
+          ongoing: map.ongoing || 0,
+          completed: map.completed || 0,
+          rejected: map.rejected || 0,
         };
       }
     }
-  }
 
-  // ─── COLLEGE ────────────────────────────────────────────────────────────────
-  else if (user.role === "college") {
-    const college = await College.findById(user.referenceId).lean();
-    profile = college;
-    organization = college;
+    // ─────────────────────────────────────────────
+    // FACULTY
+    // ─────────────────────────────────────────────
+    else if (user.role === "faculty") {
+      profile = await FacultyProfile.findOne({ user: userId })
+        .populate("college", "name address")
+        .lean();
 
-    if (college) {
-      const [facultyCount, studentCount, activeFaculty, activeStudents] =
-        await Promise.all([
-          FacultyProfile.countDocuments({ college: college._id }),
-          StudentProfile.countDocuments({ college: college._id }),
-          FacultyProfile.countDocuments({ college: college._id, status: "active" }),
-          StudentProfile.countDocuments({ college: college._id, status: "active" }),
+      if (profile && profile.college) {
+        organization = profile.college;
+
+        history = await FacultyEmploymentHistory.find({ faculty: profile._id })
+          .populate("college", "name")
+          .sort({ startDate: -1 })
+          .lean()
+          .catch(() => []);
+
+        // ✅ FIX: Fetch students for this college
+        related.students = await StudentProfile.find({ college: profile.college._id })
+          .select("fullName prn courseName specialization status")
+          .lean()
+          .catch(() => []);
+
+        const [students, faculty] = await Promise.all([
+          StudentProfile.countDocuments({ college: profile.college._id }).catch(() => 0),
+          FacultyProfile.countDocuments({ college: profile.college._id }).catch(() => 0),
         ]);
 
-      // Faculty list
-      related.faculty = await FacultyProfile.find({ college: college._id })
-        .populate("user", "email accountStatus isVerified isRegistered")
-        .select("fullName designation department employeeId status profileStatus")
-        .sort({ fullName: 1 })
-        .lean();
-
-      // Student list (limited)
-      related.students = await StudentProfile.find({ college: college._id })
-        .populate("user", "email accountStatus isVerified isRegistered")
-        .select("fullName prn courseName specialization status profileStatus")
-        .sort({ fullName: 1 })
-        .limit(50)
-        .lean();
-
-      analytics = {
-        totalFaculty: facultyCount,
-        totalStudents: studentCount,
-        activeFaculty,
-        activeStudents,
-        inactiveFaculty: facultyCount - activeFaculty,
-        inactiveStudents: studentCount - activeStudents,
-      };
+        analytics = { students, faculty };
+      } else {
+        analytics = { students: 0, faculty: 0 };
+        related.students = [];
+      }
     }
-  }
 
-  // ─── COMPANY ────────────────────────────────────────────────────────────────
-  else if (user.role === "company") {
-    const company = await Company.findById(user.referenceId).lean();
-    profile = company;
-    organization = company;
+    // ─────────────────────────────────────────────
+    // MENTOR
+    // ─────────────────────────────────────────────
+    else if (user.role === "mentor") {
+      profile = await MentorProfile.findOne({ user: userId })
+        .populate("company", "name logoUrl")
+        .lean();
 
-    if (company) {
-      const [mentorCount, activeMentorCount, totalInternships, openInternships] =
-        await Promise.all([
-          MentorProfile.countDocuments({ company: company._id }),
-          MentorProfile.countDocuments({ company: company._id, status: "active" }),
-          Internship.countDocuments({ company: company._id }),
-          Internship.countDocuments({ company: company._id, status: "open" }),
+      if (profile) {
+        organization = profile.company;
+
+        history = await MentorEmploymentHistory.find({ mentor: profile._id })
+          .populate("company", "name")
+          .sort({ startDate: -1 })
+          .lean()
+          .catch(() => []);
+
+        const [ongoing, completed] = await Promise.all([
+          Application.countDocuments({ mentor: profile._id, status: "ongoing" }).catch(() => 0),
+          Application.countDocuments({ mentor: profile._id, status: "completed" }).catch(() => 0),
         ]);
 
-      // Ongoing and completed intern counts
-      const internAgg = await Application.aggregate([
-        { $match: { company: company._id } },
-        { $group: { _id: "$status", count: { $sum: 1 } } },
-      ]);
-      const internMap = {};
-      internAgg.forEach((a) => (internMap[a._id] = a.count));
+        applications = await Application.find({ mentor: profile._id })
+          .populate("student", "fullName prn")
+          .populate("internship", "title")
+          .limit(20)
+          .lean()
+          .catch(() => []);
 
-      // Internship listings with applicant count
-      const internships = await Internship.find({ company: company._id })
-        .sort({ createdAt: -1 })
-        .lean();
-
-      // Attach application counts
-      const internshipIds = internships.map((i) => i._id);
-      const appCounts = await Application.aggregate([
-        { $match: { internship: { $in: internshipIds } } },
-        { $group: { _id: "$internship", count: { $sum: 1 } } },
-      ]);
-      const appCountMap = {};
-      appCounts.forEach((a) => (appCountMap[a._id.toString()] = a.count));
-
-      related.internships = internships.map((i) => ({
-        ...i,
-        applicantCount: appCountMap[i._id.toString()] || 0,
-      }));
-
-      // Mentor list
-      related.mentors = await MentorProfile.find({ company: company._id })
-        .populate("user", "email accountStatus isVerified isRegistered")
-        .select("fullName designation department employeeId status")
-        .lean();
-
-      analytics = {
-        totalMentors: mentorCount,
-        activeMentors: activeMentorCount,
-        totalInternships,
-        openInternships,
-        closedInternships: totalInternships - openInternships,
-        ongoingInterns: internMap["ongoing"] || 0,
-        completedInterns: internMap["completed"] || 0,
-        totalApplications: Object.values(internMap).reduce((a, b) => a + b, 0),
-      };
+        analytics = { ongoing, completed };
+      }
     }
-  }
 
-  // ─── ADMIN ──────────────────────────────────────────────────────────────────
-  else if (user.role === "admin") {
-    analytics = {
-      note: "Admin account — no profile entity",
+    // ─────────────────────────────────────────────
+    // COLLEGE
+    // ─────────────────────────────────────────────
+    else if (user.role === "college") {
+      const college = await College.findById(user.referenceId).lean();
+      profile = college;
+      organization = college;
+
+      if (college) {
+        const [students, faculty] = await Promise.all([
+          StudentProfile.countDocuments({ college: college._id }).catch(() => 0),
+          FacultyProfile.countDocuments({ college: college._id }).catch(() => 0),
+        ]);
+
+        related.students = await StudentProfile.find({ college: college._id })
+          .select("fullName prn courseName specialization status")
+          .limit(50)
+          .lean()
+          .catch(() => []);
+
+        related.faculty = await FacultyProfile.find({ college: college._id })
+          .select("fullName designation department status")
+          .lean()
+          .catch(() => []);
+
+        analytics = { students, faculty };
+      }
+    }
+
+    // ─────────────────────────────────────────────
+    // COMPANY
+    // ─────────────────────────────────────────────
+    else if (user.role === "company") {
+      const company = await Company.findById(user.referenceId).lean();
+      profile = company;
+      organization = company;
+
+      if (company) {
+        // ✅ FIX: Fetch all mentors for this company
+        related.mentors = await MentorProfile.find({ company: company._id })
+          .select("fullName designation department status")
+          .lean()
+          .catch(() => []);
+
+        const internships = await Internship.find({ company: company._id })
+          .lean()
+          .catch(() => []);
+        
+        const internshipIds = internships.map((i) => i._id);
+
+        const apps = await Application.find({
+          internship: { $in: internshipIds },
+        })
+          .populate("student", "fullName prn")
+          .select("internship status appliedAt student")
+          .lean()
+          .catch(() => []);
+
+        const appMap = {};
+        apps.forEach((a) => {
+          const key = a.internship.toString();
+          if (!appMap[key]) appMap[key] = [];
+          appMap[key].push(a);
+        });
+
+        related.internships = internships.map((i) => ({
+          ...i,
+          applicantCount: (appMap[i._id.toString()] || []).length,
+          applicants: (appMap[i._id.toString()] || []).map((a) => ({
+            _id: a._id,
+            status: a.status,
+            appliedAt: a.appliedAt,
+            student: a.student,
+          })),
+        }));
+
+        analytics = {
+          totalInternships: internships.length,
+          totalApplications: apps.length,
+        };
+      }
+    }
+
+    // ─────────────────────────────────────────────
+    // ADMIN
+    // ─────────────────────────────────────────────
+    else if (user.role === "admin") {
+      analytics = { note: "Admin user" };
+    }
+
+    return {
+      success: true,
+      data: {
+        user,
+        profile,
+        organization,
+        analytics,
+        applications,
+        history,
+        related,
+      }
+    };
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    return {
+      success: false,
+      message: error.message || "Failed to fetch user details",
+      data: null
     };
   }
-
-  return {
-    user,
-    profile,
-    organization,
-    analytics,
-    applications,
-    history,
-    related,
-  };
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

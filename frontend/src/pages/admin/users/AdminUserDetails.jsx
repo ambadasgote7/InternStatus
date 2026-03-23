@@ -89,12 +89,63 @@ function StatCard({ label, value, accent = "primary" }) {
   );
 }
 
+// ✅ Certificate Viewer Modal
+function CertificateModal({ url, onClose }) {
+  if (!url) return null;
+
+  return (
+    <div className="fixed inset-0 bg-[#0B0F19]/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div className="bg-[#0B0F19]/90 backdrop-blur-2xl rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] border border-white/10 w-full max-w-4xl max-h-[90vh] flex flex-col font-sans box-border">
+        <div className="px-8 py-6 border-b border-white/10 flex items-center justify-between">
+          <h2 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 m-0 tracking-tight">Certificate</h2>
+          <button onClick={onClose} className="text-[10px] font-bold text-white/40 uppercase tracking-widest bg-transparent border-none cursor-pointer hover:text-white transition-colors outline-none p-0">
+            Close
+          </button>
+        </div>
+        <div className="flex-1 overflow-auto bg-[#0B0F19]/50">
+          {url?.endsWith('.pdf') ? (
+            <iframe
+              src={url}
+              className="w-full h-full border-none"
+              title="Certificate PDF"
+            />
+          ) : (
+            <div className="flex items-center justify-center p-8">
+              <img
+                src={url}
+                alt="Certificate"
+                className="max-w-full max-h-full object-contain rounded-xl"
+              />
+            </div>
+          )}
+        </div>
+        <div className="px-8 py-6 border-t border-white/10 flex gap-4 justify-end bg-white/5">
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-6 py-3 text-xs font-bold text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 border-none rounded-xl hover:shadow-[0_4px_15px_-3px_rgba(217,70,239,0.5)] cursor-pointer transition-all uppercase tracking-widest outline-none"
+          >
+            Download
+          </a>
+          <button
+            onClick={onClose}
+            className="px-6 py-3 text-xs font-bold text-white/80 bg-transparent border border-white/10 rounded-xl hover:bg-white/10 transition-colors cursor-pointer uppercase tracking-widest outline-none"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const TABS_BY_ROLE = {
-  student: ["Overview", "Profile", "Applications", "History", "Organization"],
-  faculty: ["Overview", "Profile", "Employment", "Organization"],
+  student: ["Overview", "Profile", "Applications", "Reports", "History", "Organization"],
+  faculty: ["Overview", "Profile", "Employment", "Students", "Organization"],
   mentor: ["Overview", "Profile", "Employment", "Interns", "Organization"],
   college: ["Overview", "Profile", "Faculty", "Students"],
-  company: ["Overview", "Profile", "Mentors", "Internships"],
+  company: ["Overview", "Profile", "Internships", "Mentors"],
   admin: ["Overview"],
 };
 
@@ -219,6 +270,7 @@ export default function AdminUserDetails() {
   const [actionLoading, setActionLoading] = useState({});
   const [showEditModal, setShowEditModal] = useState(false);
   const [toast, setToast] = useState(null);
+  const [showCertificateUrl, setShowCertificateUrl] = useState(null);
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
@@ -233,9 +285,30 @@ export default function AdminUserDetails() {
     setLoading(true);
     try {
       const res = await api.get(`/admin/users/${id}`);
-      setData(res.data.data);
+      
+      let userData = res.data;
+      
+      if (userData?.data?.data) {
+        userData = userData.data.data;
+      } else if (userData?.data) {
+        userData = userData.data;
+      }
+      
+      if (!userData) {
+        showToast("Invalid response from server", "error");
+        return;
+      }
+
+      if (!userData.user) {
+        showToast("User not found or unable to load user details", "error");
+        return;
+      }
+
+      setData(userData);
     } catch (err) {
-      showToast(err?.response?.data?.message || "Failed to load user", "error");
+      const errorMsg = err?.response?.data?.message || err?.message || "Failed to load user";
+      console.error("Fetch error:", { status: err?.response?.status, message: errorMsg, error: err });
+      showToast(errorMsg, "error");
     } finally {
       setLoading(false);
     }
@@ -320,6 +393,14 @@ export default function AdminUserDetails() {
           profile={profile}
           onClose={() => setShowEditModal(false)}
           onSave={handleSaveProfile}
+        />
+      )}
+
+      {/* ✅ Certificate Modal */}
+      {showCertificateUrl && (
+        <CertificateModal
+          url={showCertificateUrl}
+          onClose={() => setShowCertificateUrl(null)}
         />
       )}
 
@@ -433,34 +514,31 @@ export default function AdminUserDetails() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                   {user.role === "student" && analytics && <>
                     <StatCard label="Total Apps" value={analytics.totalApplications} accent="dark" />
+                    <StatCard label="Applied" value={analytics.applied} accent="primary" />
                     <StatCard label="Shortlisted" value={analytics.shortlisted} accent="secondary" />
                     <StatCard label="Selected" value={analytics.selected} accent="accent" />
                     <StatCard label="Ongoing" value={analytics.ongoing} accent="primary" />
                     <StatCard label="Completed" value={analytics.completed} accent="light" />
                     <StatCard label="Rejected" value={analytics.rejected} accent="primary" />
-                    <StatCard label="Withdrawn" value={analytics.withdrawn} accent="light" />
                   </>}
                   {user.role === "faculty" && analytics && <>
-                    <StatCard label="College Students" value={analytics.studentsInCollege} accent="accent" />
-                    <StatCard label="College Faculty" value={analytics.facultyInCollege} accent="secondary" />
+                    <StatCard label="College Students" value={analytics.students} accent="accent" />
+                    <StatCard label="College Faculty" value={analytics.faculty} accent="secondary" />
                   </>}
                   {user.role === "mentor" && analytics && <>
-                    <StatCard label="Ongoing Interns" value={analytics.ongoingInterns} accent="dark" />
-                    <StatCard label="Completed" value={analytics.completedInterns} accent="accent" />
-                    <StatCard label="Total Interns" value={analytics.totalInterns} accent="secondary" />
+                    <StatCard label="Ongoing Interns" value={analytics.ongoing} accent="dark" />
+                    <StatCard label="Completed Interns" value={analytics.completed} accent="accent" />
                   </>}
                   {user.role === "college" && analytics && <>
-                    <StatCard label="Total Faculty" value={analytics.totalFaculty} accent="secondary" />
-                    <StatCard label="Active Faculty" value={analytics.activeFaculty} accent="accent" />
-                    <StatCard label="Total Students" value={analytics.totalStudents} accent="light" />
-                    <StatCard label="Active Students" value={analytics.activeStudents} accent="dark" />
+                    <StatCard label="Total Faculty" value={analytics.faculty} accent="secondary" />
+                    <StatCard label="Total Students" value={analytics.students} accent="light" />
                   </>}
                   {user.role === "company" && analytics && <>
-                    <StatCard label="Internships" value={analytics.totalInternships} accent="dark" />
-                    <StatCard label="Open" value={analytics.openInternships} accent="accent" />
-                    <StatCard label="Mentors" value={analytics.totalMentors} accent="secondary" />
-                    <StatCard label="Ongoing Interns" value={analytics.ongoingInterns} accent="primary" />
-                    <StatCard label="Completed" value={analytics.completedInterns} accent="light" />
+                    <StatCard label="Total Internships" value={analytics.totalInternships} accent="dark" />
+                    <StatCard label="Total Applications" value={analytics.totalApplications} accent="accent" />
+                  </>}
+                  {user.role === "admin" && <>
+                    <StatCard label="Admin User" value="–" accent="primary" />
                   </>}
                 </div>
               </div>
@@ -621,6 +699,15 @@ export default function AdminUserDetails() {
                       {app.evaluationScore != null && (
                         <p className="font-black text-fuchsia-400 text-sm mt-3 mb-0 bg-fuchsia-500/10 px-3 py-1.5 rounded-lg border border-fuchsia-500/20 w-max">Score: {app.evaluationScore}/100</p>
                       )}
+                      {/* ✅ NEW: Certificate Button */}
+                      {app.certificate && (
+                        <button
+                          onClick={() => setShowCertificateUrl(app.certificate)}
+                          className="mt-3 px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 rounded-lg hover:bg-emerald-500/30 transition-colors cursor-pointer whitespace-nowrap"
+                        >
+                          View Certificate
+                        </button>
+                      )}
                     </div>
                   </div>
                   {(app.mentorFeedback || app.facultyFeedback) && (
@@ -631,6 +718,84 @@ export default function AdminUserDetails() {
                   )}
                 </div>
               ))
+            )}
+          </div>
+        )}
+
+        {tabs[activeTab] === "Reports" && (
+          <div className="flex flex-col gap-5">
+            {!applications?.length ? (
+              <div className="bg-[#0B0F19]/50 border border-white/10 rounded-3xl py-16 text-center text-white/40 shadow-inner">
+                <p className="font-medium text-base m-0">No internship reports</p>
+              </div>
+            ) : (
+              applications.map((app) => 
+                app.report ? (
+                  <div key={app._id} className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-6 md:p-8 hover:border-white/20 transition-all duration-300 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]">
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center gap-3 flex-wrap justify-between">
+                        <h3 className="font-bold text-white/90 text-lg m-0">{app.internship?.title} - {app.company?.name}</h3>
+                        <Badge value={app.report.status} map={STATUS_COLORS} />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="bg-[#0B0F19]/30 border border-white/5 p-4 rounded-xl">
+                          <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest m-0">Total Tasks</p>
+                          <p className="text-2xl font-black text-fuchsia-400 m-0 mt-2">{app.report.totalTasks}</p>
+                        </div>
+                        <div className="bg-[#0B0F19]/30 border border-white/5 p-4 rounded-xl">
+                          <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest m-0">Completed</p>
+                          <p className="text-2xl font-black text-emerald-400 m-0 mt-2">{app.report.tasksCompleted}</p>
+                        </div>
+                        <div className="bg-[#0B0F19]/30 border border-white/5 p-4 rounded-xl">
+                          <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest m-0">Completion Rate</p>
+                          <p className="text-2xl font-black text-violet-400 m-0 mt-2">{app.report.completionRate}%</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-[#0B0F19]/30 border border-white/5 p-3 rounded-xl">
+                          <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest m-0">Mentor Score</p>
+                          <p className="text-xl font-black text-fuchsia-400 m-0 mt-1">{app.report.mentorScore}/10</p>
+                        </div>
+                        <div className="bg-[#0B0F19]/30 border border-white/5 p-3 rounded-xl">
+                          <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest m-0">Faculty Score</p>
+                          <p className="text-xl font-black text-violet-400 m-0 mt-1">{app.report.facultyScore}/10</p>
+                        </div>
+                      </div>
+
+                      {app.report.technologies?.length > 0 && (
+                        <div className="bg-[#0B0F19]/30 border border-white/5 p-4 rounded-xl">
+                          <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest m-0 mb-2">Technologies</p>
+                          <div className="flex flex-wrap gap-2">
+                            {app.report.technologies.map((tech) => (
+                              <span key={tech} className="px-3 py-1.5 bg-violet-500/20 border border-violet-500/30 text-violet-300 text-[10px] font-bold rounded-lg">{tech}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {app.report.facultyRemarks && (
+                        <div className="bg-[#0B0F19]/30 border border-white/5 p-4 rounded-xl">
+                          <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest m-0 mb-2">Faculty Remarks</p>
+                          <p className="text-sm text-white/80 m-0">{app.report.facultyRemarks}</p>
+                        </div>
+                      )}
+
+                      {app.report.reportUrl && (
+                        <a 
+                          href={app.report.reportUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-xl hover:shadow-[0_4px_15px_-3px_rgba(217,70,239,0.5)] transition-all text-center cursor-pointer"
+                        >
+                          View Full Report
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ) : null
+              )
             )}
           </div>
         )}
@@ -717,7 +882,219 @@ export default function AdminUserDetails() {
           </div>
         )}
 
-        {tabs[activeTab] === "Interns" && (
+        {/* ✅ Students Tab for Faculty */}
+        {tabs[activeTab] === "Students" && user.role === "faculty" && (
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] overflow-hidden">
+            {!related?.students?.length ? (
+              <div className="py-16 text-center text-white/40 font-medium text-base bg-[#0B0F19]/30">
+                <p className="m-0">No students in your college</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto bg-[#0B0F19]/30 shadow-inner">
+                <table className="w-full text-left border-collapse whitespace-nowrap">
+                  <thead className="bg-white/5 border-b border-white/10">
+                    <tr>
+                      <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest">Name</th>
+                      <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest">PRN</th>
+                      <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest">Course</th>
+                      <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest">Specialization</th>
+                      <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {related.students.map((student) => (
+                      <tr key={student._id} className="hover:bg-white/5 transition-colors duration-300 group">
+                        <td className="px-6 py-5 text-sm font-bold text-white/90 group-hover:text-fuchsia-300">{student.fullName}</td>
+                        <td className="px-6 py-5 text-xs text-white/60 font-mono">{student.prn || "–"}</td>
+                        <td className="px-6 py-5 text-xs text-violet-400 font-bold tracking-wide">{student.courseName || "–"}</td>
+                        <td className="px-6 py-5 text-xs text-white/70">{student.specialization || "–"}</td>
+                        <td className="px-6 py-5"><Badge value={student.status} map={STATUS_COLORS} /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ✅ Mentors Tab for Company */}
+        {tabs[activeTab] === "Mentors" && user.role === "company" && (
+          <div className="flex flex-col gap-5">
+            {!related?.mentors?.length ? (
+              <div className="bg-[#0B0F19]/50 border border-white/10 rounded-3xl py-16 text-center text-white/40 shadow-inner">
+                <p className="font-medium text-base m-0">No mentors assigned to your company</p>
+              </div>
+            ) : (
+              related.mentors.map((mentor) => (
+                <div key={mentor._id} className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-6 md:p-8 hover:border-white/20 transition-all duration-300 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]">
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div className="flex flex-col gap-2">
+                      <p className="font-bold text-white/90 text-lg m-0">{mentor.fullName}</p>
+                      <p className="text-xs text-fuchsia-400 font-bold uppercase tracking-widest m-0">{mentor.designation || "–"}</p>
+                      {mentor.department && <p className="text-xs text-white/60 m-0">{mentor.department}</p>}
+                    </div>
+                    <Badge value={mentor.status} map={STATUS_COLORS} />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {/* ✅ Internships Tab for Company */}
+        {tabs[activeTab] === "Internships" && user.role === "company" && (
+          <div className="flex flex-col gap-5">
+            {!related?.internships?.length ? (
+              <div className="bg-[#0B0F19]/50 border border-white/10 rounded-3xl py-16 text-center text-white/40 shadow-inner">
+                <p className="font-medium text-base m-0">No internships posted</p>
+              </div>
+            ) : (
+              related.internships.map((internship) => (
+                <div key={internship._id} className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-6 md:p-8 hover:border-white/20 transition-all duration-300 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]">
+                  <div className="flex flex-col gap-6">
+                    {/* Internship Header */}
+                    <div className="flex flex-col md:flex-row items-start justify-between gap-4">
+                      <div className="flex-1 flex flex-col gap-3">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <h3 className="font-bold text-white/90 text-xl m-0">{internship.title}</h3>
+                          <Badge value={internship.status} map={{ open: "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30", closed: "bg-red-500/10 text-red-400 border border-red-500/20" }} />
+                        </div>
+                        
+                        <div className="flex flex-wrap items-center gap-3 text-[10px] font-bold text-white/50 uppercase tracking-widest bg-[#0B0F19]/50 p-3.5 rounded-xl border border-white/5 w-max">
+                          {internship.mode && <span className="text-violet-400">{internship.mode}</span>}
+                          {internship.durationMonths && (
+                            <>
+                              <span className="opacity-30">|</span>
+                              <span className="text-white/80">{internship.durationMonths} mos</span>
+                            </>
+                          )}
+                          {internship.stipendType && (
+                            <>
+                              <span className="opacity-30">|</span>
+                              <span className="text-emerald-400">{internship.stipendType}</span>
+                            </>
+                          )}
+                          {internship.stipendAmount && (
+                            <>
+                              <span className="opacity-30">|</span>
+                              <span className="text-emerald-400">₹{internship.stipendAmount.toLocaleString()}/mo</span>
+                            </>
+                          )}
+                        </div>
+
+                        {internship.skillsRequired?.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {internship.skillsRequired.map((s) => (
+                              <span key={s} className="px-3 py-1.5 bg-white/5 border border-white/10 text-white/80 text-[10px] font-bold uppercase tracking-widest rounded-lg">{s}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="bg-[#0B0F19]/30 border border-fuchsia-500/20 p-5 rounded-2xl text-center min-w-[140px] shadow-[0_0_15px_rgba(217,70,239,0.1)]">
+                        <p className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-violet-400 to-fuchsia-400 m-0">{internship.applicantCount}</p>
+                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-2 mb-0">Applicants</p>
+                      </div>
+                    </div>
+
+                    {/* ✅ Applicants List */}
+                    {internship.applicants?.length > 0 && (
+                      <div className="border-t border-white/10 pt-6">
+                        <h4 className="text-[11px] font-bold text-violet-400 uppercase tracking-widest mb-4">Applicants</h4>
+                        <div className="space-y-3">
+                          {internship.applicants.map((applicant) => (
+                            <div key={applicant._id} className="bg-[#0B0F19]/30 border border-white/5 p-4 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                              <div className="flex-1">
+                                <p className="font-bold text-white/90 m-0">{applicant.student?.fullName}</p>
+                                <p className="text-[10px] text-white/50 font-mono m-0 mt-1">{applicant.student?.prn}</p>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <Badge value={applicant.status} map={APP_STATUS_COLORS} />
+                                <span className="text-[10px] text-white/40 font-bold uppercase tracking-widest whitespace-nowrap">
+                                  {new Date(applicant.appliedAt).toLocaleDateString("en-IN")}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {/* ✅ Students Tab for College */}
+        {tabs[activeTab] === "Students" && user.role === "college" && (
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] overflow-hidden">
+            {!related?.students?.length ? (
+              <div className="py-16 text-center text-white/40 font-medium text-base bg-[#0B0F19]/30">No students found</div>
+            ) : (
+              <div className="overflow-x-auto bg-[#0B0F19]/30 shadow-inner">
+                <table className="w-full text-left border-collapse whitespace-nowrap">
+                  <thead className="bg-white/5 border-b border-white/10">
+                    <tr>
+                      <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest">Name</th>
+                      <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest">PRN</th>
+                      <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest">Course</th>
+                      <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest">Specialization</th>
+                      <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {related.students.map((student) => (
+                      <tr key={student._id} className="hover:bg-white/5 transition-colors duration-300 group">
+                        <td className="px-6 py-5 text-sm font-bold text-white/90 group-hover:text-fuchsia-300">{student.fullName}</td>
+                        <td className="px-6 py-5 text-xs text-white/60 font-mono">{student.prn || "–"}</td>
+                        <td className="px-6 py-5 text-xs text-violet-400 font-bold tracking-wide">{student.courseName || "–"}</td>
+                        <td className="px-6 py-5 text-xs text-white/70">{student.specialization || "–"}</td>
+                        <td className="px-6 py-5"><Badge value={student.status} map={STATUS_COLORS} /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ✅ Faculty Tab for College */}
+        {tabs[activeTab] === "Faculty" && user.role === "college" && (
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] overflow-hidden">
+            {!related?.faculty?.length ? (
+              <div className="py-16 text-center text-white/40 font-medium text-base bg-[#0B0F19]/30">No faculty found</div>
+            ) : (
+              <div className="overflow-x-auto bg-[#0B0F19]/30 shadow-inner">
+                <table className="w-full text-left border-collapse whitespace-nowrap">
+                  <thead className="bg-white/5 border-b border-white/10">
+                    <tr>
+                      <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest">Name</th>
+                      <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest">Designation</th>
+                      <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest">Department</th>
+                      <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {related.faculty.map((member) => (
+                      <tr key={member._id} className="hover:bg-white/5 transition-colors duration-300 group">
+                        <td className="px-6 py-5 text-sm font-bold text-white/90 group-hover:text-fuchsia-300">{member.fullName}</td>
+                        <td className="px-6 py-5 text-xs text-white/70">{member.designation || "–"}</td>
+                        <td className="px-6 py-5 text-xs text-violet-400 font-bold tracking-wide">{member.department || "–"}</td>
+                        <td className="px-6 py-5"><Badge value={member.status} map={STATUS_COLORS} /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ✅ Interns Tab for Mentor */}
+        {tabs[activeTab] === "Interns" && user.role === "mentor" && (
           <div className="flex flex-col gap-5">
             {applications?.length === 0 ? (
               <div className="bg-[#0B0F19]/50 border border-white/10 rounded-3xl py-16 text-center text-white/40 shadow-inner">
@@ -729,138 +1106,16 @@ export default function AdminUserDetails() {
                   <div className="flex flex-col md:flex-row items-start justify-between gap-5">
                     <div className="flex flex-col gap-2">
                       <p className="font-bold text-white/90 text-xl m-0">
-                        {app.studentSnapshot?.fullName || app.student?.fullName}
+                        {app.student?.fullName}
                       </p>
-                      <p className="text-[10px] font-bold text-fuchsia-400 uppercase tracking-widest m-0 bg-[#0B0F19]/50 px-3 py-1.5 rounded-lg border border-white/5 w-max mt-1">
-                        {app.studentSnapshot?.collegeName} <span className="opacity-30 mx-2">|</span> {app.studentSnapshot?.courseName}
-                      </p>
+                      {app.student && (
+                        <p className="text-[10px] font-bold text-fuchsia-400 uppercase tracking-widest m-0 bg-[#0B0F19]/50 px-3 py-1.5 rounded-lg border border-white/5 w-max mt-1">
+                          {app.student?.prn}
+                        </p>
+                      )}
                       <p className="text-sm font-medium text-white/70 m-0 mt-2">{app.internship?.title}</p>
                     </div>
                     <Badge value={app.status} map={APP_STATUS_COLORS} />
-                  </div>
-                  <div className="flex flex-wrap items-center gap-5 mt-6 pt-5 border-t border-white/10 text-[10px] font-bold uppercase tracking-widest text-white/60">
-                    {app.internshipStartDate && <span className="bg-[#0B0F19]/30 px-3 py-1.5 rounded-lg border border-white/5"><span className="text-violet-400 mr-2">Start:</span> {new Date(app.internshipStartDate).toLocaleDateString("en-IN")}</span>}
-                    {app.internshipEndDate && <span className="bg-[#0B0F19]/30 px-3 py-1.5 rounded-lg border border-white/5"><span className="text-violet-400 mr-2">End:</span> {new Date(app.internshipEndDate).toLocaleDateString("en-IN")}</span>}
-                    {app.evaluationScore != null && <span className="text-fuchsia-400 bg-fuchsia-500/10 border border-fuchsia-500/20 px-3 py-1.5 rounded-lg ml-auto">Score: {app.evaluationScore}/100</span>}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        )}
-
-        {(tabs[activeTab] === "Faculty" || tabs[activeTab] === "Students" || tabs[activeTab] === "Mentors") && (
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] overflow-hidden box-border transition-all duration-300 hover:border-white/20">
-            {(!related?.[tabs[activeTab].toLowerCase()]?.length) ? (
-              <div className="py-16 text-center text-white/40 font-medium text-base bg-[#0B0F19]/30">No {tabs[activeTab].toLowerCase()} found</div>
-            ) : (
-              <div className="overflow-x-auto bg-[#0B0F19]/30 shadow-inner">
-                <table className="w-full text-left border-collapse whitespace-nowrap">
-                  <thead className="bg-white/5 border-b border-white/10">
-                    <tr>
-                      {(tabs[activeTab] === "Students" 
-                        ? ["Name", "PRN", "Course", "Specialization", "Status", "Profile"] 
-                        : ["Name", "Designation", "Department", "Emp ID", "Status", "Account"]
-                      ).map((h) => (
-                        <th key={h} className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest border-b border-white/5">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {related[tabs[activeTab].toLowerCase()].map((item) => (
-                      <tr key={item._id} className="hover:bg-white/5 transition-colors duration-300 group">
-                        <td className="px-6 py-5 text-sm font-bold text-white/90 group-hover:text-fuchsia-300 transition-colors">{item.fullName}</td>
-                        
-                        {tabs[activeTab] === "Students" ? (
-                          <>
-                            <td className="px-6 py-5 text-xs text-white/60 font-mono">{item.prn || "–"}</td>
-                            <td className="px-6 py-5 text-xs text-violet-400 font-bold tracking-wide">{item.courseName || "–"}</td>
-                            <td className="px-6 py-5 text-xs text-white/70">{item.specialization || "–"}</td>
-                            <td className="px-6 py-5"><Badge value={item.status} map={STATUS_COLORS} /></td>
-                            <td className="px-6 py-5"><Badge value={item.profileStatus} map={STATUS_COLORS} /></td>
-                          </>
-                        ) : (
-                          <>
-                            <td className="px-6 py-5 text-xs text-white/70">{item.designation || "–"}</td>
-                            <td className="px-6 py-5 text-xs text-violet-400 font-bold tracking-wide">{item.department || "–"}</td>
-                            <td className="px-6 py-5 text-xs text-white/60 font-mono">{item.employeeId || "–"}</td>
-                            <td className="px-6 py-5"><Badge value={item.status} map={STATUS_COLORS} /></td>
-                            {tabs[activeTab] === "Faculty" && <td className="px-6 py-5"><Badge value={item.profileStatus} map={STATUS_COLORS} /></td>}
-                            {tabs[activeTab] === "Mentors" && <td className="px-6 py-5"><Badge value={item.user?.accountStatus} map={STATUS_COLORS} /></td>}
-                          </>
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-
-        {tabs[activeTab] === "Internships" && (
-          <div className="flex flex-col gap-5">
-            {!related?.internships?.length ? (
-              <div className="bg-[#0B0F19]/50 border border-white/10 rounded-3xl py-16 text-center text-white/40 shadow-inner">
-                <p className="font-medium text-base m-0">No internships posted</p>
-              </div>
-            ) : (
-              related.internships.map((i) => (
-                <div key={i._id} className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-6 md:p-8 hover:border-white/20 hover:-translate-y-1 transition-all duration-300 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]">
-                  <div className="flex flex-col md:flex-row items-start justify-between gap-6">
-                    <div className="flex-1 flex flex-col gap-4">
-                      <div className="flex items-center gap-4 flex-wrap">
-                        <h3 className="font-bold text-white/90 text-xl m-0">{i.title}</h3>
-                        <Badge value={i.status} map={{ open: "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30", closed: "bg-red-500/10 text-red-400 border border-red-500/20" }} />
-                      </div>
-                      
-                      <div className="flex flex-wrap items-center gap-3 text-[10px] font-bold text-white/50 uppercase tracking-widest bg-[#0B0F19]/50 p-3.5 rounded-xl border border-white/5 w-max">
-                        {i.mode && <span className="text-violet-400">{i.mode}</span>}
-                        {i.durationMonths && (
-                          <>
-                            <span className="opacity-30">|</span>
-                            <span className="text-white/80">{i.durationMonths} mos</span>
-                          </>
-                        )}
-                        {i.stipendType && (
-                          <>
-                            <span className="opacity-30">|</span>
-                            <span className="text-emerald-400">{i.stipendType}</span>
-                          </>
-                        )}
-                        {i.stipendAmount && (
-                          <>
-                            <span className="opacity-30">|</span>
-                            <span className="text-emerald-400">₹{i.stipendAmount.toLocaleString()}/mo</span>
-                          </>
-                        )}
-                        {i.positions && (
-                          <>
-                            <span className="opacity-30">|</span>
-                            <span className="text-fuchsia-400">{i.positions} positions</span>
-                          </>
-                        )}
-                      </div>
-
-                      {i.applicationDeadline && (
-                        <div className="text-[10px] font-bold uppercase tracking-widest text-fuchsia-400 mt-1">
-                          Deadline: <span className="text-white/80 ml-1">{new Date(i.applicationDeadline).toLocaleDateString("en-IN")}</span>
-                        </div>
-                      )}
-
-                      {i.skillsRequired?.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-2 pt-4 border-t border-white/5">
-                          {i.skillsRequired.map((s) => (
-                            <span key={s} className="px-3 py-1.5 bg-white/5 border border-white/10 text-white/80 text-[10px] font-bold uppercase tracking-widest rounded-lg">{s}</span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="bg-[#0B0F19]/30 border border-fuchsia-500/20 p-5 rounded-2xl text-center min-w-[140px] shadow-[0_0_15px_rgba(217,70,239,0.1)]">
-                      <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-violet-400 to-fuchsia-400 m-0">{i.applicantCount}</p>
-                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-2 mb-0">Applicants</p>
-                    </div>
                   </div>
                 </div>
               ))
