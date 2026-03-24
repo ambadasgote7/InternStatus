@@ -13,7 +13,7 @@ export default function CollegeRegister() {
     location: "",
     website: "",
     emailDomain: "",
-    verificationDocument: null
+    verificationDocument: null,
   });
 
   const [loading, setLoading] = useState(false);
@@ -38,9 +38,9 @@ export default function CollegeRegister() {
     const { name, value, files } = e.target;
 
     if (name === "verificationDocument") {
-      setForm(prev => ({
+      setForm((prev) => ({
         ...prev,
-        verificationDocument: files[0]
+        verificationDocument: files[0],
       }));
       return;
     }
@@ -48,24 +48,24 @@ export default function CollegeRegister() {
     if (name === "selectedCollege") {
       if (value === "other") {
         setIsOther(true);
-        setForm(prev => ({
+        setForm((prev) => ({
           ...prev,
           selectedCollege: "",
-          collegeName: ""
+          collegeName: "",
         }));
       } else {
         setIsOther(false);
-        setForm(prev => ({
+        setForm((prev) => ({
           ...prev,
-          selectedCollege: value
+          selectedCollege: value,
         }));
       }
       return;
     }
 
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -96,19 +96,18 @@ export default function CollegeRegister() {
       formData.append("emailDomain", form.emailDomain);
 
       if (form.verificationDocument) {
-        formData.append(
-          "verificationDocument",
-          form.verificationDocument
-        );
+        formData.append("verificationDocument", form.verificationDocument);
       }
 
       await API.post("/onboarding/college", formData, {
         headers: {
-          "Content-Type": "multipart/form-data"
-        }
+          "Content-Type": "multipart/form-data",
+        },
       });
 
-      setSuccess("Request submitted successfully. Please wait for admin approval.");
+      setSuccess(
+        "Request submitted successfully. Please wait for admin approval.",
+      );
       setForm({
         requesterName: "",
         requesterEmail: "",
@@ -118,126 +117,124 @@ export default function CollegeRegister() {
         location: "",
         website: "",
         emailDomain: "",
-        verificationDocument: null
+        verificationDocument: null,
       });
       setIsOther(false);
-
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-        "Error submitting request"
-      );
+      setError(err.response?.data?.message || "Error submitting request");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0B0F19] p-4 md:p-8 font-sans box-border text-white selection:bg-fuchsia-500/30 selection:text-fuchsia-200 relative overflow-hidden">
-      <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-violet-600/20 rounded-full blur-[120px] pointer-events-none mix-blend-screen"></div>
-      <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-fuchsia-600/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen"></div>
-
-      <div className="w-full max-w-2xl bg-white/5 backdrop-blur-xl p-8 md:p-12 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] border border-white/10 box-border relative z-10 transition-all duration-300 hover:border-white/20">
-        <h2 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 mt-0 mb-10 text-center tracking-tight">
-          College Registration
-        </h2>
+    <div className="min-h-screen flex items-center justify-center bg-[#f9f9f9] p-4 md:p-6 font-sans text-[#333]">
+      <div className="w-full max-w-xl bg-[#fff] p-6 md:p-10 rounded-[20px] shadow-sm border border-[#e5e5e5] box-border">
+        <header className="mb-8 border-b border-[#e5e5e5] pb-4">
+          <h2 className="text-[24px] font-black m-0 tracking-tight text-[#333] text-center">
+            College Registration
+          </h2>
+          <p className="text-[13px] font-bold text-[#333] opacity-60 m-0 mt-1 uppercase tracking-widest text-center">
+            Request Institutional Access
+          </p>
+        </header>
 
         {error && (
-          <div className="mb-6 px-5 py-4 text-[11px] font-bold text-white bg-red-500/10 border border-red-500/20 rounded-xl uppercase tracking-widest text-center">
+          <div className="mb-5 px-4 py-3 text-[12px] font-bold text-[#cc0000] bg-[#fff] border border-[#cc0000] rounded-[14px] text-center uppercase tracking-widest">
             {error}
           </div>
         )}
         {success && (
-          <div className="mb-6 px-5 py-4 text-[11px] font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 rounded-xl uppercase tracking-widest text-center">
+          <div className="mb-5 px-4 py-3 text-[12px] font-bold text-[#008000] bg-[#fff] border border-[#008000] rounded-[14px] text-center uppercase tracking-widest">
             {success}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
                 Your Name
               </label>
               <input
                 name="requesterName"
-                placeholder="John Doe"
+                placeholder="Full Name"
                 value={form.requesterName}
                 onChange={handleChange}
                 required
-                className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 placeholder:text-white/20 box-border"
+                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
               />
             </div>
-            <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
                 Official Email
               </label>
               <input
                 name="requesterEmail"
                 type="email"
-                placeholder="john@college.edu"
+                placeholder="email@college.edu"
                 value={form.requesterEmail}
                 onChange={handleChange}
                 required
-                className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 placeholder:text-white/20 box-border"
+                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
               />
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
               Phone Number
             </label>
             <input
               name="requesterPhone"
-              placeholder="+91 98765 43210"
+              placeholder="+91 XXXXX XXXXX"
               value={form.requesterPhone}
               onChange={handleChange}
               required
-              className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 placeholder:text-white/20 box-border"
+              className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
             />
           </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
-              Select College
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+              Select Institution
             </label>
             <select
               name="selectedCollege"
               value={form.selectedCollege}
               onChange={handleChange}
-              className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 box-border appearance-none cursor-pointer [&>option]:bg-[#0B0F19]"
+              className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none cursor-pointer appearance-none"
             >
-              <option value="" disabled className="text-white/40">Select College</option>
-              {colleges.map(col => (
+              <option value="" disabled>
+                Select College
+              </option>
+              {colleges.map((col) => (
                 <option key={col._id} value={col._id}>
                   {col.name}
                 </option>
               ))}
-              <option value="other">
-                Other (Not Listed)
-              </option>
+              <option value="other">Other (Not Listed)</option>
             </select>
           </div>
 
           {isOther && (
-            <div className="flex flex-col gap-2 p-5 bg-[#0B0F19]/30 rounded-2xl border border-fuchsia-500/20 shadow-inner">
-              <label className="text-[10px] font-bold text-fuchsia-400 uppercase tracking-widest">
-                New College Name
+            <div className="flex flex-col gap-1.5 p-4 bg-[#f9f9f9] border border-dashed border-[#333] rounded-[14px]">
+              <label className="text-[11px] font-bold text-[#333] uppercase tracking-widest">
+                New Institution Name
               </label>
               <input
                 name="collegeName"
-                placeholder="Enter College Name"
+                placeholder="Full Institution Name"
                 value={form.collegeName}
                 onChange={handleChange}
                 required
-                className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/80 border border-white/10 rounded-xl outline-none focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500 transition-all duration-300 placeholder:text-white/20 box-border"
+                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
               />
             </div>
           )}
 
-          <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
               Address
             </label>
             <input
@@ -246,13 +243,13 @@ export default function CollegeRegister() {
               value={form.location}
               onChange={handleChange}
               required
-              className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 placeholder:text-white/20 box-border"
+              className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
                 Website
               </label>
               <input
@@ -260,26 +257,26 @@ export default function CollegeRegister() {
                 placeholder="https://college.edu"
                 value={form.website}
                 onChange={handleChange}
-                className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 placeholder:text-white/20 box-border"
+                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
               />
             </div>
 
-            <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
-                Email Domain
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                Domain
               </label>
               <input
                 name="emailDomain"
                 placeholder="college.edu"
                 value={form.emailDomain}
                 onChange={handleChange}
-                className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 placeholder:text-white/20 box-border"
+                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
               />
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 mt-4 p-6 bg-[#0B0F19]/30 rounded-2xl border border-white/5 border-dashed">
-            <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest text-center">
+          <div className="flex flex-col gap-2 p-5 bg-[#f9f9f9] border border-dashed border-[#e5e5e5] rounded-[14px] text-center">
+            <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
               Verification Document
             </label>
             <input
@@ -287,19 +284,16 @@ export default function CollegeRegister() {
               name="verificationDocument"
               onChange={handleChange}
               required
-              className="block w-full text-sm text-white/70 file:mr-4 file:py-3 file:px-5 file:rounded-xl file:border-0 file:text-[10px] file:font-bold file:uppercase file:tracking-widest file:bg-white/5 file:text-white/80 hover:file:bg-white/10 hover:file:text-white transition-all cursor-pointer box-border outline-none file:cursor-pointer"
+              className="block w-full text-[11px] text-[#333] font-bold file:mr-4 file:py-2 file:px-4 file:rounded-[10px] file:border-none file:text-[10px] file:font-black file:uppercase file:bg-[#111] file:text-[#fff] cursor-pointer"
             />
           </div>
 
-          <div className="pt-8 border-t border-white/10 mt-2">
-            <button 
+          <div className="pt-6 border-t border-[#e5e5e5] mt-2">
+            <button
               disabled={loading}
-              className="w-full py-4 text-xs font-bold text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 border-none rounded-xl cursor-pointer transition-all duration-300 hover:shadow-[0_8px_20px_-6px_rgba(217,70,239,0.5)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest flex items-center justify-center gap-3 outline-none"
+              className="w-full py-3.5 text-[12px] font-black text-[#fff] bg-[#111] border-none rounded-[14px] cursor-pointer transition-opacity hover:opacity-80 disabled:opacity-30 uppercase tracking-widest flex items-center justify-center gap-2 outline-none"
             >
-              {loading && (
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-              )}
-              {loading ? "Submitting..." : "Submit Registration"}
+              {loading ? "Processing..." : "Submit Registration"}
             </button>
           </div>
         </form>

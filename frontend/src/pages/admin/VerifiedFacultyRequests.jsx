@@ -14,14 +14,14 @@ const VerifiedFacultyRequests = () => {
 
       const res = await axios.get(
         `${BASE_URL}/api/admin/verified-faculty-requests`,
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       setRequests(res.data.verifiedRequests || []);
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          "Failed to fetch verified faculty requests"
+          "Failed to fetch verified faculty requests",
       );
     } finally {
       setLoading(false);
@@ -149,11 +149,14 @@ const VerifiedFacultyRequests = () => {
 
                         <td className="px-6 py-5 align-middle text-white/50 font-medium text-xs tracking-wide">
                           {req.verifiedAt
-                            ? new Date(req.verifiedAt).toLocaleDateString(undefined, {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                              })
+                            ? new Date(req.verifiedAt).toLocaleDateString(
+                                undefined,
+                                {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                },
+                              )
                             : "—"}
                         </td>
 

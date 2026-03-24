@@ -14,7 +14,7 @@ const PendingVerification = () => {
       await axios.post(
         BASE_URL + "/api/auth/logout",
         {},
-        { withCredentials: true }
+        { withCredentials: true },
       );
       dispatch(removeUser());
       navigate("/login");
@@ -26,7 +26,6 @@ const PendingVerification = () => {
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-white to-[#FFEDC7]/20 flex items-center justify-center px-6 font-sans">
       <div className="w-full max-w-md bg-white rounded-md shadow-xl border border-[#FFEDC7] p-8 md:p-10 transition-all">
-
         {/* Icon */}
         <div className="flex justify-center mb-6">
           <div className="w-16 h-16 rounded-full bg-[#FFEDC7]/40 flex items-center justify-center">
@@ -55,8 +54,8 @@ const PendingVerification = () => {
 
         {/* Message */}
         <p className="text-center text-gray-600 text-sm mb-4 leading-relaxed">
-          Your account has been submitted for verification. Once approved,
-          you will be able to access your dashboard and all platform features.
+          Your account has been submitted for verification. Once approved, you
+          will be able to access your dashboard and all platform features.
         </p>
 
         <p className="text-center text-gray-500 text-sm mb-8">

@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import NavBar from "../components/NavBar";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -13,75 +14,162 @@ export default function Home() {
   }, [user, navigate]);
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-white font-sans overflow-hidden relative selection:bg-fuchsia-500/30 selection:text-fuchsia-200">
-      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-violet-600/30 rounded-full blur-[150px] pointer-events-none mix-blend-screen animate-pulse"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-fuchsia-600/20 rounded-full blur-[150px] pointer-events-none mix-blend-screen"></div>
+    <>
+      <NavBar />
 
-      <div className="relative z-10 w-full flex flex-col items-center justify-center pt-24 pb-20 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto w-full flex flex-col items-center text-center mb-20 md:mb-28">
-          <div className="inline-block px-5 py-2 mb-8 bg-white/5 border border-white/10 rounded-full backdrop-blur-md animate-bounce">
-            <span className="text-xs font-bold uppercase tracking-widest text-fuchsia-400">
-              Welcome to the Future of Placements
-            </span>
+      <div className="font-nunito bg-[#f8fafc] text-[#111]">
+
+        {/* HERO */}
+        <section className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
+
+          <div className="max-w-4xl">
+            <p className="text-sm font-semibold tracking-widest text-gray-500 mb-4 uppercase">
+              Built for Students • Colleges • Companies
+            </p>
+
+            <h1 className="text-5xl md:text-6xl font-extrabold leading-tight mb-6">
+              From Internship Search <br />
+              to <span className="text-blue-600">Completion</span>
+            </h1>
+
+            <p className="text-lg text-gray-600 mb-10 max-w-2xl mx-auto">
+              Apply, hire, mentor, and complete internships — all in one seamless
+              flow. No spreadsheets. No confusion. Just outcomes.
+            </p>
+
+            {/* CTA */}
+            <div className="flex flex-wrap justify-center gap-4">
+              <button
+                onClick={() => navigate("/login")}
+                className="px-8 py-3 rounded-xl bg-blue-600 text-white font-semibold shadow-md hover:scale-105 transition"
+              >
+                Get Started
+              </button>
+
+              <button
+                onClick={() => navigate("/college/register")}
+                className="px-8 py-3 rounded-xl border border-gray-300 bg-white font-semibold hover:bg-gray-100 transition"
+              >
+                For Colleges
+              </button>
+
+              <button
+                onClick={() => navigate("/company/register")}
+                className="px-8 py-3 rounded-xl border border-gray-300 bg-white font-semibold hover:bg-gray-100 transition"
+              >
+                For Companies
+              </button>
+            </div>
           </div>
+        </section>
 
-          <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight max-w-4xl leading-[1.1]">
-            Internship Management <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-violet-400 animate-gradient-x">
-              Simplified
-            </span>
-          </h1>
-
-          <p className="text-lg md:text-xl text-white/50 max-w-2xl leading-relaxed font-medium m-0">
-            A unified platform connecting Colleges, Students, Companies, Mentors,
-            and Faculty to manage the complete internship lifecycle — from
-            onboarding to completion.
-          </p>
-        </div>
-
-        <div className="max-w-7xl mx-auto w-full border-t border-white/5 pt-16 md:pt-24">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-4xl font-black text-white/90 mb-4 tracking-tight">
-              One Platform. Every Role.
+        {/* VALUE SECTION */}
+        <section className="py-20 px-6 max-w-7xl mx-auto">
+          <div className="text-center mb-14">
+            <h2 className="text-4xl font-bold mb-3">
+              Built Around Outcomes, Not Tools
             </h2>
-            <p className="text-white/40 font-medium text-lg m-0">
-              Tailored experiences for everyone involved in the placement process.
+            <p className="text-gray-500">
+              Everything is connected — nothing feels fragmented.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 md:p-10 rounded-3xl transition-all duration-500 hover:-translate-y-2 hover:border-violet-500/30 group shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] flex flex-col">
-              <h3 className="text-xl font-bold text-white mb-4 group-hover:text-violet-400 transition-colors">
-                For Students
-              </h3>
-              <p className="text-white/50 leading-relaxed text-sm m-0">
-                Discover opportunities, track your application status in real-time,
-                and manage your profile and resumes all in one sleek dashboard.
+          <div className="grid md:grid-cols-3 gap-8">
+
+            <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-lg transition">
+              <h3 className="text-xl font-bold mb-3">Get Placed Faster</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Discover internships, apply instantly, and always know your
+                status — no more guessing or chasing updates.
               </p>
             </div>
 
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 md:p-10 rounded-3xl transition-all duration-500 hover:-translate-y-2 hover:border-fuchsia-500/30 group shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] flex flex-col">
-              <h3 className="text-xl font-bold text-white mb-4 group-hover:text-fuchsia-400 transition-colors">
-                For Companies
-              </h3>
-              <p className="text-white/50 leading-relaxed text-sm m-0">
-                Post internship drives, filter top talent based on precise skill
-                matching, and extend offers effortlessly with streamlined workflows.
+            <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-lg transition">
+              <h3 className="text-xl font-bold mb-3">Hire Without Chaos</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Review applicants, assign mentors, and onboard interns in a
+                structured, clean workflow.
               </p>
             </div>
 
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 md:p-10 rounded-3xl transition-all duration-500 hover:-translate-y-2 hover:border-emerald-500/30 group shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] flex flex-col">
-              <h3 className="text-xl font-bold text-white mb-4 group-hover:text-emerald-400 transition-colors">
-                For Colleges
-              </h3>
-              <p className="text-white/50 leading-relaxed text-sm m-0">
-                Monitor student progress, assign dedicated mentors, and maintain a
-                comprehensive overview of placement statistics and success rates.
+            <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-lg transition">
+              <h3 className="text-xl font-bold mb-3">One Continuous Flow</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                From application to completion, every step is connected — no
+                switching tools, no broken processes.
               </p>
             </div>
+
           </div>
-        </div>
+        </section>
+
+        {/* FLOW SECTION */}
+        <section className="py-20 px-6 bg-white">
+          <div className="max-w-6xl mx-auto text-center mb-14">
+            <h2 className="text-4xl font-bold mb-3">
+              A Complete Internship Lifecycle
+            </h2>
+            <p className="text-gray-500">
+              Not separate features — one continuous experience.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-8 text-center max-w-6xl mx-auto">
+
+            <div>
+              <div className="text-blue-600 font-bold text-lg mb-2">01</div>
+              <h4 className="font-semibold mb-2">Discover</h4>
+              <p className="text-sm text-gray-500">
+                Students explore relevant internship opportunities.
+              </p>
+            </div>
+
+            <div>
+              <div className="text-blue-600 font-bold text-lg mb-2">02</div>
+              <h4 className="font-semibold mb-2">Apply</h4>
+              <p className="text-sm text-gray-500">
+                Applications are submitted and tracked in real-time.
+              </p>
+            </div>
+
+            <div>
+              <div className="text-blue-600 font-bold text-lg mb-2">03</div>
+              <h4 className="font-semibold mb-2">Work</h4>
+              <p className="text-sm text-gray-500">
+                Mentors guide interns while progress is continuously tracked.
+              </p>
+            </div>
+
+            <div>
+              <div className="text-blue-600 font-bold text-lg mb-2">04</div>
+              <h4 className="font-semibold mb-2">Complete</h4>
+              <p className="text-sm text-gray-500">
+                Performance is evaluated and credits are assigned.
+              </p>
+            </div>
+
+          </div>
+        </section>
+
+        {/* FINAL CTA */}
+        <section className="py-20 px-6 text-center bg-blue-600 text-white">
+          <h2 className="text-4xl font-bold mb-4">
+            Stop Managing. Start Delivering Outcomes.
+          </h2>
+
+          <p className="mb-8 text-blue-100">
+            One platform to run internships end-to-end — without friction.
+          </p>
+
+          <button
+            onClick={() => navigate("/login")}
+            className="px-8 py-3 bg-white text-blue-600 rounded-xl font-semibold hover:scale-105 transition"
+          >
+            Enter Platform
+          </button>
+        </section>
+
       </div>
-    </div>
+    </>
   );
 }

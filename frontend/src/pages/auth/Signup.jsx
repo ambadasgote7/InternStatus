@@ -50,7 +50,7 @@ const Signup = () => {
       const res = await axios.post(
         `${BASE_URL}/api/auth${endpoint}`,
         { email, password },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       const userData = res.data?.data;
@@ -72,24 +72,21 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] flex items-center justify-center p-4 selection:bg-fuchsia-500/30 selection:text-fuchsia-200 relative overflow-hidden font-sans">
-      <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-violet-600/20 rounded-full blur-[120px] pointer-events-none mix-blend-screen"></div>
-      <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-fuchsia-600/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen"></div>
-
-      <div className="w-full max-w-[360px] bg-white/5 backdrop-blur-xl p-8 rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] border border-white/10 relative z-10 transition-all duration-300 hover:border-white/20">
-        <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 text-center mt-0 mb-6 tracking-tight">
+    <div className="min-h-screen bg-[#f9f9f9] flex items-center justify-center p-4 font-sans">
+      <div className="w-full max-w-[360px] bg-[#fff] p-8 rounded-[20px] border border-[#e5e5e5] shadow-sm flex flex-col gap-3">
+        <h2 className="text-[23px] font-black text-[#333] text-center m-0 mb-4">
           Create Account
         </h2>
 
         {error && (
-          <div className="mb-5 px-4 py-3 text-[11px] font-bold text-white bg-red-500/10 border border-red-500/20 rounded-lg backdrop-blur-md">
+          <div className="px-4 py-3 text-[13px] font-bold text-[#cc0000] bg-[#fff] border border-[#cc0000] rounded-[14px]">
             {error}
           </div>
         )}
 
         <div className="flex flex-col gap-4">
           <div className="relative flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
+            <label className="text-[13px] font-bold text-[#333]">
               Account Type
             </label>
 
@@ -97,18 +94,13 @@ const Signup = () => {
               type="button"
               onClick={() => setIsRoleOpen((prev) => !prev)}
               disabled={submitting}
-              className="w-full px-4 py-3 text-sm bg-[#0B0F19]/50 border border-white/10 rounded-lg outline-none transition-all duration-300 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 flex justify-between items-center text-left"
+              className="w-full px-4 py-3 text-[13px] bg-[#fff] border border-[#333] rounded-[14px] outline-none flex justify-between items-center text-left"
             >
-              <span className={role ? "text-white" : "text-white/20"}>
-                {role || "Select Role"}
-              </span>
-              <span className="text-[10px] text-white/40 transform transition-transform duration-200">
-                ▼
-              </span>
+              <span className="text-[#333]">{role || "Select Role"}</span>
             </button>
 
             {isRoleOpen && (
-              <div className="absolute top-full left-0 mt-2 w-full bg-[#0B0F19]/90 backdrop-blur-2xl border border-white/10 rounded-lg shadow-xl z-50 overflow-hidden">
+              <div className="absolute top-full left-0 mt-2 w-full bg-[#fff] border border-[#333] rounded-[14px] z-50 overflow-hidden">
                 {["Student", "Faculty", "Company"].map((r) => (
                   <button
                     key={r}
@@ -117,7 +109,7 @@ const Signup = () => {
                       setRole(r);
                       setIsRoleOpen(false);
                     }}
-                    className="w-full text-left px-4 py-3 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors duration-200 border-none cursor-pointer"
+                    className="w-full text-left px-4 py-3 text-[13px] font-medium text-[#333] hover:bg-[#f9f9f9] border-none cursor-pointer"
                   >
                     {r}
                   </button>
@@ -127,7 +119,7 @@ const Signup = () => {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
+            <label className="text-[13px] font-bold text-[#333]">
               Email Address
             </label>
             <input
@@ -136,12 +128,12 @@ const Signup = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={submitting}
-              className="w-full px-4 py-3 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-lg outline-none transition-all duration-300 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 placeholder:text-white/20"
+              className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
+            <label className="text-[13px] font-bold text-[#333]">
               Password
             </label>
             <div className="relative">
@@ -151,12 +143,12 @@ const Signup = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={submitting}
-                className="w-full pl-4 pr-16 py-3 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-lg outline-none transition-all duration-300 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 placeholder:text-white/20"
+                className="w-full pl-4 pr-16 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-fuchsia-400 uppercase tracking-widest hover:text-fuchsia-300 transition-colors bg-transparent border-none cursor-pointer outline-none p-0"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-[13px] font-bold text-[#333] bg-transparent border-none cursor-pointer outline-none p-0 hover:opacity-80"
               >
                 {showPassword ? "Hide" : "Show"}
               </button>
@@ -166,21 +158,18 @@ const Signup = () => {
           <button
             onClick={handleSignup}
             disabled={submitting}
-            className="w-full mt-3 py-3.5 text-xs font-bold text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 border-none rounded-lg cursor-pointer transition-all duration-300 hover:shadow-[0_8px_20px_-6px_rgba(217,70,239,0.5)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest flex justify-center items-center gap-2"
+            className="w-full mt-3 py-3 text-[14px] font-bold text-[#fff] bg-[#111] border-none rounded-[14px] cursor-pointer hover:opacity-80 flex justify-center items-center"
           >
-            {submitting && (
-              <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-            )}
             {submitting ? "Creating..." : "Sign Up"}
           </button>
         </div>
 
-        <div className="mt-6 text-center">
-          <p className="text-xs font-medium text-white/50 m-0">
+        <div className="mt-4 text-center">
+          <p className="text-[13px] text-[#333] m-0">
             Already have an account?{" "}
             <Link
               to="/login"
-              className="text-fuchsia-400 hover:text-fuchsia-300 transition-colors no-underline font-bold"
+              className="text-[#111] hover:opacity-80 no-underline font-bold"
             >
               Login here
             </Link>

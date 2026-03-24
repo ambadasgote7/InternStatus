@@ -5,11 +5,14 @@ import {
   getCompanyInterns,
   getCompanyMentors,
   getCompanyProfile,
-  getInternProgress,
+  getInternProgressController,
   issueCertificate,
   removeMentorFromCompany,
   updateCompanyMentor,
-  updateCompanyProfile
+  updateCompanyProfile,
+  getCompanyDashboard,
+  getCompanyInternships, // ✅ ADD THIS
+  getCompanyApplications,
 } from "./company.controller.js";
 
 import { authenticate } from "../../middleware/auth.js";
@@ -22,7 +25,7 @@ router.get(
   "/profile",
   authenticate,
   authorizeRoles("company"),
-  getCompanyProfile
+  getCompanyProfile,
 );
 
 router.patch(
@@ -30,49 +33,56 @@ router.patch(
   authenticate,
   authorizeRoles("company"),
   upload.single("logo"),
-  updateCompanyProfile
+  updateCompanyProfile,
+);
+
+router.get(
+  "/internships",
+  authenticate,
+  authorizeRoles("company"),
+  getCompanyInternships,
 );
 
 router.get(
   "/mentors",
   authenticate,
   authorizeRoles("company"),
-  getCompanyMentors
+  getCompanyMentors,
 );
 
 router.patch(
   "/mentors/:mentorId",
   authenticate,
   authorizeRoles("company"),
-  updateCompanyMentor
+  updateCompanyMentor,
 );
 
 router.delete(
   "/mentors/:mentorId",
   authenticate,
   authorizeRoles("company"),
-  removeMentorFromCompany
+  removeMentorFromCompany,
 );
 
 router.get(
   "/interns",
   authenticate,
   authorizeRoles("company"),
-  getCompanyInterns
+  getCompanyInterns,
 );
 
 router.patch(
   "/:id/assign-mentor",
   authenticate,
   authorizeRoles("company"),
-  assignMentor
+  assignMentor,
 );
 
 router.get(
   "/interns/:id/progress",
   authenticate,
   authorizeRoles("company"),
-  getInternProgress
+  getInternProgressController,
 );
 
 router.post(
@@ -80,13 +90,23 @@ router.post(
   authenticate,
   authorizeRoles("company"),
   upload.single("certificate"),
-  issueCertificate
+  issueCertificate,
+);
+
+router.get("/applications/:id/certificate", authenticate, getCertificate);
+
+router.get(
+  "/dashboard",
+  authenticate,
+  authorizeRoles("company"),
+  getCompanyDashboard,
 );
 
 router.get(
-  "/applications/:id/certificate",
+  "/applications",
   authenticate,
-  getCertificate
+  authorizeRoles("company"),
+  getCompanyApplications,
 );
 
 export default router;

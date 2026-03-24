@@ -20,21 +20,17 @@ const SetMentorPassword = () => {
     if (!password || !confirmPassword) {
       return "All security fields are required";
     }
-
     if (password.length < 6) {
-      return "Entropy too low: Password must be at least 6 characters";
+      return "Password must be at least 6 characters";
     }
-
     if (password !== confirmPassword) {
-      return "Credential mismatch: Passwords do not match";
+      return "Passwords do not match";
     }
-
     return null;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setError("");
     setSuccess("");
 
@@ -46,26 +42,15 @@ const SetMentorPassword = () => {
 
     try {
       setLoading(true);
+      const res = await axios.post(`${BASE_URL}/api/mentor/set-password`, {
+        token,
+        password,
+      });
 
-      const res = await axios.post(
-        `${BASE_URL}/api/mentor/set-password`,
-        {
-          token,
-          password,
-        }
-      );
-
-      setSuccess(res.data.message || "Password uplink successful");
-
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
-
+      setSuccess(res.data.message || "Password updated successfully");
+      setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
-      setError(
-        err?.response?.data?.message ||
-          "Uplink failed: Could not set password"
-      );
+      setError(err?.response?.data?.message || "Failed to set password");
     } finally {
       setLoading(false);
     }
@@ -73,14 +58,17 @@ const SetMentorPassword = () => {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0B0F19] p-4 font-sans box-border text-white selection:bg-fuchsia-500/30">
-        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-red-600/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="w-full max-w-md bg-white/5 backdrop-blur-xl rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] border border-white/10 p-8 md:p-12 text-center relative z-10">
-          <div className="text-[10px] font-bold text-red-400 uppercase tracking-[0.3em] mb-4">Security Protocol</div>
-          <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 mt-0 mb-6 tracking-tight">
-            Access Denied
-          </h2>
-          <div className="px-5 py-4 text-[11px] font-bold text-red-300 bg-red-500/10 border border-red-500/20 rounded-xl uppercase tracking-widest">
+      <div className="min-h-screen flex items-center justify-center bg-[#f9f9f9] p-4 font-sans text-[#333]">
+        <div className="w-full max-w-md bg-[#fff] border border-[#cc0000] p-8 md:p-12 rounded-[20px] text-center shadow-sm">
+          <header className="mb-6">
+            <h2 className="text-[23px] font-black tracking-tight m-0">
+              Access Denied
+            </h2>
+            <p className="text-[11px] font-bold opacity-60 uppercase tracking-widest mt-1">
+              Security Protocol
+            </p>
+          </header>
+          <div className="text-[12px] font-bold text-[#cc0000] uppercase tracking-widest">
             Invalid or missing security token
           </div>
         </div>
@@ -89,38 +77,32 @@ const SetMentorPassword = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0B0F19] p-4 font-sans box-border text-white selection:bg-fuchsia-500/30 relative overflow-hidden">
-      <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-violet-600/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-fuchsia-600/10 rounded-full blur-[120px] pointer-events-none" />
-
-      <div className="w-full max-w-md bg-white/5 backdrop-blur-xl rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] border border-white/10 p-8 md:p-12 box-border relative z-10 transition-all duration-300 hover:border-white/20">
-
-        <header className="text-center mb-10 border-b border-white/10 pb-8">
-          <div className="text-[10px] font-bold text-violet-400 uppercase tracking-[0.3em] mb-3">Onboarding Terminal</div>
-          <h2 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 m-0 tracking-tight">
+    <div className="min-h-screen flex items-center justify-center bg-[#f9f9f9] p-4 font-sans text-[#333]">
+      <div className="w-full max-w-md bg-[#fff] border border-[#e5e5e5] p-6 md:p-10 rounded-[20px] shadow-sm">
+        <header className="text-center mb-8 border-b border-[#e5e5e5] pb-6">
+          <h2 className="text-[24px] font-black m-0 tracking-tight">
             Secure Account
           </h2>
-          <p className="text-white/40 text-sm mt-3 m-0 tracking-wide font-medium">
-            Define your mentor access credentials
+          <p className="text-[13px] font-bold opacity-60 m-0 mt-1 uppercase tracking-widest">
+            Define Access Credentials
           </p>
         </header>
 
         {error && (
-          <div className="mb-8 px-5 py-4 text-[11px] font-bold text-red-300 bg-red-500/10 border border-red-500/20 rounded-xl uppercase tracking-widest text-center animate-pulse">
+          <div className="mb-6 px-4 py-3 text-[12px] font-bold text-[#cc0000] border border-[#cc0000] rounded-[14px] uppercase tracking-widest text-center">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="mb-8 px-5 py-4 text-[11px] font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 rounded-xl uppercase tracking-widest text-center animate-bounce">
+          <div className="mb-6 px-4 py-3 text-[12px] font-bold text-[#008000] border border-[#008000] rounded-[14px] uppercase tracking-widest text-center">
             {success}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-
-          <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest ml-1">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[11px] font-bold opacity-60 uppercase tracking-widest ml-1">
               New Password
             </label>
             <input
@@ -128,13 +110,13 @@ const SetMentorPassword = () => {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 placeholder:text-white/10"
+              className="w-full px-4 py-3 text-[13px] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
               required
             />
           </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest ml-1">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[11px] font-bold opacity-60 uppercase tracking-widest ml-1">
               Confirm Password
             </label>
             <input
@@ -142,24 +124,20 @@ const SetMentorPassword = () => {
               placeholder="••••••••"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 placeholder:text-white/10"
+              className="w-full px-4 py-3 text-[13px] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
               required
             />
           </div>
 
-          <div className="pt-4 border-t border-white/10 mt-2">
+          <div className="pt-4 border-t border-[#e5e5e5] mt-2">
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 text-xs font-black text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 border-none rounded-2xl cursor-pointer transition-all duration-300 hover:shadow-[0_8px_20px_-6px_rgba(217,70,239,0.5)] hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-[0.2em] flex items-center justify-center gap-3 outline-none"
+              className="w-full py-4 text-[12px] font-black text-[#fff] bg-[#111] border-none rounded-[14px] cursor-pointer hover:opacity-80 transition-opacity disabled:opacity-30 uppercase tracking-widest"
             >
-              {loading && (
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-              )}
-              {loading ? "Authorizing..." : "Initialize Password"}
+              {loading ? "Processing..." : "Initialize Access"}
             </button>
           </div>
-
         </form>
       </div>
     </div>

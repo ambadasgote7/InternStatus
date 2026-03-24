@@ -30,7 +30,7 @@ const Colleges = () => {
   const filteredColleges = colleges.filter(
     (college) =>
       college.name.toLowerCase().includes(search.toLowerCase()) ||
-      college.location.toLowerCase().includes(search.toLowerCase())
+      college.location.toLowerCase().includes(search.toLowerCase()),
   );
 
   if (loading) {

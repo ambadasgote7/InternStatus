@@ -52,22 +52,19 @@ export default function CollegeProfile() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0B0F19] text-white">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-white/10 border-t-fuchsia-500 rounded-full animate-spin"></div>
-          <p className="text-fuchsia-400 font-bold tracking-widest uppercase text-[10px] animate-pulse m-0">
-            Loading Profile
-          </p>
-        </div>
+      <div className="min-h-screen bg-[#f9f9f9] flex items-center justify-center">
+        <p className="text-[14px] font-bold text-[#333] animate-pulse">
+          Loading Profile...
+        </p>
       </div>
     );
   }
 
   if (!college) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0B0F19] text-white">
-        <div className="bg-[#0B0F19]/50 border border-white/10 rounded-3xl p-12 text-center shadow-inner">
-          <p className="text-white/40 m-0 text-base font-medium">
+      <div className="min-h-screen bg-[#f9f9f9] flex items-center justify-center p-4">
+        <div className="bg-[#fff] border-2 border-dashed border-[#e5e5e5] rounded-[20px] p-10 text-center">
+          <p className="text-[13px] font-bold text-[#333] opacity-60">
             No data found.
           </p>
         </div>
@@ -83,108 +80,99 @@ export default function CollegeProfile() {
     .toUpperCase();
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] p-4 md:p-8 font-sans text-white selection:bg-fuchsia-500/30 selection:text-fuchsia-200 relative overflow-hidden">
-      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-violet-600/20 rounded-full blur-[120px] pointer-events-none mix-blend-screen" aria-hidden="true" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-fuchsia-600/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen" aria-hidden="true" />
-
-      <div className="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row gap-6 md:gap-8">
-        
-        <aside className="w-full lg:w-[380px] flex-shrink-0 bg-white/5 backdrop-blur-xl p-6 md:p-8 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] border border-white/10 h-max box-border transition-all duration-300 hover:border-white/20">
-          <div className="flex justify-center mb-8 relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-violet-600/30 to-fuchsia-600/30 blur-xl rounded-full scale-110 animate-pulse" />
-            <div className="relative w-28 h-28 bg-[#0B0F19] border border-white/10 rounded-full flex items-center justify-center text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-violet-400 to-fuchsia-400 shadow-inner">
+    <div className="min-h-screen bg-[#f9f9f9] text-[#333] font-sans pb-10">
+      <div className="max-w-6xl mx-auto w-full p-4 md:p-6 flex flex-col md:flex-row gap-5">
+        <aside className="w-full md:w-[300px] flex-shrink-0 bg-[#fff] p-6 rounded-[20px] shadow-sm border border-[#e5e5e5] h-max flex flex-col gap-4">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-20 h-20 bg-[#f9f9f9] border border-[#e5e5e5] rounded-full flex items-center justify-center text-[24px] font-black text-[#333]">
               {abbr}
+            </div>
+
+            <div className="text-center">
+              <h2 className="text-[18px] font-black text-[#333] m-0 mb-1 leading-tight">
+                {college.name || "College"}
+              </h2>
+              {college.website && (
+                <a
+                  className="text-[13px] font-bold text-[#111] underline hover:opacity-70 transition-opacity"
+                  href={college.website}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {college.website.replace(/^https?:\/\//, "")}
+                </a>
+              )}
             </div>
           </div>
 
-          <h2 className="text-2xl font-bold text-white/90 text-center mt-0 mb-2 tracking-tight">
-            {college.name || "College"}
-          </h2>
-
-          {college.website && (
-            <div className="text-center mb-8">
-              <a
-                className="text-xs font-bold text-fuchsia-400 hover:text-fuchsia-300 transition-colors no-underline tracking-wide uppercase"
-                href={college.website}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {college.website.replace(/^https?:\/\//, "")}
-              </a>
-            </div>
-          )}
-
-          <div className="flex flex-col gap-4 mt-6 pt-6 border-t border-white/10">
-            <div className="flex flex-col gap-1.5 bg-[#0B0F19]/30 p-4 rounded-xl border border-white/5">
-              <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
+          <div className="flex flex-col gap-3 pt-4 border-t border-[#e5e5e5]">
+            <div className="flex flex-col">
+              <span className="text-[11px] font-bold text-[#333] opacity-50 uppercase tracking-widest">
                 Phone
               </span>
-              <span className="text-sm font-medium text-white/90">
+              <span className="text-[13px] font-bold text-[#333]">
                 {college.phone || "—"}
               </span>
             </div>
-            <div className="flex flex-col gap-1.5 bg-[#0B0F19]/30 p-4 rounded-xl border border-white/5">
-              <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
+            <div className="flex flex-col">
+              <span className="text-[11px] font-bold text-[#333] opacity-50 uppercase tracking-widest">
                 Address
               </span>
-              <span className="text-sm font-medium text-white/90 leading-relaxed">
+              <span className="text-[13px] font-bold text-[#333] leading-snug">
                 {college.address || "—"}
               </span>
             </div>
           </div>
 
           {college.description && (
-            <div className="mt-6 pt-6 border-t border-white/10 flex flex-col gap-2">
-              <span className="text-[10px] font-bold text-fuchsia-400 uppercase tracking-widest">
+            <div className="pt-4 border-t border-[#e5e5e5] flex flex-col gap-1">
+              <span className="text-[11px] font-bold text-[#333] opacity-50 uppercase tracking-widest">
                 About
               </span>
-              <p className="text-sm text-white/70 leading-relaxed m-0">
+              <p className="text-[13px] text-[#333] leading-snug m-0 opacity-80">
                 {college.description}
               </p>
             </div>
           )}
         </aside>
 
-        <main className="flex-1 bg-white/5 backdrop-blur-xl p-6 md:p-10 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] border border-white/10 box-border transition-all duration-300 hover:border-white/20">
-          <header className="mb-10 border-b border-white/10 pb-6">
-            <h1 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 m-0 tracking-tight mb-2">
+        <main className="flex-1 bg-[#fff] p-6 md:p-8 rounded-[20px] shadow-sm border border-[#e5e5e5]">
+          <header className="mb-6 border-b border-[#e5e5e5] pb-4">
+            <h1 className="text-[23px] font-black text-[#333] m-0 tracking-tight leading-tight">
               College Profile
             </h1>
-            <p className="text-sm text-white/40 font-medium m-0">
-              Manage your institution's details
+            <p className="text-[13px] font-bold text-[#333] opacity-60 m-0 mt-1 uppercase tracking-widest">
+              Update institutional records
             </p>
           </header>
 
-          <form className="flex flex-col gap-10" onSubmit={handleSubmit} noValidate>
-            
+          <form
+            className="flex flex-col gap-6"
+            onSubmit={handleSubmit}
+            noValidate
+          >
             {error && (
-              <div className="px-5 py-4 text-[11px] font-bold text-white bg-red-500/10 border border-red-500/20 rounded-xl uppercase tracking-widest">
+              <div className="px-4 py-3 text-[13px] font-bold text-[#cc0000] bg-[#fff] border border-[#cc0000] rounded-[14px]">
                 {error}
               </div>
             )}
             {success && (
-              <div className="px-5 py-4 text-[11px] font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 rounded-xl uppercase tracking-widest">
+              <div className="px-4 py-3 text-[13px] font-bold text-[#008000] bg-[#fff] border border-[#008000] rounded-[14px]">
                 {success}
               </div>
             )}
 
-            <section className="flex flex-col gap-6">
-              <div className="flex items-center gap-4 border-b border-white/5 pb-4">
-                <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white flex items-center justify-center text-[10px] font-black shadow-lg">
-                  01
-                </span>
-                <h3 className="text-sm font-bold text-white/90 uppercase tracking-widest m-0">
-                  Identity
-                </h3>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest" htmlFor="name">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label
+                  className="text-[13px] font-bold text-[#333]"
+                  htmlFor="name"
+                >
                   College Name
                 </label>
                 <input
                   id="name"
-                  className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-white/20"
+                  className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
                   name="name"
                   value={college.name || ""}
                   onChange={handleChange}
@@ -193,14 +181,17 @@ export default function CollegeProfile() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="flex flex-col gap-2">
-                  <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest" htmlFor="website">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label
+                    className="text-[13px] font-bold text-[#333]"
+                    htmlFor="website"
+                  >
                     Website
                   </label>
                   <input
                     id="website"
-                    className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-white/20"
+                    className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
                     name="website"
                     value={college.website || ""}
                     onChange={handleChange}
@@ -208,13 +199,16 @@ export default function CollegeProfile() {
                     type="url"
                   />
                 </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest" htmlFor="phone">
+                <div className="flex flex-col gap-1.5">
+                  <label
+                    className="text-[13px] font-bold text-[#333]"
+                    htmlFor="phone"
+                  >
                     Phone
                   </label>
                   <input
                     id="phone"
-                    className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-white/20"
+                    className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
                     name="phone"
                     value={college.phone || ""}
                     onChange={handleChange}
@@ -222,72 +216,52 @@ export default function CollegeProfile() {
                   />
                 </div>
               </div>
-            </section>
 
-            <section className="flex flex-col gap-6 pt-2">
-              <div className="flex items-center gap-4 border-b border-white/5 pb-4">
-                <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white flex items-center justify-center text-[10px] font-black shadow-lg">
-                  02
-                </span>
-                <h3 className="text-sm font-bold text-white/90 uppercase tracking-widest m-0">
-                  Location
-                </h3>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest" htmlFor="address">
+              <div className="flex flex-col gap-1.5">
+                <label
+                  className="text-[13px] font-bold text-[#333]"
+                  htmlFor="address"
+                >
                   Address
                 </label>
                 <input
                   id="address"
-                  className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-white/20"
+                  className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
                   name="address"
                   value={college.address || ""}
                   onChange={handleChange}
-                  placeholder="123 University Road, City, State"
+                  placeholder="Full physical address"
                 />
               </div>
-            </section>
 
-            <section className="flex flex-col gap-6 pt-2">
-              <div className="flex items-center gap-4 border-b border-white/5 pb-4">
-                <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white flex items-center justify-center text-[10px] font-black shadow-lg">
-                  03
-                </span>
-                <h3 className="text-sm font-bold text-white/90 uppercase tracking-widest m-0">
-                  About
-                </h3>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest" htmlFor="description">
+              <div className="flex flex-col gap-1.5">
+                <label
+                  className="text-[13px] font-bold text-[#333]"
+                  htmlFor="description"
+                >
                   Description
                 </label>
                 <textarea
                   id="description"
-                  className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-white/20 resize-y"
+                  className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none resize-y"
                   name="description"
-                  rows={5}
+                  rows={4}
                   value={college.description || ""}
                   onChange={handleChange}
                   placeholder="Write a brief description of your institution…"
                 />
               </div>
-            </section>
+            </div>
 
-            <div className="pt-8 border-t border-white/10 flex justify-end">
+            <div className="pt-4 border-t border-[#f9f9f9] flex justify-end">
               <button
-                className="w-full md:w-auto px-10 py-4 text-[10px] font-bold text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 border-none rounded-xl cursor-pointer transition-all duration-300 hover:shadow-[0_8px_20px_-6px_rgba(217,70,239,0.5)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest flex items-center justify-center gap-3 outline-none"
+                className="w-full md:w-auto px-8 py-3 text-[14px] font-bold text-[#fff] bg-[#111] border-none rounded-[14px] cursor-pointer hover:opacity-80 transition-opacity disabled:opacity-50 uppercase tracking-widest"
                 type="submit"
                 disabled={saving}
               >
-                {saving && (
-                  <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                )}
                 {saving ? "Saving…" : "Save Changes"}
               </button>
             </div>
-
           </form>
         </main>
       </div>

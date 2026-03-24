@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import API from "../../api/api";
 
 export default function StudentTaskDetails() {
-
   const { taskId } = useParams();
 
   const [task, setTask] = useState(null);
@@ -15,7 +14,7 @@ export default function StudentTaskDetails() {
     workSummary: "",
     githubLink: "",
     technologiesUsed: "",
-    files: []
+    files: [],
   });
 
   const ALLOWED_TYPES = [
@@ -23,7 +22,7 @@ export default function StudentTaskDetails() {
     "image/png",
     "image/jpeg",
     "image/jpg",
-    "application/zip"
+    "application/zip",
   ];
 
   /* ================= FETCH ================= */
@@ -32,17 +31,16 @@ export default function StudentTaskDetails() {
     try {
       const [taskRes, subRes] = await Promise.all([
         API.get(`/tasks/${taskId}`),
-        API.get(`/task-submissions/task/${taskId}`)
+        API.get(`/task-submissions/task/${taskId}`),
       ]);
 
       setTask(taskRes.data.data);
 
       const sorted = (subRes.data.data || []).sort(
-        (a, b) => new Date(b.submittedAt) - new Date(a.submittedAt)
+        (a, b) => new Date(b.submittedAt) - new Date(a.submittedAt),
       );
 
       setSubmissions(sorted);
-
     } catch (err) {
       console.error(err);
     } finally {
@@ -82,7 +80,7 @@ export default function StudentTaskDetails() {
       }
     }
 
-    setForm(prev => ({ ...prev, files }));
+    setForm((prev) => ({ ...prev, files }));
   };
 
   /* ================= SUBMIT ================= */
@@ -104,12 +102,12 @@ export default function StudentTaskDetails() {
 
       const techArray = form.technologiesUsed
         .split(",")
-        .map(t => t.trim())
+        .map((t) => t.trim())
         .filter(Boolean);
 
       formData.append("technologiesUsed", JSON.stringify(techArray));
 
-      form.files.forEach(file => {
+      form.files.forEach((file) => {
         formData.append("files", file);
       });
 
@@ -121,11 +119,10 @@ export default function StudentTaskDetails() {
         workSummary: "",
         githubLink: "",
         technologiesUsed: "",
-        files: []
+        files: [],
       });
 
       fetchTask();
-
     } catch (err) {
       alert(err.response?.data?.message || "Error");
     } finally {
@@ -158,12 +155,13 @@ export default function StudentTaskDetails() {
 
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-6">
-
       {/* ===== TASK ===== */}
       <div className="bg-white p-6 rounded-xl border space-y-3">
         <div className="flex justify-between">
           <h1 className="font-bold text-lg">{task.title}</h1>
-          <span className={`text-xs px-3 py-1 rounded ${getStatusColor(task.status)}`}>
+          <span
+            className={`text-xs px-3 py-1 rounded ${getStatusColor(task.status)}`}
+          >
             {task.status}
           </span>
         </div>
@@ -203,15 +201,14 @@ export default function StudentTaskDetails() {
 
       {/* ===== SUBMISSIONS ===== */}
       <div className="space-y-4">
-
-        {submissions.map(sub => (
-          <div key={sub._id} className="bg-white p-5 rounded-xl border space-y-3">
-
+        {submissions.map((sub) => (
+          <div
+            key={sub._id}
+            className="bg-white p-5 rounded-xl border space-y-3"
+          >
             <div className="flex justify-between text-xs">
               <span>Attempt {sub.attempt}</span>
-              <span className={getStatusColor(sub.status)}>
-                {sub.status}
-              </span>
+              <span className={getStatusColor(sub.status)}>{sub.status}</span>
             </div>
 
             <p className="text-sm">{sub.workSummary}</p>
@@ -220,7 +217,10 @@ export default function StudentTaskDetails() {
             {sub.technologiesUsed?.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {sub.technologiesUsed.map((t, i) => (
-                  <span key={i} className="bg-blue-100 text-xs px-2 py-1 rounded">
+                  <span
+                    key={i}
+                    className="bg-blue-100 text-xs px-2 py-1 rounded"
+                  >
                     {t}
                   </span>
                 ))}
@@ -262,16 +262,13 @@ export default function StudentTaskDetails() {
                 {sub.mentorFeedback}
               </div>
             )}
-
           </div>
         ))}
-
       </div>
 
       {/* ===== FORM ===== */}
       {canSubmit && (
         <div className="bg-white p-5 rounded-xl border space-y-3">
-
           <textarea
             placeholder="Work summary"
             value={form.workSummary}
@@ -282,7 +279,9 @@ export default function StudentTaskDetails() {
           <input
             placeholder="Technologies (comma separated)"
             value={form.technologiesUsed}
-            onChange={(e) => setForm({ ...form, technologiesUsed: e.target.value })}
+            onChange={(e) =>
+              setForm({ ...form, technologiesUsed: e.target.value })
+            }
             className="w-full border p-2 rounded"
           />
 
@@ -302,10 +301,8 @@ export default function StudentTaskDetails() {
           >
             {submitting ? "Submitting..." : "Submit"}
           </button>
-
         </div>
       )}
-
     </div>
   );
 }

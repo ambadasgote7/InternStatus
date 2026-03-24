@@ -67,8 +67,8 @@ import AdminCompanyForm from "./pages/admin/companies/AdminCompanyForm";
 import AdminCompanyDetails from "./pages/admin/companies/AdminCompanyDetails";
 import AdminUsers from "./pages/admin/users/AdminUsers";
 import AdminUserDetails from "./pages/admin/users/AdminUserDetails";
-import ForgotPassword from "../../../Member/internStatus/frontend/src/pages/auth/ForgotPassword";
-import ResetPassword from "../../../Member/internStatus/frontend/src/pages/auth/ResetPassword";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
 import MentorInterns from "./pages/mentor/MentorInterns";
 import TrackInternship from "./pages/students/TrackInternship";
 import MentorInternTrack from "./pages/mentor/MentorInternTrack";
@@ -83,217 +83,225 @@ import StudentCredits from "./pages/students/StudentCredits";
 import CreditManagement from "./pages/college/CreditManagement";
 
 function AppContent() {
-
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
 
-useEffect(() => {
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const path = window.location.pathname;
 
-  const initAuth = async () => {
+        // 🔥 SKIP AUTH CHECK FOR PUBLIC TOKEN PAGES
+        const isPublic =
+          path.startsWith("/setup-account") ||
+          path.startsWith("/reset-password");
 
-    try {
+        if (isPublic) {
+          setLoading(false);
+          return;
+        }
 
-      const path = window.location.pathname;
+        const res = await API.get("/users/profile");
 
-      // 🔥 SKIP AUTH CHECK FOR PUBLIC TOKEN PAGES
-      const isPublic =
-        path.startsWith("/setup-account") ||
-        path.startsWith("/reset-password");
-
-      if (isPublic) {
+        dispatch(
+          addUser({
+            user: res.data.user,
+            profile: res.data.profile,
+            token: null,
+          }),
+        );
+      } catch (err) {
+        dispatch(removeUser());
+      } finally {
         setLoading(false);
-        return;
       }
+    };
 
-      const res = await API.get("/users/profile");
+    initAuth();
+  }, [dispatch]);
 
-      dispatch(addUser({
-        user: res.data.user,
-        profile: res.data.profile,
-        token: null
-      }));
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const token = localStorage.getItem("token");
 
-    } catch (err) {
+      if (!token) {
+        dispatch(removeUser());
+      }
+    };
 
-      dispatch(removeUser());
+    window.addEventListener("storage", handleStorageChange);
 
-    } finally {
-      setLoading(false);
-    }
-  };
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, [dispatch]);
 
-  initAuth();
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
-}, [dispatch]);
-
-
-useEffect(() => {
-
-  const handleStorageChange = () => {
-
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      dispatch(removeUser());
-    }
-
-  };
-
-  window.addEventListener("storage", handleStorageChange);
-
-  return () => {
-    window.removeEventListener("storage", handleStorageChange);
-  };
-
-}, [dispatch]);
-
-if (loading) {
   return (
-    <div className="h-screen flex items-center justify-center">
-      <p>Loading...</p>
+    <div className="font-nunito">
+      <BrowserRouter>
+        <Routes>
+          <Route element={<MainLayout />}>
+            
+            <Route path="/login" element={<Login />} />
+            <Route path="/college/register" element={<CollegeRegister />} />
+            <Route path="/company/register" element={<CompanyRegister />} />
+            <Route path="/setup-account" element={<SetPassword />} />
+          </Route>
+
+          <Route element={<ProtectedRoute role="college" />}>
+            <Route path="/college/dashboard" element={<CollegeDashboard />} />
+            <Route path="/college/invite-student" element={<InviteStudent />} />
+            <Route path="/college/invite-faculty" element={<InviteFaculty />} />
+            <Route path="/college/courses" element={<Courses />} />
+            <Route path="/college/profile" element={<CollegeProfile />} />
+            <Route path="/college/faculty" element={<CollegeFacultyList />} />
+            <Route path="/college/students" element={<CollegeStudents />} />
+            <Route
+              path="/college/students/:studentId"
+              element={<StudentDetails />}
+            />
+          </Route>
+
+          <Route element={<ProtectedRoute role="faculty" />}>
+            <Route path="/faculty/dashboard" element={<FacultyDashboard />} />
+            <Route path="/faculty/profile" element={<FacultyProfile />} />
+            <Route path="/faculty/invite-student" element={<InviteStudent />} />
+            <Route path="/faculty/students" element={<FacultyStudents />} />
+            <Route
+              path="/faculty/students/:studentId"
+              element={<StudentDetails />}
+            />
+          </Route>
+
+          <Route element={<ProtectedRoute role={["faculty", "college"]} />}>
+            <Route
+              path="/academic-internship-track/:applicationId"
+              element={<AcademicInternshipTrack />}
+            />
+            <Route
+              path="/student/internships"
+              element={<StudentInternships />}
+            />
+            <Route path="/credits" element={<CreditManagement />} />
+          </Route>
+
+          <Route element={<ProtectedRoute role="mentor" />}>
+            <Route path="/mentor/dashboard" element={<MentorDashboard />} />
+            <Route path="/mentor/profile" element={<MentorProfile />} />
+            <Route path="/mentor/interns" element={<MentorInterns />} />
+            <Route
+              path="/mentor/intern/:applicationId/track"
+              element={<MentorInternTrack />}
+            />
+            <Route path="/mentor/tasks/:taskId" element={<TaskDetails />} />
+            <Route
+              path="/mentor/intern/:applicationId/create-task"
+              element={<CreateTask />}
+            />
+          </Route>
+
+          <Route element={<ProtectedRoute role="company" />}>
+            <Route path="/company/dashboard" element={<CompanyDashboard />} />
+            <Route path="/company/invite-mentor" element={<InviteMentor />} />
+            <Route path="/company/profile" element={<CompanyProfile />} />
+            <Route path="/company/mentors" element={<CompanyMentorList />} />
+            <Route
+              path="/company/post-internship"
+              element={<PostInternship />}
+            />
+            <Route
+              path="/company/company-internships"
+              element={<CompanyInternships />}
+            />
+            <Route
+              path="/company/internship/:id/applicants"
+              element={<InternshipApplicants />}
+            />
+            <Route
+              path="/company/internship/:id/edit"
+              element={<EditInternship />}
+            />
+            <Route path="/company/interns" element={<CompanyInterns />} />
+            <Route path="/company/intern/:id" element={<InternDetails />} />
+            <Route
+              path="/company/interns/:id/progress"
+              element={<InternProgress />}
+            />
+          </Route>
+
+          <Route element={<ProtectedRoute role="student" />}>
+            <Route path="/student/dashboard" element={<StudentDashboard />} />
+            <Route path="/student/profile" element={<StudentProfile />} />
+            <Route
+              path="/student/browse-internships"
+              element={<BrowseInternships />}
+            />
+            <Route
+              path="/student/internships/:id"
+              element={<InternshipDetails />}
+            />
+            <Route
+              path="/student/my-applications"
+              element={<MyApplications />}
+            />
+            <Route path="/student/credits" element={<StudentCredits />} />
+
+            <Route
+              path="/student/intern/:applicationId/track"
+              element={<TrackInternship />}
+            />
+
+            <Route path="/student/task/:taskId" element={<StudentTasks />} />
+          </Route>
+
+          <Route element={<ProtectedRoute role="admin" />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              {/* Dashboard */}
+              <Route index element={<div>ADMIN OK</div>} />
+
+              {/* Onboarding */}
+              <Route path="onboarding/pending" element={<PendingRequests />} />
+              <Route
+                path="onboarding/verified"
+                element={<VerifiedOnboardings />}
+              />
+              <Route
+                path="onboarding/:type/:id"
+                element={<OnboardingDetails />}
+              />
+              <Route path="colleges" element={<AdminColleges />} />
+              <Route path="colleges/new" element={<AdminCollegeForm />} />
+              <Route path="colleges/edit/:id" element={<AdminCollegeForm />} />
+              <Route path="colleges/:id" element={<AdminCollegeDetails />} />
+
+              <Route path="companies" element={<AdminCompanies />} />
+              <Route path="companies/new" element={<AdminCompanyForm />} />
+              <Route path="companies/edit/:id" element={<AdminCompanyForm />} />
+              <Route path="companies/:id" element={<AdminCompanyDetails />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="users/:id" element={<AdminUserDetails />} />
+            </Route>
+          </Route>
+
+          <Route path="/admin/login" element={<AdminLogin />} />
+
+          <Route path="/" element={<Home />} />
+
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }
-
-  return (
-    <BrowserRouter>
-      <Routes>
-
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/college/register" element={<CollegeRegister />} />
-          <Route path="/company/register" element={<CompanyRegister />} />
-          <Route path="/setup-account" element={<SetPassword />} />
-        </Route>
-
-        <Route element={<ProtectedRoute role="college" />}>
-          <Route path="/college/dashboard" element={<CollegeDashboard />} />
-          <Route path="/college/invite-student" element={<InviteStudent />} />
-          <Route path="/college/invite-faculty" element={<InviteFaculty />} />
-          <Route path="/college/courses" element={<Courses />} />
-          <Route path="/college/profile" element={<CollegeProfile />} />
-          <Route path="/college/faculty" element={<CollegeFacultyList />} />
-          <Route path="/college/students" element={<CollegeStudents />} />
-          <Route path="/college/students/:studentId" element={<StudentDetails />} />
-
-     
-        </Route>
-
-        <Route element={<ProtectedRoute role="faculty" />}>
-          <Route path="/faculty/dashboard" element={<FacultyDashboard />} />
-          <Route path="/faculty/profile" element={<FacultyProfile />} />
-          <Route path="/faculty/invite-student" element={<InviteStudent />} />
-          <Route path="/faculty/students" element={<FacultyStudents />} />
-          <Route path="/faculty/students/:studentId" element={<StudentDetails />} />
-       </Route>
-
-       <Route element={<ProtectedRoute role={["faculty","college"]} />}>
-          <Route
-            path="/academic-internship-track/:applicationId"
-            element={<AcademicInternshipTrack />}
-          />
-          <Route
-          path="/student/internships"
-          element={<StudentInternships />}
-        />
-        <Route
-  path="/credits"
-  element={<CreditManagement />}
-/>
-
-
-        </Route>
-
-
-        <Route element={<ProtectedRoute role="mentor" />}>
-          <Route path="/mentor/dashboard" element={<MentorDashboard />} />
-          <Route path="/mentor/profile" element={<MentorProfile />} />
-          <Route path="/mentor/interns" element={<MentorInterns />} />
-          <Route path="/mentor/intern/:applicationId/track" element={<MentorInternTrack />} />
-          <Route path="/mentor/tasks/:taskId" element={<TaskDetails/>} />
-        <Route
-  path="/mentor/intern/:applicationId/create-task"
-  element={<CreateTask />}
-/>
-        </Route>
-
-        <Route element={<ProtectedRoute role="company" />}>
-          <Route path="/company/dashboard" element={<CompanyDashboard />} />
-          <Route path="/company/invite-mentor" element={<InviteMentor />} />
-          <Route path="/company/profile" element={<CompanyProfile />} />
-          <Route path="/company/mentors" element={<CompanyMentorList />} />
-          <Route path="/company/post-internship" element={<PostInternship />} />
-          <Route path="/company/company-internships" element={<CompanyInternships />} />
-          <Route path="/company/internship/:id/applicants" element={<InternshipApplicants />} />
-          <Route path="/company/internship/:id/edit" element={<EditInternship />} />
-          <Route path="/company/interns" element={<CompanyInterns />} />
-          <Route path="/company/intern/:id" element={<InternDetails />} />
-          <Route
-  path="/company/interns/:id/progress"
-  element={<InternProgress />}
-/>
-
-        </Route>
-
-        <Route element={<ProtectedRoute role="student" />}>
-          <Route path="/student/dashboard" element={<StudentDashboard />} />
-          <Route path="/student/profile" element={<StudentProfile />} />
-          <Route path="/student/browse-internships" element={<BrowseInternships />} />
-          <Route path="/student/internships/:id" element={<InternshipDetails />} />
-          <Route path="/student/my-applications" element={<MyApplications />} />
-          <Route path="/student/credits" element={<StudentCredits />} />
-           
-           <Route
-  path="/student/intern/:applicationId/track"
-  element={<TrackInternship />}
-/>
-
-<Route
-  path="/student/task/:taskId"
-  element={<StudentTasks />}
-/>
-        </Route>
-
-       <Route element={<ProtectedRoute role="admin" />}>
-  
-        <Route path="/admin" element={<AdminLayout />}>
-
-        {/* Dashboard */}
-        <Route index element={<div>ADMIN OK</div>} />
-
-        {/* Onboarding */}
-        <Route path="onboarding/pending" element={<PendingRequests />} />
-        <Route path="onboarding/verified" element={<VerifiedOnboardings />} />
-        <Route path="onboarding/:type/:id" element={<OnboardingDetails />} /> 
-        <Route path="colleges" element={<AdminColleges />} />
-<Route path="colleges/new" element={<AdminCollegeForm />} />
-<Route path="colleges/edit/:id" element={<AdminCollegeForm />} />
-<Route path="colleges/:id" element={<AdminCollegeDetails />} />
-
-        <Route path="companies" element={<AdminCompanies />} />
-<Route path="companies/new" element={<AdminCompanyForm />} />
-<Route path="companies/edit/:id" element={<AdminCompanyForm />} />
-<Route path="companies/:id" element={<AdminCompanyDetails />} />
-<Route path="users" element={<AdminUsers />} />
-<Route path="users/:id" element={<AdminUserDetails />} />
-
-      </Route>
-
-</Route>
-
-        <Route path="/admin/login" element={<AdminLogin />} />
-
-        <Route path="*" element={<Home />} />
-
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-
-      </Routes>
-    </BrowserRouter>
-  );
-}
-
 
 function App() {
   return (

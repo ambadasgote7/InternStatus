@@ -20,14 +20,10 @@ export default function InviteMentor() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       setLoading(true);
-
       await API.post("/users/mentor/invite", form);
-
       alert("Mentor invited successfully. Setup email sent.");
-
       setForm({
         email: "",
         fullName: "",
@@ -43,57 +39,83 @@ export default function InviteMentor() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-80px)] flex items-center justify-center bg-[#F9F7F7] p-4 md:p-8 font-sans box-border">
-      <div className="w-full max-w-lg bg-white p-8 md:p-10 rounded-md shadow-sm border border-[#DBE2EF] box-border">
-        <h2 className="text-2xl md:text-3xl font-semibold text-[#112D4E] mt-0 mb-8 text-center">
-          Add Mentor
-        </h2>
+    <div className="min-h-screen flex items-center justify-center bg-[#f9f9f9] p-4 md:p-6 font-sans text-[#333]">
+      <div className="w-full max-w-lg bg-[#fff] p-6 md:p-10 rounded-[20px] shadow-sm border border-[#e5e5e5] box-border">
+        <header className="mb-8 border-b border-[#e5e5e5] pb-4">
+          <h2 className="text-[24px] font-black m-0 tracking-tight text-[#333] text-center">
+            Invite Mentor
+          </h2>
+          <p className="text-[13px] font-bold text-[#333] opacity-60 m-0 mt-1 uppercase tracking-widest text-center">
+            Organizational Access Request
+          </p>
+        </header>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-5"
-        >
-          <input
-            name="fullName"
-            placeholder="Full Name"
-            value={form.fullName}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-3.5 text-[15px] text-[#112D4E] bg-[#F9F7F7] border border-[#DBE2EF] rounded-md outline-none transition-colors duration-200 focus:border-[#3F72AF] focus:bg-white placeholder:text-[#3F72AF] placeholder:opacity-60 box-border"
-          />
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+              Full Name
+            </label>
+            <input
+              name="fullName"
+              placeholder="Mentor Full Name"
+              value={form.fullName}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+            />
+          </div>
 
-          <input
-            name="email"
-            type="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-3.5 text-[15px] text-[#112D4E] bg-[#F9F7F7] border border-[#DBE2EF] rounded-md outline-none transition-colors duration-200 focus:border-[#3F72AF] focus:bg-white placeholder:text-[#3F72AF] placeholder:opacity-60 box-border"
-          />
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+              Corporate Email
+            </label>
+            <input
+              name="email"
+              type="email"
+              placeholder="email@company.com"
+              value={form.email}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+            />
+          </div>
 
-          <input
-            name="designation"
-            placeholder="Designation"
-            value={form.designation}
-            onChange={handleChange}
-            className="w-full px-4 py-3.5 text-[15px] text-[#112D4E] bg-[#F9F7F7] border border-[#DBE2EF] rounded-md outline-none transition-colors duration-200 focus:border-[#3F72AF] focus:bg-white placeholder:text-[#3F72AF] placeholder:opacity-60 box-border"
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                Designation
+              </label>
+              <input
+                name="designation"
+                placeholder="e.g. Senior Lead"
+                value={form.designation}
+                onChange={handleChange}
+                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+              />
+            </div>
 
-          <input
-            name="department"
-            placeholder="Department"
-            value={form.department}
-            onChange={handleChange}
-            className="w-full px-4 py-3.5 text-[15px] text-[#112D4E] bg-[#F9F7F7] border border-[#DBE2EF] rounded-md outline-none transition-colors duration-200 focus:border-[#3F72AF] focus:bg-white placeholder:text-[#3F72AF] placeholder:opacity-60 box-border"
-          />
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                Department
+              </label>
+              <input
+                name="department"
+                placeholder="e.g. Engineering"
+                value={form.department}
+                onChange={handleChange}
+                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+              />
+            </div>
+          </div>
 
-          <button
-            disabled={loading}
-            className="w-full mt-2 py-4 text-[15px] font-semibold text-white bg-[#3F72AF] border-none rounded-md cursor-pointer transition-all duration-200 hover:bg-[#112D4E] active:translate-y-px disabled:bg-[#DBE2EF] disabled:text-[#112D4E] disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {loading ? "Sending..." : "Invite Mentor"}
-          </button>
+          <div className="pt-4 border-t border-[#e5e5e5] mt-2">
+            <button
+              disabled={loading}
+              className="w-full py-3.5 text-[12px] font-black text-[#fff] bg-[#111] border-none rounded-[14px] cursor-pointer transition-opacity hover:opacity-80 disabled:opacity-30 uppercase tracking-widest flex items-center justify-center gap-2 outline-none"
+            >
+              {loading ? "Processing..." : "Send Invitation"}
+            </button>
+          </div>
         </form>
       </div>
     </div>

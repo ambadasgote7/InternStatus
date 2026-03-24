@@ -1,14 +1,15 @@
 import {
   getCompanyProfileService,
   updateCompanyProfileService,
-    getCompanyMentorsService,
+  getCompanyMentorsService,
   updateCompanyMentorService,
   removeMentorFromCompanyService,
   getCompanyInternsService,
   assignMentorService,
   getInternProgressService,
   getCertificateService,
-  issueCertificateService
+  issueCertificateService,
+  getCompanyDashboardService, // ✅ ADD THIS
 } from "./company.service.js";
 
 export const getCompanyProfile = async (req, res, next) => {
@@ -17,7 +18,7 @@ export const getCompanyProfile = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      data: profile
+      data: profile,
     });
   } catch (err) {
     next(err);
@@ -29,29 +30,26 @@ export const updateCompanyProfile = async (req, res, next) => {
     const profile = await updateCompanyProfileService(
       req.user,
       req.body,
-      req.file
+      req.file,
     );
 
     res.status(200).json({
       success: true,
-      data: profile
+      data: profile,
     });
   } catch (err) {
     next(err);
   }
 };
 
-
 export const getCompanyMentors = async (req, res, next) => {
   try {
-
     const data = await getCompanyMentorsService(req.user);
 
     res.json({
       success: true,
-      data
+      data,
     });
-
   } catch (err) {
     next(err);
   }
@@ -59,18 +57,16 @@ export const getCompanyMentors = async (req, res, next) => {
 
 export const updateCompanyMentor = async (req, res, next) => {
   try {
-
     const data = await updateCompanyMentorService(
       req.user,
       req.params.mentorId,
-      req.body
+      req.body,
     );
 
     res.json({
       success: true,
-      data
+      data,
     });
-
   } catch (err) {
     next(err);
   }
@@ -78,17 +74,15 @@ export const updateCompanyMentor = async (req, res, next) => {
 
 export const removeMentorFromCompany = async (req, res, next) => {
   try {
-
     const data = await removeMentorFromCompanyService(
       req.user,
-      req.params.mentorId
+      req.params.mentorId,
     );
 
     res.json({
       success: true,
-      data
+      data,
     });
-
   } catch (err) {
     next(err);
   }
@@ -96,59 +90,43 @@ export const removeMentorFromCompany = async (req, res, next) => {
 
 export const getCompanyInterns = async (req, res) => {
   try {
-
     const data = await getCompanyInternsService(req.user);
 
     res.json({
       success: true,
-      data
+      data,
     });
-
   } catch (err) {
-
     res.status(400).json({
       success: false,
-      message: err.message
+      message: err.message,
     });
-
   }
 };
 
 export const assignMentor = async (req, res) => {
   try {
-
-    const { id } = req.params;
-    const { mentorId } = req.body;
-
     const data = await assignMentorService(
       req.user,
-      id,
-      mentorId
+      req.params.id,
+      req.body.mentorId,
     );
 
-    res.status(200).json({
+    res.json({
       success: true,
-      message: "Mentor assigned successfully",
-      data
+      message: "Mentor assigned",
+      data,
     });
-
   } catch (err) {
-
-    const statusCode =
-      err.message.includes("not found") ? 404 :
-      err.message.includes("allowed") ? 403 :
-      400;
-
-    res.status(statusCode).json({
+    res.status(400).json({
       success: false,
-      message: err.message
+      message: err.message,
     });
   }
 };
 
-export const getInternProgress = async (req, res) => {
+export const getInternProgressController = async (req, res) => {
   try {
-
     const companyId = req.user.referenceId; // ✅ correct
     const { id } = req.params;
 
@@ -156,16 +134,13 @@ export const getInternProgress = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data
+      data,
     });
-
   } catch (error) {
-
     res.status(400).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
-
   }
 };
 
@@ -176,17 +151,15 @@ export const issueCertificate = async (req, res) => {
     const data = await issueCertificateService({
       applicationId: id,
       file: req.file,
-      user: req.user
+      user: req.user,
     });
 
     res.status(200).json({
       success: true,
       message: "Certificate issued successfully",
-      data
+      data,
     });
-
   } catch (err) {
-
     let statusCode = 400;
 
     if (err.message.includes("Unauthorized")) statusCode = 403;
@@ -195,7 +168,7 @@ export const issueCertificate = async (req, res) => {
 
     res.status(statusCode).json({
       success: false,
-      message: err.message
+      message: err.message,
     });
   }
 };
@@ -209,22 +182,73 @@ export const getCertificate = async (req, res) => {
 
     const data = await getCertificateService({
       applicationId: id,
-      user: req.user
+      user: req.user,
     });
 
     res.status(200).json({
       success: true,
-      data
+      data,
     });
-
   } catch (err) {
-
-    const statusCode =
-      err.message === "Forbidden" ? 403 : 400;
+    const statusCode = err.message === "Forbidden" ? 403 : 400;
 
     res.status(statusCode).json({
       success: false,
-      message: err.message
+      message: err.message,
+    });
+  }
+};
+
+export const getCompanyDashboard = async (req, res) => {
+  try {
+    const data = await getCompanyDashboardService(req.user);
+
+    res.json({
+      success: true,
+      data,
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+export const getCompanyInternships = async (req, res) => {
+  try {
+    const data = await Internship.find({
+      company: req.user.referenceId,
+    });
+
+    res.json({
+      success: true,
+      data,
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+export const getCompanyApplications = async (req, res) => {
+  try {
+    const data = await Application.find({
+      company: req.user.referenceId,
+    })
+      .populate("student")
+      .populate("internship");
+
+    res.json({
+      success: true,
+      data,
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message,
     });
   }
 };

@@ -9,17 +9,6 @@ export default function CompanyProfile() {
   const [success, setSuccess] = useState("");
   const [logoFile, setLogoFile] = useState(null);
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => setSuccess(""), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [success]);
-
   const fetchProfile = async () => {
     try {
       const res = await API.get("/company/profile");
@@ -30,6 +19,17 @@ export default function CompanyProfile() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(""), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -65,7 +65,6 @@ export default function CompanyProfile() {
 
       if (logoFile) {
         const formData = new FormData();
-
         formData.append("name", profile.name || "");
         formData.append("website", profile.website || "");
         formData.append("industry", profile.industry || "");
@@ -75,7 +74,7 @@ export default function CompanyProfile() {
         formData.append("logo", logoFile);
 
         res = await API.patch("/company/profile", formData, {
-          headers: { "Content-Type": "multipart/form-data" }
+          headers: { "Content-Type": "multipart/form-data" },
         });
       } else {
         const payload = {
@@ -84,9 +83,8 @@ export default function CompanyProfile() {
           industry: profile.industry || "",
           companySize: profile.companySize || "",
           description: profile.description || "",
-          locations: profile.locations || []
+          locations: profile.locations || [],
         };
-
         res = await API.patch("/company/profile", payload);
       }
 
@@ -102,11 +100,11 @@ export default function CompanyProfile() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0B0F19]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-white/10 border-t-fuchsia-500 rounded-full animate-spin"></div>
-          <p className="text-fuchsia-400 font-bold tracking-widest uppercase text-[10px] animate-pulse m-0">
-            Loading Profile
+      <div className="min-h-screen bg-[#f9f9f9] flex flex-col font-sans">
+        <AdminNavBar />
+        <div className="flex-grow flex items-center justify-center">
+          <p className="text-[14px] font-bold text-[#333] animate-pulse">
+            Loading Profile...
           </p>
         </div>
       </div>
@@ -115,243 +113,267 @@ export default function CompanyProfile() {
 
   if (!profile) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0B0F19]">
-        <div className="bg-[#0B0F19]/50 border border-white/10 rounded-3xl p-16 text-center shadow-inner">
-          <p className="text-white/40 m-0 text-base font-medium">
-            No profile found.
-          </p>
+      <div className="min-h-screen bg-[#f9f9f9] flex flex-col font-sans">
+        <AdminNavBar />
+        <div className="flex-grow flex items-center justify-center p-4">
+          <div className="bg-[#fff] border-2 border-dashed border-[#e5e5e5] rounded-[20px] p-10 text-center">
+            <p className="text-[13px] font-bold text-[#333] opacity-60 m-0">
+              No profile found
+            </p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] p-4 md:p-8 font-sans text-white selection:bg-fuchsia-500/30 selection:text-fuchsia-200 relative overflow-hidden">
-      {/* Ambient Backgrounds */}
-      <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-violet-600/20 rounded-full blur-[120px] pointer-events-none mix-blend-screen" aria-hidden="true"></div>
-      <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-fuchsia-600/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen" aria-hidden="true"></div>
+    <div className="min-h-screen bg-[#f9f9f9] text-[#333] flex flex-col font-sans pb-10">
+      <AdminNavBar />
 
-      <div className="relative z-10 max-w-4xl mx-auto bg-white/5 backdrop-blur-xl rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] border border-white/10 p-6 md:p-10 box-border transition-all duration-300 hover:border-white/20">
-
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-10 pb-8 border-b border-white/10">
-          <div className="w-24 h-24 flex-shrink-0 bg-gradient-to-br from-violet-600/30 to-fuchsia-600/30 border border-white/10 rounded-2xl overflow-hidden flex items-center justify-center text-white font-black text-4xl shadow-inner shadow-white/5">
-            {profile.logoUrl ? (
-              <img src={profile.logoUrl} alt="logo" className="w-full h-full object-cover" />
-            ) : (
-              <div className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">
-                {profile.name?.charAt(0)}
-              </div>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-3 items-center sm:items-start text-center sm:text-left mt-2">
-            <h2 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 m-0 tracking-tight leading-none">
+      <main className="max-w-6xl mx-auto w-full px-4 md:px-6 py-6 flex flex-col md:flex-row gap-6">
+        <aside className="w-full md:w-[320px] flex-shrink-0 flex flex-col gap-6">
+          <div className="bg-[#fff] border border-[#e5e5e5] rounded-[20px] p-6 shadow-sm flex flex-col items-center text-center">
+            <div className="w-24 h-24 bg-[#f9f9f9] border border-[#e5e5e5] rounded-[20px] overflow-hidden flex items-center justify-center mb-4">
+              {profile.logoUrl ? (
+                <img
+                  src={profile.logoUrl}
+                  alt="logo"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="text-[32px] font-black text-[#333]">
+                  {profile.name?.charAt(0)}
+                </div>
+              )}
+            </div>
+            <h2 className="text-[20px] font-black text-[#333] m-0 leading-tight mb-2">
               {profile.name}
             </h2>
-            <span className="w-max px-3 py-1.5 text-[10px] font-bold tracking-widest text-emerald-300 bg-emerald-500/20 border border-emerald-500/30 rounded-lg uppercase">
-              {profile.status?.toUpperCase()}
+            <span className="px-3 py-1 text-[10px] font-black text-[#fff] bg-[#111] rounded-[10px] uppercase tracking-widest">
+              {profile.status}
             </span>
           </div>
-        </div>
 
-        {error && (
-          <div className="mb-8 px-5 py-4 text-[11px] font-bold text-red-300 bg-red-500/10 border border-red-500/30 rounded-xl uppercase tracking-widest text-center">
-            {error}
-          </div>
-        )}
-        {success && (
-          <div className="mb-8 px-5 py-4 text-[11px] font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-xl uppercase tracking-widest text-center">
-            {success}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
-                Company Name
-              </label>
-              <input
-                name="name"
-                value={profile.name || ""}
-                onChange={handleChange}
-                placeholder="e.g. Acme Corp"
-                className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 placeholder:text-white/20 box-border"
-              />
+          <div className="bg-[#fff] border border-[#e5e5e5] rounded-[20px] p-5 shadow-sm flex flex-col gap-4">
+            <div className="flex flex-col gap-1">
+              <span className="text-[11px] font-bold text-[#333] opacity-50 uppercase tracking-widest">
+                Email Domain
+              </span>
+              <span className="text-[13px] font-bold">
+                {profile.emailDomain || "—"}
+              </span>
             </div>
-
-            <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
-                Website
-              </label>
-              <input
-                name="website"
-                value={profile.website || ""}
-                onChange={handleChange}
-                placeholder="https://acme.com"
-                className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 placeholder:text-white/20 box-border"
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
-                Industry
-              </label>
-              <input
-                name="industry"
-                value={profile.industry || ""}
-                onChange={handleChange}
-                placeholder="e.g. Technology"
-                className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 placeholder:text-white/20 box-border"
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
-                Company Size
-              </label>
-              <input
-                name="companySize"
-                value={profile.companySize || ""}
-                onChange={handleChange}
-                placeholder="e.g. 50-200"
-                className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 placeholder:text-white/20 box-border"
-              />
+            <div className="flex flex-col gap-1">
+              <span className="text-[11px] font-bold text-[#333] opacity-50 uppercase tracking-widest">
+                Approved On
+              </span>
+              <span className="text-[13px] font-bold">
+                {profile.approvedAt
+                  ? new Date(profile.approvedAt).toLocaleDateString("en-IN")
+                  : "—"}
+              </span>
             </div>
           </div>
+        </aside>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
-              Description
-            </label>
-            <textarea
-              name="description"
-              rows={4}
-              value={profile.description || ""}
-              onChange={handleChange}
-              placeholder="Brief overview of the company..."
-              className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 resize-y placeholder:text-white/20 box-border"
-            />
-          </div>
+        <section className="flex-1 flex flex-col gap-6">
+          <div className="bg-[#fff] border border-[#e5e5e5] rounded-[20px] p-6 md:p-8 shadow-sm">
+            <header className="mb-8 border-b border-[#e5e5e5] pb-4">
+              <h1 className="text-[23px] font-black text-[#333] m-0 tracking-tight leading-tight">
+                Company Profile
+              </h1>
+              <p className="text-[13px] font-bold text-[#333] opacity-60 m-0 mt-1 uppercase tracking-widest">
+                Identity and Infrastructure Settings
+              </p>
+            </header>
 
-          <div className="flex flex-col gap-5 pt-4 border-t border-white/10">
-            <h3 className="text-sm font-bold text-violet-400 uppercase tracking-widest m-0">
-              Locations
-            </h3>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+              {error && (
+                <div className="px-4 py-3 text-[12px] font-bold text-[#cc0000] bg-[#fff] border border-[#cc0000] rounded-[14px] uppercase tracking-widest text-center">
+                  {error}
+                </div>
+              )}
+              {success && (
+                <div className="px-4 py-3 text-[12px] font-bold text-[#008000] bg-[#fff] border border-[#008000] rounded-[14px] uppercase tracking-widest text-center">
+                  {success}
+                </div>
+              )}
 
-            <div className="flex flex-col gap-4">
-              {profile.locations?.map((loc, index) => (
-                <div key={index} className="flex flex-col sm:flex-row gap-3 bg-[#0B0F19]/30 p-4 rounded-xl border border-white/5 transition-all hover:border-white/10 relative group">
-                  <div className="flex-1 flex flex-col gap-1.5">
-                    <label className="text-[9px] font-bold text-fuchsia-400 uppercase tracking-widest">City</label>
-                    <input
-                      placeholder="e.g. San Francisco"
-                      value={loc.city || ""}
-                      onChange={(e) => handleLocationChange(index, "city", e.target.value)}
-                      className="w-full bg-transparent border-none text-sm text-white outline-none placeholder:text-white/20 font-medium"
-                    />
-                  </div>
-                  <div className="hidden sm:block w-px bg-white/10 self-stretch"></div>
-                  <div className="flex-1 flex flex-col gap-1.5">
-                    <label className="text-[9px] font-bold text-fuchsia-400 uppercase tracking-widest">State</label>
-                    <input
-                      placeholder="e.g. California"
-                      value={loc.state || ""}
-                      onChange={(e) => handleLocationChange(index, "state", e.target.value)}
-                      className="w-full bg-transparent border-none text-sm text-white outline-none placeholder:text-white/20 font-medium"
-                    />
-                  </div>
-                  <div className="hidden sm:block w-px bg-white/10 self-stretch"></div>
-                  <div className="flex-1 flex flex-col gap-1.5">
-                    <label className="text-[9px] font-bold text-fuchsia-400 uppercase tracking-widest">Country</label>
-                    <input
-                      placeholder="e.g. USA"
-                      value={loc.country || ""}
-                      onChange={(e) => handleLocationChange(index, "country", e.target.value)}
-                      className="w-full bg-transparent border-none text-sm text-white outline-none placeholder:text-white/20 font-medium"
-                    />
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                    Company Name
+                  </label>
+                  <input
+                    name="name"
+                    value={profile.name || ""}
+                    onChange={handleChange}
+                    placeholder="Acme Corp"
+                    className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                    Website
+                  </label>
+                  <input
+                    name="website"
+                    value={profile.website || ""}
+                    onChange={handleChange}
+                    placeholder="https://acme.com"
+                    className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                    Industry
+                  </label>
+                  <input
+                    name="industry"
+                    value={profile.industry || ""}
+                    onChange={handleChange}
+                    placeholder="Technology"
+                    className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                    Company Size
+                  </label>
+                  <input
+                    name="companySize"
+                    value={profile.companySize || ""}
+                    onChange={handleChange}
+                    placeholder="50-200"
+                    className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                  Description
+                </label>
+                <textarea
+                  name="description"
+                  rows={3}
+                  value={profile.description || ""}
+                  onChange={handleChange}
+                  placeholder="Overview..."
+                  className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none resize-y"
+                />
+              </div>
+
+              <div className="flex flex-col gap-4 pt-6 border-t border-[#e5e5e5]">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-[11px] font-bold text-[#333] opacity-50 m-0 uppercase tracking-widest">
+                    Office Locations
+                  </h3>
                   <button
                     type="button"
-                    onClick={() => removeLocation(index)}
-                    className="sm:absolute sm:right-4 sm:top-1/2 sm:-translate-y-1/2 px-4 py-2 text-[10px] font-bold text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg hover:bg-red-500/20 transition-all duration-300 uppercase tracking-widest outline-none mt-2 sm:mt-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                    onClick={addLocation}
+                    className="px-4 py-2 text-[11px] font-bold text-[#333] bg-[#f9f9f9] border border-[#e5e5e5] rounded-[12px] hover:border-[#333] transition-colors cursor-pointer uppercase tracking-widest"
                   >
-                    Remove
+                    Add Location
                   </button>
                 </div>
-              ))}
-            </div>
 
-            <button 
-              type="button" 
-              onClick={addLocation}
-              className="self-start px-6 py-3 text-[10px] font-bold text-white/80 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all duration-300 uppercase tracking-widest outline-none hover:-translate-y-0.5 cursor-pointer"
-            >
-              + Add Location
-            </button>
-          </div>
-
-          <div className="flex flex-col gap-3 pt-6 border-t border-white/10">
-            <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
-              Company Logo
-            </label>
-            <div className="flex items-center justify-center w-full">
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-white/10 border-dashed rounded-xl cursor-pointer bg-[#0B0F19]/50 hover:bg-white/5 hover:border-violet-500/50 transition-all group">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <svg className="w-8 h-8 mb-3 text-white/40 group-hover:text-violet-400 transition-colors" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
-                  </svg>
-                  <p className="mb-2 text-sm text-white/60 font-medium"><span className="font-bold text-white">Click to upload</span> or drag and drop</p>
-                  <p className="text-xs text-white/40">SVG, PNG, JPG or GIF</p>
+                <div className="flex flex-col gap-3">
+                  {profile.locations?.map((loc, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col md:flex-row gap-3 bg-[#f9f9f9] p-4 rounded-[14px] border border-[#e5e5e5] relative group"
+                    >
+                      <div className="flex-1 flex flex-col gap-1">
+                        <span className="text-[10px] font-bold text-[#333] opacity-50 uppercase">
+                          City
+                        </span>
+                        <input
+                          placeholder="Pune"
+                          value={loc.city || ""}
+                          onChange={(e) =>
+                            handleLocationChange(index, "city", e.target.value)
+                          }
+                          className="bg-transparent border-none text-[13px] font-bold text-[#333] outline-none p-0"
+                        />
+                      </div>
+                      <div className="flex-1 flex flex-col gap-1">
+                        <span className="text-[10px] font-bold text-[#333] opacity-50 uppercase">
+                          State
+                        </span>
+                        <input
+                          placeholder="Maharashtra"
+                          value={loc.state || ""}
+                          onChange={(e) =>
+                            handleLocationChange(index, "state", e.target.value)
+                          }
+                          className="bg-transparent border-none text-[13px] font-bold text-[#333] outline-none p-0"
+                        />
+                      </div>
+                      <div className="flex-1 flex flex-col gap-1">
+                        <span className="text-[10px] font-bold text-[#333] opacity-50 uppercase">
+                          Country
+                        </span>
+                        <input
+                          placeholder="India"
+                          value={loc.country || ""}
+                          onChange={(e) =>
+                            handleLocationChange(
+                              index,
+                              "country",
+                              e.target.value,
+                            )
+                          }
+                          className="bg-transparent border-none text-[13px] font-bold text-[#333] outline-none p-0"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeLocation(index)}
+                        className="text-[10px] font-black text-[#cc0000] border-none bg-transparent cursor-pointer uppercase tracking-widest self-end md:self-center"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
                 </div>
-                <input 
-                  type="file" 
-                  className="hidden" 
-                  accept="image/*"
-                  onChange={(e) => setLogoFile(e.target.files[0])}
-                />
-              </label>
-            </div>
-            {logoFile && (
-              <p className="text-xs font-bold text-emerald-400 mt-2">
-                Selected: {logoFile.name}
-              </p>
-            )}
-          </div>
+              </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-             <div className="bg-[#0B0F19]/30 border border-white/5 rounded-xl p-5 flex flex-col gap-1.5 transition-all hover:border-white/10">
-               <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Email Domain</span>
-               <span className="text-sm font-medium text-white/90">{profile.emailDomain}</span>
-             </div>
-             <div className="bg-[#0B0F19]/30 border border-white/5 rounded-xl p-5 flex flex-col gap-1.5 transition-all hover:border-white/10">
-               <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Approved At</span>
-               <span className="text-sm font-medium text-white/90">
-                 {profile.approvedAt ? new Date(profile.approvedAt).toLocaleDateString("en-IN", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric"
-                 }) : "—"}
-               </span>
-             </div>
-          </div>
+              <div className="flex flex-col gap-3 pt-6 border-t border-[#e5e5e5]">
+                <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                  Update Logo
+                </label>
+                <div className="border-2 border-dashed border-[#e5e5e5] rounded-[20px] p-6 text-center cursor-pointer hover:border-[#333] transition-colors relative">
+                  <input
+                    type="file"
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    accept="image/*"
+                    onChange={(e) => setLogoFile(e.target.files[0])}
+                  />
+                  <p className="text-[13px] font-bold text-[#333] m-0">
+                    {logoFile
+                      ? `Selected: ${logoFile.name}`
+                      : "Click to upload company logo"}
+                  </p>
+                  <p className="text-[11px] font-bold text-[#333] opacity-40 uppercase mt-1">
+                    PNG, JPG, SVG (Max 2MB)
+                  </p>
+                </div>
+              </div>
 
-          <div className="pt-8 mt-2 border-t border-white/10 flex justify-end">
-            <button
-              type="submit"
-              disabled={saving}
-              className="w-full md:w-auto px-10 py-4 text-[10px] font-bold text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 border-none rounded-xl cursor-pointer transition-all duration-300 hover:shadow-[0_8px_20px_-6px_rgba(217,70,239,0.5)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest flex items-center justify-center gap-3 outline-none"
-            >
-              {saving && (
-                <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-              )}
-              {saving ? "Saving..." : "Save Profile Changes"}
-            </button>
+              <div className="pt-6 border-t border-[#e5e5e5] flex justify-end">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="w-full md:w-auto px-10 py-3.5 text-[13px] font-bold text-[#fff] bg-[#111] border-none rounded-[14px] cursor-pointer hover:opacity-80 transition-opacity disabled:opacity-50 uppercase tracking-widest"
+                >
+                  {saving ? "Saving Changes..." : "Save Profile Changes"}
+                </button>
+              </div>
+            </form>
           </div>
-
-        </form>
-      </div>
+        </section>
+      </main>
     </div>
   );
 }

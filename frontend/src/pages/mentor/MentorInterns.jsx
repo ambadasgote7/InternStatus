@@ -33,183 +33,169 @@ const MentorInterns = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen text-lg">
-        Loading interns...
+      <div className="min-h-screen bg-[#f9f9f9] flex items-center justify-center font-sans">
+        <p className="text-[14px] font-bold text-[#333] animate-pulse m-0">
+          Syncing Intern Cohort...
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="p-8">
+    <div className="min-h-screen bg-[#f9f9f9] text-[#333] font-sans pb-10">
+      <main className="max-w-7xl mx-auto w-full px-4 md:px-6 py-6 flex flex-col gap-6">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#e5e5e5] pb-4">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-[23px] font-black text-[#333] m-0 tracking-tight leading-tight">
+              My Interns
+            </h1>
+            <p className="text-[13px] font-bold text-[#333] opacity-60 m-0 uppercase tracking-widest">
+              Active Mentorship Roster
+            </p>
+          </div>
+          <div className="text-[11px] font-black text-[#111] bg-[#fff] border border-[#e5e5e5] px-3 py-1.5 rounded-[10px] uppercase tracking-widest">
+            Total Interns: {interns.length}
+          </div>
+        </header>
 
-      <h1 className="text-3xl font-bold mb-6">My Interns</h1>
+        {interns.length === 0 ? (
+          <div className="bg-[#fff] border-2 border-dashed border-[#e5e5e5] rounded-[20px] p-20 text-center">
+            <p className="text-[13px] font-bold text-[#333] opacity-40 m-0 uppercase tracking-widest">
+              No interns assigned to your profile
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {interns.map((intern) => (
+              <div
+                key={intern.applicationId}
+                className="bg-[#fff] border border-[#e5e5e5] rounded-[20px] shadow-sm hover:border-[#333] transition-all flex flex-col p-6"
+              >
+                <div className="flex justify-between items-start mb-5">
+                  <div className="flex-1 min-w-0 pr-2">
+                    <h2 className="text-[17px] font-black text-[#333] m-0 leading-tight truncate">
+                      {intern.studentName}
+                    </h2>
+                    <p className="text-[12px] font-bold text-[#333] opacity-50 truncate mt-1">
+                      {intern.studentEmail}
+                    </p>
+                  </div>
+                  <span className="px-2 py-1 rounded-[10px] text-[9px] font-black uppercase tracking-widest bg-[#f9f9f9] border border-[#e5e5e5]">
+                    {intern.status}
+                  </span>
+                </div>
 
-      {interns.length === 0 ? (
-        <div className="text-gray-500 text-center mt-20">
-          No interns assigned yet
-        </div>
-      ) : (
+                <div className="flex flex-col gap-4 py-4 border-y border-[#f9f9f9]">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold opacity-40 uppercase tracking-widest">
+                      Internship Program
+                    </span>
+                    <span className="text-[13px] font-bold text-[#333] leading-tight">
+                      {intern.internshipTitle}
+                    </span>
+                  </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold opacity-40 uppercase tracking-widest">
+                        Mode
+                      </span>
+                      <span className="text-[13px] font-bold">
+                        {intern.mode}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold opacity-40 uppercase tracking-widest">
+                        Location
+                      </span>
+                      <span className="text-[13px] font-bold truncate">
+                        {intern.location}
+                      </span>
+                    </div>
+                  </div>
 
-          {interns.map((intern) => (
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold opacity-40 uppercase tracking-widest">
+                      Timeline
+                    </span>
+                    <span className="text-[12px] font-mono font-bold text-[#111] uppercase mt-0.5">
+                      {intern.startDate
+                        ? new Date(intern.startDate).toLocaleDateString(
+                            "en-IN",
+                            { day: "2-digit", month: "short" },
+                          )
+                        : "—"}
+                      <span className="mx-2 opacity-30">/</span>
+                      {intern.endDate
+                        ? new Date(intern.endDate).toLocaleDateString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                          })
+                        : "Ongoing"}
+                    </span>
+                  </div>
+                </div>
 
-            <div
-              key={intern.applicationId}
-              className="bg-white rounded-xl shadow-md p-6 border hover:shadow-lg transition"
-            >
-
-              {/* Student */}
-
-              <div className="flex justify-between items-center mb-4">
-
-                <h2 className="text-xl font-semibold text-black text-ellipsis overflow-hidden">
-                  {intern.studentName}
-                </h2>
-
-                <span className="text-xs px-3 py-1 rounded-full bg-blue-100 text-blue-600">
-                  {intern.status}
-                </span>
-
-              </div>
-
-              {/* Student info */}
-
-              <div className="text-sm text-gray-600 space-y-1">
-
-                <p>
-                  <span className="font-medium">Email:</span>{" "}
-                  {intern.studentEmail}
-                </p>
-
-                {intern.resumeUrl && (
-                  <p>
-                    <a
-                      href={intern.resumeUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-blue-600 underline"
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {intern.status === "offer_accepted" && (
+                    <button
+                      onClick={() =>
+                        updateStatus(intern.applicationId, "ongoing")
+                      }
+                      className="px-4 py-2 bg-[#111] text-[#fff] text-[11px] font-bold rounded-[10px] border-none cursor-pointer uppercase tracking-widest hover:opacity-80 transition-opacity"
                     >
-                      View Resume
-                    </a>
-                  </p>
-                )}
+                      Start
+                    </button>
+                  )}
 
+                  {intern.status === "ongoing" && (
+                    <>
+                      <button
+                        onClick={() =>
+                          updateStatus(intern.applicationId, "completed")
+                        }
+                        className="px-4 py-2 bg-[#111] text-[#fff] text-[11px] font-bold rounded-[10px] border-none cursor-pointer uppercase tracking-widest hover:opacity-80 transition-opacity"
+                      >
+                        Complete
+                      </button>
+                      <button
+                        onClick={() =>
+                          updateStatus(intern.applicationId, "terminated")
+                        }
+                        className="px-4 py-2 bg-[#fff] border border-[#cc0000] text-[#cc0000] text-[11px] font-bold rounded-[10px] cursor-pointer uppercase tracking-widest hover:bg-[#cc0000] hover:text-[#fff] transition-colors"
+                      >
+                        Terminate
+                      </button>
+                    </>
+                  )}
+
+                  {intern.status === "completed" &&
+                    intern.report &&
+                    intern.report.status !== "generated" && (
+                      <button
+                        onClick={() =>
+                          window.open(intern.report.reportUrl, "_blank")
+                        }
+                        className="px-4 py-2 bg-[#f9f9f9] border border-[#333] text-[#333] text-[11px] font-bold rounded-[10px] cursor-pointer uppercase tracking-widest hover:bg-[#333] hover:text-[#fff] transition-all"
+                      >
+                        Report
+                      </button>
+                    )}
+
+                  <button
+                    onClick={() =>
+                      navigate(`/mentor/intern/${intern.applicationId}/track`)
+                    }
+                    className="px-4 py-2 bg-[#f9f9f9] border border-[#e5e5e5] text-[#333] text-[11px] font-bold rounded-[10px] cursor-pointer uppercase tracking-widest hover:border-[#333] transition-colors ml-auto"
+                  >
+                    Track Task
+                  </button>
+                </div>
               </div>
-
-              {/* Internship */}
-
-              <div className="mt-4 border-t pt-4 text-sm text-gray-700 space-y-1">
-
-                <p>
-                  <span className="font-medium">Internship:</span>{" "}
-                  {intern.internshipTitle}
-                </p>
-
-                <p>
-                  <span className="font-medium">Mode:</span>{" "}
-                  {intern.mode}
-                </p>
-
-                <p>
-                  <span className="font-medium">Location:</span>{" "}
-                  {intern.location}
-                </p>
-
-              </div>
-
-              {/* Duration */}
-
-              <div className="mt-4 text-sm">
-
-                <p>
-                  <span className="font-medium">Duration:</span>{" "}
-                  {intern.startDate
-                    ? new Date(intern.startDate).toLocaleDateString()
-                    : "-"}
-                  {" - "}
-                  {intern.endDate
-                    ? new Date(intern.endDate).toLocaleDateString()
-                    : "Ongoing"}
-                </p>
-
-                <p>
-                  <span className="font-medium">Evaluation:</span>{" "}
-                  {intern.evaluationScore ?? "Not evaluated"}
-                </p>
-
-              </div>
-
-              {/* Actions */}
-
-            <div className="mt-5 flex gap-2 flex-wrap">
-
-              <div className="mt-5 flex gap-2 flex-wrap">
-
-  {/* START */}
-  {intern.status === "offer_accepted" && (
-    <button
-      onClick={() => updateStatus(intern.applicationId, "ongoing")}
-      className="px-3 py-1 bg-green-600 text-white rounded text-sm"
-    >
-      Start
-    </button>
-  )}
-
-  {/* ONGOING */}
-  {intern.status === "ongoing" && (
-    <>
-      <button
-        onClick={() => updateStatus(intern.applicationId, "completed")}
-        className="px-3 py-1 bg-blue-600 text-white rounded text-sm"
-      >
-        Complete
-      </button>
-
-      <button
-        onClick={() => updateStatus(intern.applicationId, "terminated")}
-        className="px-3 py-1 bg-red-600 text-white rounded text-sm"
-      >
-        Terminate
-      </button>
-    </>
-  )}
-
-  {/* 🔥 VIEW REPORT ONLY AFTER COMPLETED + SUBMITTED */}
-  {intern.status === "completed" &&
-    intern.report &&
-    intern.report.status !== "generated" && (
-      <button
-        onClick={() => window.open(intern.report.reportUrl, "_blank")}
-        className="px-3 py-1 bg-gray-800 text-white rounded text-sm"
-      >
-        View Report
-      </button>
-  )}
-
-  {/* TRACK (ALWAYS AVAILABLE) */}
-  <button
-    onClick={() =>
-      navigate(`/mentor/intern/${intern.applicationId}/track`)
-    }
-    className="px-3 py-1 bg-purple-600 text-white rounded text-sm"
-  >
-    Track
-  </button>
-
-</div>
-  
-
-            </ div>
-
-            </div>
-
-          ))}
-
-        </div>
-
-      )}
-
+            ))}
+          </div>
+        )}
+      </main>
     </div>
   );
 };

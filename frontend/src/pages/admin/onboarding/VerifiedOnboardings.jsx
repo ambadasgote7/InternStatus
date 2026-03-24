@@ -7,32 +7,20 @@ export default function VerifiedOnboardings() {
 
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
-
   const [colleges, setColleges] = useState([]);
   const [companies, setCompanies] = useState([]);
-
-  const [counts, setCounts] = useState({
-    all: 0,
-    college: 0,
-    company: 0,
-  });
-
+  const [counts, setCounts] = useState({ all: 0, college: 0, company: 0 });
   const [loading, setLoading] = useState(true);
-
-  /* ================= FETCH ================= */
 
   const fetchData = async () => {
     try {
       setLoading(true);
-
       const res = await API.get(`/admin/onboarding/verified?type=${filter}`);
-
       const collegeList = res.data?.data?.colleges || [];
       const companyList = res.data?.data?.companies || [];
 
       setColleges(collegeList);
       setCompanies(companyList);
-
       setCounts({
         all: collegeList.length + companyList.length,
         college: collegeList.length,
@@ -49,97 +37,79 @@ export default function VerifiedOnboardings() {
     fetchData();
   }, [filter]);
 
-  /* ================= MERGE ================= */
-
   const list = [
     ...colleges.map((c) => ({ ...c, type: "college" })),
     ...companies.map((c) => ({ ...c, type: "company" })),
   ];
-
-  /* ================= SEARCH ================= */
 
   const filteredList = list.filter(
     (item) =>
       item.requesterName?.toLowerCase().includes(search.toLowerCase()) ||
       item.requesterEmail?.toLowerCase().includes(search.toLowerCase()) ||
       item.collegeName?.toLowerCase().includes(search.toLowerCase()) ||
-      item.companyName?.toLowerCase().includes(search.toLowerCase())
+      item.companyName?.toLowerCase().includes(search.toLowerCase()),
   );
 
-  /* ================= UI ================= */
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#f9f9f9] flex items-center justify-center font-sans">
+        <p className="text-[14px] font-bold text-[#333] animate-pulse m-0 uppercase tracking-widest">
+          Indexing Verified Directory...
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] p-4 md:p-8 font-sans text-white selection:bg-fuchsia-500/30 selection:text-fuchsia-200">
-      <div className="max-w-7xl mx-auto">
-        <header className="mb-10 border-b border-white/10 pb-6">
-          <h2 className="text-3xl md:text-4xl font-black m-0 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 mb-2">
-            Verified Onboardings
-          </h2>
-          <p className="text-white/40 text-sm font-medium m-0">
-            Manage and view officially verified colleges and companies.
-          </p>
+    <div className="min-h-screen bg-[#f9f9f9] text-[#333] font-sans pb-10">
+      <main className="max-w-7xl mx-auto w-full px-4 md:px-6 py-6 flex flex-col gap-6">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#e5e5e5] pb-4">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-[23px] font-black text-[#333] m-0 tracking-tight leading-tight">
+              Verified Onboardings
+            </h1>
+            <p className="text-[13px] font-bold text-[#333] opacity-60 m-0 uppercase tracking-widest">
+              Authorized Institutional Directory
+            </p>
+          </div>
         </header>
 
-        {/* CONTROLS (SEARCH & FILTERS) */}
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-8 mb-10 flex flex-col lg:flex-row gap-6 justify-between items-start lg:items-center shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-white/20">
+        <section className="bg-[#fff] border border-[#e5e5e5] rounded-[20px] p-5 md:p-6 shadow-sm flex flex-col lg:flex-row gap-5 justify-between items-center">
           <div className="w-full lg:max-w-md">
             <input
               type="text"
-              placeholder="Search by name, email, or institution..."
+              placeholder="Search directory records..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none transition-all duration-300 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 placeholder:text-white/20"
+              className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
             />
           </div>
 
-          <div className="flex flex-wrap gap-3 w-full lg:w-auto">
-            <button
-              onClick={() => setFilter("all")}
-              className={`flex-1 lg:flex-none px-6 py-3.5 text-xs font-bold rounded-xl transition-all duration-300 uppercase tracking-widest cursor-pointer outline-none ${
-                filter === "all"
-                  ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white border-none shadow-[0_4px_15px_-3px_rgba(217,70,239,0.5)]"
-                  : "bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white"
-              }`}
-            >
-              All ({counts.all})
-            </button>
-
-            <button
-              onClick={() => setFilter("college")}
-              className={`flex-1 lg:flex-none px-6 py-3.5 text-xs font-bold rounded-xl transition-all duration-300 uppercase tracking-widest cursor-pointer outline-none ${
-                filter === "college"
-                  ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white border-none shadow-[0_4px_15px_-3px_rgba(217,70,239,0.5)]"
-                  : "bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white"
-              }`}
-            >
-              Colleges ({counts.college})
-            </button>
-
-            <button
-              onClick={() => setFilter("company")}
-              className={`flex-1 lg:flex-none px-6 py-3.5 text-xs font-bold rounded-xl transition-all duration-300 uppercase tracking-widest cursor-pointer outline-none ${
-                filter === "company"
-                  ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white border-none shadow-[0_4px_15px_-3px_rgba(217,70,239,0.5)]"
-                  : "bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white"
-              }`}
-            >
-              Companies ({counts.company})
-            </button>
+          <div className="flex gap-2 p-1 bg-[#f9f9f9] border border-[#e5e5e5] rounded-[14px]">
+            {[
+              { id: "all", label: "All Records", count: counts.all },
+              { id: "college", label: "Colleges", count: counts.college },
+              { id: "company", label: "Companies", count: counts.company },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setFilter(tab.id)}
+                className={`px-6 py-2 rounded-[10px] text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer border-none ${
+                  filter === tab.id
+                    ? "bg-[#111] text-[#fff]"
+                    : "text-[#333] opacity-40 hover:opacity-100"
+                }`}
+              >
+                {tab.label} ({tab.count})
+              </button>
+            ))}
           </div>
-        </div>
+        </section>
 
-        {/* LIST */}
-        {loading ? (
-          <div className="py-20 flex flex-col items-center justify-center gap-4">
-            <div className="w-10 h-10 border-4 border-white/10 border-t-fuchsia-500 rounded-full animate-spin"></div>
-            <p className="text-fuchsia-400 font-medium tracking-widest uppercase text-xs animate-pulse m-0">
-              Loading Records
-            </p>
-          </div>
-        ) : filteredList.length === 0 ? (
-          <div className="bg-[#0B0F19]/50 border border-white/10 rounded-3xl p-16 text-center shadow-inner">
-            <p className="text-white/40 m-0 text-lg font-medium">
-              No verified onboardings found.
+        {filteredList.length === 0 ? (
+          <div className="bg-[#fff] border-2 border-dashed border-[#e5e5e5] rounded-[20px] p-20 text-center">
+            <p className="text-[13px] font-bold text-[#333] opacity-40 m-0 uppercase tracking-widest">
+              No matching verified entities found
             </p>
           </div>
         ) : (
@@ -147,53 +117,55 @@ export default function VerifiedOnboardings() {
             {filteredList.map((item) => (
               <div
                 key={item._id}
-                className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-8 flex flex-col transition-all duration-300 hover:border-white/20 hover:-translate-y-1 hover:shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] group"
+                className="bg-[#fff] border border-[#e5e5e5] rounded-[20px] shadow-sm hover:border-[#333] transition-all flex flex-col"
               >
-                <div className="flex justify-between items-start mb-6">
-                  <span
-                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest border ${
-                      item.type === "college"
-                        ? "bg-violet-500/20 text-violet-300 border-violet-500/30"
-                        : "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30"
-                    }`}
-                  >
-                    {item.type}
-                  </span>
-                </div>
+                <div className="p-6 flex-grow flex flex-col gap-5">
+                  <div className="flex justify-between items-start">
+                    <span className="px-2.5 py-1 rounded-[10px] text-[9px] font-black uppercase tracking-widest bg-[#f9f9f9] border border-[#e5e5e5]">
+                      {item.type}
+                    </span>
+                  </div>
 
-                <div className="flex flex-col flex-grow mb-8">
-                  <h3 className="text-xl font-bold text-white/90 mt-0 mb-2 leading-tight group-hover:text-fuchsia-300 transition-colors">
-                    {item.type === "college" ? item.collegeName : item.companyName}
-                  </h3>
-                  
-                  <div className="flex flex-col gap-1.5 mt-2">
-                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
-                      Requester
-                    </span>
-                    <span className="text-sm font-medium text-white/80">
-                      {item.requesterName || "—"}
-                    </span>
-                    <span className="text-xs text-fuchsia-400 font-medium">
-                      {item.requesterEmail}
-                    </span>
+                  <div className="flex flex-col gap-1">
+                    <h3 className="text-[18px] font-black text-[#111] m-0 leading-tight">
+                      {item.type === "college"
+                        ? item.collegeName
+                        : item.companyName}
+                    </h3>
+                  </div>
+
+                  <div className="flex flex-col gap-4 py-4 border-y border-[#f9f9f9] mt-auto">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] font-bold opacity-40 uppercase tracking-widest">
+                        Official Requester
+                      </span>
+                      <div className="flex flex-col">
+                        <span className="text-[13px] font-bold text-[#111]">
+                          {item.requesterName || "Not Documented"}
+                        </span>
+                        <span className="text-[11px] font-mono text-[#333] opacity-60">
+                          {item.requesterEmail}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="pt-6 border-t border-white/10 mt-auto">
+                <div className="p-4 bg-[#fcfcfc] border-t border-[#f9f9f9] rounded-b-[20px]">
                   <button
                     onClick={() =>
                       navigate(`/admin/onboarding/${item.type}/${item._id}`)
                     }
-                    className="w-full px-4 py-3.5 text-xs font-bold text-white bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all duration-300 hover:-translate-y-0.5 tracking-widest uppercase cursor-pointer outline-none"
+                    className="w-full py-3 bg-[#f9f9f9] border border-[#333] text-[#333] text-[11px] font-black uppercase tracking-widest rounded-[10px] hover:bg-[#333] hover:text-[#fff] transition-all cursor-pointer"
                   >
-                    View Details
+                    View Record Details
                   </button>
                 </div>
               </div>
             ))}
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

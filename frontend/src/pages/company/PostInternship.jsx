@@ -14,7 +14,7 @@ export default function PostInternship() {
     positions: 1,
     maxApplicants: "",
     stipendType: "paid",
-    stipendAmount: ""
+    stipendAmount: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -23,9 +23,9 @@ export default function PostInternship() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -41,14 +41,22 @@ export default function PostInternship() {
         durationMonths: Number(form.durationMonths),
         positions: Number(form.positions),
         maxApplicants: form.maxApplicants ? Number(form.maxApplicants) : null,
-        skillsRequired: form.skillsRequired.split(",").map(s => s.trim()).filter(Boolean),
-        locations: form.mode === "remote" ? [] : form.locations.split(",").map(l => l.trim()).filter(Boolean)
+        skillsRequired: form.skillsRequired
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean),
+        locations:
+          form.mode === "remote"
+            ? []
+            : form.locations
+                .split(",")
+                .map((l) => l.trim())
+                .filter(Boolean),
       };
 
       const res = await API.post("/internships", payload);
-      setSuccess(res.data.message || "Internship deployed to the command center!");
-      
-      // Reset form on success
+      setSuccess(res.data.message || "Internship listing published.");
+
       setForm({
         title: "",
         description: "",
@@ -61,233 +69,240 @@ export default function PostInternship() {
         positions: 1,
         maxApplicants: "",
         stipendType: "paid",
-        stipendAmount: ""
+        stipendAmount: "",
       });
-
     } catch (err) {
-      setError(err.response?.data?.message || "Deployment failed. Check your uplink.");
+      setError(err.response?.data?.message || "Failed to post internship.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0B0F19] p-4 md:p-12 font-sans box-border text-white selection:bg-fuchsia-500/30 selection:text-fuchsia-200 relative overflow-hidden">
-      {/* Ambient Orbs */}
-      <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-violet-600/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen" aria-hidden="true" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-fuchsia-600/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen" aria-hidden="true" />
+    <div className="min-h-screen bg-[#f9f9f9] text-[#333] flex flex-col font-sans pb-10">
+      <main className="max-w-4xl mx-auto w-full p-4 md:p-6 flex flex-col gap-6">
+        <div className="bg-[#fff] border border-[#e5e5e5] p-6 md:p-10 rounded-[20px] shadow-sm">
+          <header className="mb-8 border-b border-[#e5e5e5] pb-4">
+            <h2 className="text-[23px] font-black m-0 tracking-tight text-[#333]">
+              Post Internship
+            </h2>
+            <p className="text-[13px] font-bold text-[#333] opacity-60 m-0 mt-1 uppercase tracking-widest">
+              Create New Opportunity
+            </p>
+          </header>
 
-      <div className="w-full max-w-4xl bg-white/5 backdrop-blur-xl p-8 md:p-12 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] border border-white/10 box-border relative z-10 transition-all duration-300 hover:border-white/20">
-        
-        <header className="mb-12 text-center md:text-left">
-          <div className="text-[10px] font-bold text-violet-400 uppercase tracking-[0.3em] mb-3">Recruitment Terminal</div>
-          <h2 className="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 m-0 tracking-tight">
-            Post New Internship
-          </h2>
-        </header>
+          {error && (
+            <div className="mb-6 px-4 py-3 text-[12px] font-bold text-[#cc0000] bg-[#fff] border border-[#cc0000] rounded-[14px] uppercase tracking-widest text-center">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="mb-6 px-4 py-3 text-[12px] font-bold text-[#008000] bg-[#fff] border border-[#008000] rounded-[14px] uppercase tracking-widest text-center">
+              {success}
+            </div>
+          )}
 
-        {error && (
-          <div className="mb-8 px-6 py-4 text-[11px] font-bold text-red-300 bg-red-500/10 border border-red-500/20 rounded-xl uppercase tracking-widest animate-pulse">
-            {error}
-          </div>
-        )}
-        {success && (
-          <div className="mb-8 px-6 py-4 text-[11px] font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 rounded-xl uppercase tracking-widest animate-bounce">
-            {success}
-          </div>
-        )}
+          <form
+            className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5"
+            onSubmit={handleSubmit}
+          >
+            <div className="flex flex-col gap-1.5 md:col-span-2">
+              <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                Internship Title
+              </label>
+              <input
+                name="title"
+                placeholder="Software Development Intern"
+                value={form.title}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+              />
+            </div>
 
-        <form className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6" onSubmit={handleSubmit}>
-          
-          <div className="flex flex-col gap-2 md:col-span-2">
-            <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Opportunity Title</label>
-            <input
-              name="title"
-              placeholder="e.g. Frontend Architecture Intern"
-              value={form.title}
-              onChange={handleChange}
-              required
-              className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 placeholder:text-white/20"
-            />
-          </div>
+            <div className="flex flex-col gap-1.5 md:col-span-2">
+              <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                Job Description
+              </label>
+              <textarea
+                name="description"
+                placeholder="Roles, responsibilities and expectations..."
+                value={form.description}
+                onChange={handleChange}
+                required
+                rows={4}
+                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none resize-y"
+              />
+            </div>
 
-          <div className="flex flex-col gap-2 md:col-span-2">
-            <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Job Specification</label>
-            <textarea
-              name="description"
-              placeholder="Outline the mission, tech stack, and expectations..."
-              value={form.description}
-              onChange={handleChange}
-              required
-              rows={5}
-              className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 resize-none placeholder:text-white/20"
-            />
-          </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                Start Date
+              </label>
+              <input
+                type="date"
+                name="startDate"
+                value={form.startDate}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none uppercase"
+              />
+            </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Commencement Date</label>
-            <input
-              type="date"
-              name="startDate"
-              value={form.startDate}
-              onChange={handleChange}
-              required
-              className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 uppercase appearance-none"
-            />
-          </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                Application Deadline
+              </label>
+              <input
+                type="date"
+                name="applicationDeadline"
+                value={form.applicationDeadline}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none uppercase"
+              />
+            </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Application Cutoff</label>
-            <input
-              type="date"
-              name="applicationDeadline"
-              value={form.applicationDeadline}
-              onChange={handleChange}
-              required
-              className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 uppercase appearance-none"
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Program Duration</label>
-            <div className="relative">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                Duration
+              </label>
               <select
                 name="durationMonths"
                 value={form.durationMonths}
                 onChange={handleChange}
-                className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 transition-all duration-300 cursor-pointer appearance-none [&>option]:bg-[#0B0F19]"
+                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none cursor-pointer appearance-none"
               >
-                {[1, 2, 3, 4, 5, 6, 9, 12].map(m => (
+                {[1, 2, 3, 4, 5, 6, 9, 12].map((m) => (
                   <option key={m} value={m}>
                     {m} Month{m > 1 ? "s" : ""}
                   </option>
                 ))}
               </select>
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">▼</div>
             </div>
-          </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Work Mode</label>
-            <div className="relative">
-              <select 
-                name="mode" 
-                value={form.mode} 
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                Mode
+              </label>
+              <select
+                name="mode"
+                value={form.mode}
                 onChange={handleChange}
-                className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 transition-all duration-300 cursor-pointer appearance-none [&>option]:bg-[#0B0F19]"
+                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none cursor-pointer appearance-none"
               >
                 <option value="remote">Remote</option>
                 <option value="onsite">Onsite</option>
                 <option value="hybrid">Hybrid</option>
               </select>
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">▼</div>
             </div>
-          </div>
 
-          {form.mode !== "remote" && (
-            <div className="flex flex-col gap-2 md:col-span-2">
-              <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Geographic Hubs</label>
+            {form.mode !== "remote" && (
+              <div className="flex flex-col gap-1.5 md:col-span-2">
+                <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                  Office Locations
+                </label>
+                <input
+                  name="locations"
+                  placeholder="Pune, Mumbai, Bangalore"
+                  value={form.locations}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+                />
+              </div>
+            )}
+
+            <div className="flex flex-col gap-1.5 md:col-span-2">
+              <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                Required Skills
+              </label>
               <input
-                name="locations"
-                placeholder="Comma separated: Pune, Mumbai, Bangalore"
-                value={form.locations}
+                name="skillsRequired"
+                placeholder="React, Node.js, SQL"
+                value={form.skillsRequired}
                 onChange={handleChange}
                 required
-                className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 placeholder:text-white/20"
+                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
               />
             </div>
-          )}
 
-          <div className="flex flex-col gap-2 md:col-span-2">
-            <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Prerequisite Skills</label>
-            <input
-              name="skillsRequired"
-              placeholder="e.g. React, TypeScript, TailwindCSS"
-              value={form.skillsRequired}
-              onChange={handleChange}
-              required
-              className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 placeholder:text-white/20"
-            />
-          </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                Positions
+              </label>
+              <input
+                type="number"
+                name="positions"
+                min="1"
+                value={form.positions}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+              />
+            </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Open Positions</label>
-            <input
-              type="number"
-              name="positions"
-              min="1"
-              value={form.positions}
-              onChange={handleChange}
-              required
-              className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300"
-            />
-          </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                Max Applicants
+              </label>
+              <input
+                type="number"
+                name="maxApplicants"
+                min="1"
+                placeholder="Optional"
+                value={form.maxApplicants}
+                onChange={handleChange}
+                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+              />
+            </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Applicant Ceiling</label>
-            <input
-              type="number"
-              name="maxApplicants"
-              min="1"
-              placeholder="Total capacity"
-              value={form.maxApplicants}
-              onChange={handleChange}
-              className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 placeholder:text-white/20"
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Compensation Model</label>
-            <div className="relative">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                Stipend Type
+              </label>
               <select
                 name="stipendType"
                 value={form.stipendType}
                 onChange={handleChange}
-                className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 transition-all duration-300 cursor-pointer appearance-none [&>option]:bg-[#0B0F19]"
+                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none cursor-pointer appearance-none"
               >
                 <option value="paid">Paid</option>
                 <option value="unpaid">Unpaid</option>
                 <option value="performance_based">Performance Based</option>
               </select>
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">▼</div>
             </div>
-          </div>
 
-          {form.stipendType === "paid" && (
-            <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
-              <label className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Monthly Stipend (₹)</label>
-              <input
-                type="number"
-                name="stipendAmount"
-                min="0"
-                placeholder="e.g. 15000"
-                value={form.stipendAmount}
-                onChange={handleChange}
-                required
-                className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 placeholder:text-white/20"
-              />
+            {form.stipendType === "paid" && (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                  Monthly Stipend (INR)
+                </label>
+                <input
+                  type="number"
+                  name="stipendAmount"
+                  min="0"
+                  placeholder="15000"
+                  value={form.stipendAmount}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+                />
+              </div>
+            )}
+
+            <div className="md:col-span-2 pt-6 border-t border-[#f9f9f9] mt-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-4 text-[14px] font-black text-[#fff] bg-[#111] border-none rounded-[14px] cursor-pointer hover:opacity-80 transition-opacity disabled:opacity-30 uppercase tracking-widest flex items-center justify-center gap-2"
+              >
+                {loading ? "Processing..." : "Publish Internship"}
+              </button>
             </div>
-          )}
-
-          <div className="md:col-span-2 mt-8 pt-8 border-t border-white/10">
-            <button 
-              type="submit"
-              disabled={loading}
-              className="w-full py-5 text-xs font-black text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 border-none rounded-2xl cursor-pointer transition-all duration-300 hover:shadow-[0_12px_24px_-8px_rgba(217,70,239,0.6)] hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-[0.2em] flex items-center justify-center gap-4"
-            >
-              {loading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                "Deploy Internship"
-              )}
-            </button>
-          </div>
-
-        </form>
-      </div>
+          </form>
+        </div>
+      </main>
     </div>
   );
 }

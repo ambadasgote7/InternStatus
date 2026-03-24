@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import API from "../../api/api";
 
 export default function TaskDetails() {
-
   const { taskId } = useParams();
 
   const [task, setTask] = useState(null);
@@ -20,26 +19,25 @@ export default function TaskDetails() {
       const [taskRes, latestRes, historyRes] = await Promise.all([
         API.get(`/tasks/${taskId}`),
         API.get(`/task-submissions/task/${taskId}?latestOnly=true`),
-        API.get(`/task-submissions/task/${taskId}`)
+        API.get(`/task-submissions/task/${taskId}`),
       ]);
 
       setTask(taskRes.data.data);
 
       const latest = (latestRes.data.data || []).sort(
-        (a, b) => new Date(b.submittedAt) - new Date(a.submittedAt)
+        (a, b) => new Date(b.submittedAt) - new Date(a.submittedAt),
       );
 
       setLatestSubs(latest);
 
       const map = {};
-      (historyRes.data.data || []).forEach(sub => {
+      (historyRes.data.data || []).forEach((sub) => {
         const key = sub.student;
         if (!map[key]) map[key] = [];
         map[key].push(sub);
       });
 
       setHistoryMap(map);
-
     } catch (err) {
       console.error(err);
     } finally {
@@ -71,12 +69,12 @@ export default function TaskDetails() {
   /* ================= REVIEW ================= */
 
   const updateReviewField = (id, field, value) => {
-    setReviewState(prev => ({
+    setReviewState((prev) => ({
       ...prev,
       [id]: {
         ...prev[id],
-        [field]: value
-      }
+        [field]: value,
+      },
     }));
   };
 
@@ -94,17 +92,16 @@ export default function TaskDetails() {
       await API.patch(`/task-submissions/${id}/review`, {
         status: review.status,
         mentorFeedback: review.mentorFeedback || "",
-        score: review.score ? Number(review.score) : undefined
+        score: review.score ? Number(review.score) : undefined,
       });
 
-      setReviewState(prev => {
+      setReviewState((prev) => {
         const copy = { ...prev };
         delete copy[id];
         return copy;
       });
 
       fetchTask();
-
     } catch (err) {
       alert(err.response?.data?.message || "Failed");
     } finally {
@@ -117,19 +114,18 @@ export default function TaskDetails() {
   if (loading) return <div className="p-10">Loading...</div>;
   if (!task) return <div className="p-10">Task not found</div>;
 
-  const pending = latestSubs.filter(s =>
-    s.status === "submitted" || s.status === "under_review"
+  const pending = latestSubs.filter(
+    (s) => s.status === "submitted" || s.status === "under_review",
   );
 
-  const reviewed = latestSubs.filter(s =>
-    s.status === "approved" || s.status === "revision_requested"
+  const reviewed = latestSubs.filter(
+    (s) => s.status === "approved" || s.status === "revision_requested",
   );
 
   /* ================= UI ================= */
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-8">
-
       {/* TASK HEADER */}
       <div className="bg-white p-6 rounded-xl border space-y-3">
         <h1 className="text-xl font-bold">{task.title}</h1>
@@ -138,9 +134,13 @@ export default function TaskDetails() {
         {task.resourceFiles?.length > 0 && (
           <div>
             <p className="text-xs text-gray-500">Resources:</p>
-            {task.resourceFiles.map((f,i)=>(
-              <a key={i} href={f.url} target="_blank"
-                className="block text-blue-600 text-sm">
+            {task.resourceFiles.map((f, i) => (
+              <a
+                key={i}
+                href={f.url}
+                target="_blank"
+                className="block text-blue-600 text-sm"
+              >
                 📎 {f.fileName}
               </a>
             ))}
@@ -148,28 +148,31 @@ export default function TaskDetails() {
         )}
 
         {/* CANCEL BUTTON */}
-{task.status !== "completed" && task.status !== "cancelled" && (
-  <button
-    onClick={async () => {
-      if (!window.confirm("Cancel this task?")) return;
+        {task.status !== "completed" && task.status !== "cancelled" && (
+          <button
+            onClick={async () => {
+              if (!window.confirm("Cancel this task?")) return;
 
-      try {
-        await API.patch(`/tasks/${taskId}/cancel`);
-        alert("Task cancelled");
-        fetchTask();
-      } catch (err) {
-        alert(err.response?.data?.message || "Cancel failed");
-      }
-    }}
-    className="mt-3 px-4 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
-  >
-    Cancel Task
-  </button>
-)}
+              try {
+                await API.patch(`/tasks/${taskId}/cancel`);
+                alert("Task cancelled");
+                fetchTask();
+              } catch (err) {
+                alert(err.response?.data?.message || "Cancel failed");
+              }
+            }}
+            className="mt-3 px-4 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Cancel Task
+          </button>
+        )}
 
         {task.externalLink && (
-          <a href={task.externalLink} target="_blank"
-            className="text-blue-600 text-sm underline">
+          <a
+            href={task.externalLink}
+            target="_blank"
+            className="text-blue-600 text-sm underline"
+          >
             Open Resource
           </a>
         )}
@@ -177,20 +180,20 @@ export default function TaskDetails() {
 
       {/* ================= PENDING ================= */}
       <div>
-        <h2 className="font-semibold mb-3">
-          Pending ({pending.length})
-        </h2>
+        <h2 className="font-semibold mb-3">Pending ({pending.length})</h2>
 
         {pending.length === 0 && (
           <div className="text-gray-400">Nothing pending</div>
         )}
 
-        {pending.map(sub => {
+        {pending.map((sub) => {
           const review = reviewState[sub._id] || {};
 
           return (
-            <div key={sub._id} className="bg-white p-5 rounded-xl border space-y-3">
-
+            <div
+              key={sub._id}
+              className="bg-white p-5 rounded-xl border space-y-3"
+            >
               <p className="font-semibold">{sub.student?.fullName}</p>
               <p className="text-sm text-gray-500">
                 {new Date(sub.submittedAt).toLocaleString()}
@@ -199,22 +202,31 @@ export default function TaskDetails() {
               <p>{sub.workSummary}</p>
 
               {sub.githubLink && (
-                <a href={sub.githubLink} target="_blank"
-                  className="text-blue-600 underline text-sm">
+                <a
+                  href={sub.githubLink}
+                  target="_blank"
+                  className="text-blue-600 underline text-sm"
+                >
                   GitHub
                 </a>
               )}
 
-              {sub.files?.map((f,i)=>(
-                <a key={i} href={f.url} target="_blank"
-                  className="block text-blue-600 text-sm">
+              {sub.files?.map((f, i) => (
+                <a
+                  key={i}
+                  href={f.url}
+                  target="_blank"
+                  className="block text-blue-600 text-sm"
+                >
                   📎 {f.fileName}
                 </a>
               ))}
 
               <select
                 value={review.status || ""}
-                onChange={(e)=>updateReviewField(sub._id,"status",e.target.value)}
+                onChange={(e) =>
+                  updateReviewField(sub._id, "status", e.target.value)
+                }
                 className="w-full border p-2 rounded"
               >
                 <option value="">Decision</option>
@@ -225,7 +237,9 @@ export default function TaskDetails() {
               <textarea
                 placeholder="Feedback"
                 value={review.mentorFeedback || ""}
-                onChange={(e)=>updateReviewField(sub._id,"mentorFeedback",e.target.value)}
+                onChange={(e) =>
+                  updateReviewField(sub._id, "mentorFeedback", e.target.value)
+                }
                 className="w-full border p-2 rounded"
               />
 
@@ -233,17 +247,18 @@ export default function TaskDetails() {
                 type="number"
                 placeholder="Score"
                 value={review.score || ""}
-                onChange={(e)=>updateReviewField(sub._id,"score",e.target.value)}
+                onChange={(e) =>
+                  updateReviewField(sub._id, "score", e.target.value)
+                }
                 className="w-full border p-2 rounded"
               />
 
               <button
-                onClick={()=>reviewSubmission(sub._id)}
+                onClick={() => reviewSubmission(sub._id)}
                 className="bg-green-600 text-white px-4 py-2 rounded"
               >
                 {reviewLoading === sub._id ? "Saving..." : "Submit"}
               </button>
-
             </div>
           );
         })}
@@ -251,20 +266,20 @@ export default function TaskDetails() {
 
       {/* ================= REVIEWED ================= */}
       <div>
-        <h2 className="font-semibold mb-3">
-          Reviewed ({reviewed.length})
-        </h2>
+        <h2 className="font-semibold mb-3">Reviewed ({reviewed.length})</h2>
 
-        {reviewed.map(sub => {
-
-          const history = (historyMap[sub.student] || [])
-            .sort((a,b)=> new Date(b.submittedAt)-new Date(a.submittedAt));
+        {reviewed.map((sub) => {
+          const history = (historyMap[sub.student] || []).sort(
+            (a, b) => new Date(b.submittedAt) - new Date(a.submittedAt),
+          );
 
           const isRevision = sub.status === "revision_requested";
 
           return (
-            <div key={sub._id} className="bg-white p-6 rounded-xl border space-y-4">
-
+            <div
+              key={sub._id}
+              className="bg-white p-6 rounded-xl border space-y-4"
+            >
               {/* HEADER */}
               <div className="flex justify-between">
                 <div>
@@ -283,15 +298,22 @@ export default function TaskDetails() {
               <p>{sub.workSummary}</p>
 
               {sub.githubLink && (
-                <a href={sub.githubLink} target="_blank"
-                  className="text-blue-600 text-sm underline">
+                <a
+                  href={sub.githubLink}
+                  target="_blank"
+                  className="text-blue-600 text-sm underline"
+                >
                   GitHub
                 </a>
               )}
 
-              {sub.files?.map((f,i)=>(
-                <a key={i} href={f.url} target="_blank"
-                  className="block text-blue-600 text-sm">
+              {sub.files?.map((f, i) => (
+                <a
+                  key={i}
+                  href={f.url}
+                  target="_blank"
+                  className="block text-blue-600 text-sm"
+                >
                   📎 {f.fileName}
                 </a>
               ))}
@@ -310,14 +332,15 @@ export default function TaskDetails() {
 
               {/* HISTORY */}
               <div className="border-t pt-3 space-y-2">
-
                 <p className="text-xs text-gray-500 font-semibold">
                   Attempt Timeline
                 </p>
 
-                {history.map((h,i)=>(
-                  <div key={i} className="bg-gray-50 p-3 rounded text-xs space-y-1">
-
+                {history.map((h, i) => (
+                  <div
+                    key={i}
+                    className="bg-gray-50 p-3 rounded text-xs space-y-1"
+                  >
                     <div className="flex justify-between">
                       <span>Attempt {h.attempt}</span>
                       <span className={getStatusColor(h.status)}>
@@ -328,15 +351,22 @@ export default function TaskDetails() {
                     <div>{h.workSummary}</div>
 
                     {h.githubLink && (
-                      <a href={h.githubLink} target="_blank"
-                        className="text-blue-600">
+                      <a
+                        href={h.githubLink}
+                        target="_blank"
+                        className="text-blue-600"
+                      >
                         GitHub
                       </a>
                     )}
 
-                    {h.files?.map((f,i)=>(
-                      <a key={i} href={f.url} target="_blank"
-                        className="block text-blue-600">
+                    {h.files?.map((f, i) => (
+                      <a
+                        key={i}
+                        href={f.url}
+                        target="_blank"
+                        className="block text-blue-600"
+                      >
                         📎 {f.fileName}
                       </a>
                     ))}
@@ -347,20 +377,14 @@ export default function TaskDetails() {
                       </div>
                     )}
 
-                    {h.score !== undefined && (
-                      <div>Score: {h.score}/10</div>
-                    )}
-
+                    {h.score !== undefined && <div>Score: {h.score}/10</div>}
                   </div>
                 ))}
-
               </div>
-
             </div>
           );
         })}
       </div>
-
     </div>
   );
 }

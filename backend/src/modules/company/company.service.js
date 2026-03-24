@@ -8,13 +8,14 @@ import Application from "../../models/Application.js";
 import Task from "../../models/Task.js";
 import ProgressLog from "../../models/ProgressLog.js";
 import InternshipReport from "../../models/InternshipReport.js";
+import Internship from "../../models/Internship.js";
 
 const EDITABLE_FIELDS = [
   "name",
   "website",
   "industry",
   "companySize",
-  "description"
+  "description",
 ];
 
 // =============================
@@ -39,11 +40,7 @@ export const getCompanyProfileService = async (user) => {
 // =============================
 // UPDATE COMPANY PROFILE
 // =============================
-export const updateCompanyProfileService = async (
-  user,
-  body,
-  file
-) => {
+export const updateCompanyProfileService = async (user, body, file) => {
   const companyId = user.referenceId;
 
   if (!companyId) {
@@ -60,9 +57,7 @@ export const updateCompanyProfileService = async (
   EDITABLE_FIELDS.forEach((field) => {
     if (body[field] !== undefined) {
       const value =
-        typeof body[field] === "string"
-          ? body[field].trim()
-          : body[field];
+        typeof body[field] === "string" ? body[field].trim() : body[field];
 
       profile[field] = value;
     }
@@ -86,10 +81,7 @@ export const updateCompanyProfileService = async (
 
   // ===== LOGO UPLOAD =====
   if (file) {
-    const upload = await uploadToCloudinary(
-      file,
-      "company-logos"
-    );
+    const upload = await uploadToCloudinary(file, "company-logos");
 
     profile.logoUrl = upload.secure_url;
   }
@@ -99,14 +91,12 @@ export const updateCompanyProfileService = async (
     profile.name,
     profile.industry,
     profile.companySize,
-    profile.locations?.length
+    profile.locations?.length,
   ];
 
   const isComplete = requiredFields.every(Boolean);
 
-  profile.profileStatus = isComplete
-    ? "completed"
-    : "pending";
+  profile.profileStatus = isComplete ? "completed" : "pending";
 
   if (isComplete && !profile.profileCompletedAt) {
     profile.profileCompletedAt = new Date();
@@ -118,12 +108,11 @@ export const updateCompanyProfileService = async (
 };
 
 export const getCompanyMentorsService = async (user) => {
-
   const companyId = user.referenceId;
 
   const mentors = await MentorProfile.find({
     company: companyId,
-    status: "active"
+    status: "active",
   })
     .populate("user", "email")
     .lean();
@@ -131,30 +120,21 @@ export const getCompanyMentorsService = async (user) => {
   return mentors;
 };
 
-export const updateCompanyMentorService = async (
-  user,
-  mentorId,
-  body
-) => {
-
+export const updateCompanyMentorService = async (user, mentorId, body) => {
   const companyId = user.referenceId;
 
   const mentor = await MentorProfile.findOne({
     _id: mentorId,
-    company: companyId
+    company: companyId,
   });
 
   if (!mentor) {
     throw new Error("Mentor not found");
   }
 
-  const allowedFields = [
-    "designation",
-    "department",
-    "employeeId"
-  ];
+  const allowedFields = ["designation", "department", "employeeId"];
 
-  allowedFields.forEach(field => {
+  allowedFields.forEach((field) => {
     if (body[field] !== undefined) {
       mentor[field] = body[field];
     }
@@ -165,17 +145,13 @@ export const updateCompanyMentorService = async (
   return mentor;
 };
 
-export const removeMentorFromCompanyService = async (
-  user,
-  mentorId
-) => {
-
+export const removeMentorFromCompanyService = async (user, mentorId) => {
   const companyId = user.referenceId;
   const adminId = user._id;
 
   const mentor = await MentorProfile.findOne({
     _id: mentorId,
-    company: companyId
+    company: companyId,
   });
 
   if (!mentor) {
@@ -186,19 +162,18 @@ export const removeMentorFromCompanyService = async (
   session.startTransaction();
 
   try {
-
     // END EMPLOYMENT HISTORY
     await MentorEmploymentHistory.updateOne(
       {
         mentor: mentorId,
-        status: "active"
+        status: "active",
       },
       {
         endDate: new Date(),
         status: "ended",
-        endedBy: adminId
+        endedBy: adminId,
       },
-      { session }
+      { session },
     );
 
     // CLEAR PROFILE
@@ -218,18 +193,16 @@ export const removeMentorFromCompanyService = async (
         isRegistered: false,
         isVerified: false,
         passwordSetupToken: undefined,
-        passwordSetupExpires: undefined
+        passwordSetupExpires: undefined,
       },
-      { session }
+      { session },
     );
 
     await session.commitTransaction();
     session.endSession();
 
     return { success: true };
-
   } catch (err) {
-
     await session.abortTransaction();
     session.endSession();
     throw err;
@@ -237,14 +210,13 @@ export const removeMentorFromCompanyService = async (
 };
 
 export const getCompanyInternsService = async (user) => {
-
   if (user.role !== "company") {
     throw new Error("Only company allowed");
   }
 
   const applications = await Application.find({
     company: user.referenceId,
-    status: { $in: ["offer_accepted", "ongoing", "completed"] }
+    status: { $in: ["offer_accepted", "ongoing", "completed"] },
   })
     .populate("student")
     .populate("mentor")
@@ -252,75 +224,50 @@ export const getCompanyInternsService = async (user) => {
     .lean();
 
   // 🔥 FETCH REPORTS
-  const appIds = applications.map(app => app._id);
+  const appIds = applications.map((app) => app._id);
 
   const reports = await InternshipReport.find({
-    application: { $in: appIds }
+    application: { $in: appIds },
   }).lean();
 
   const reportMap = {};
-  reports.forEach(r => {
+  reports.forEach((r) => {
     reportMap[r.application.toString()] = r;
   });
 
   // 🔥 ATTACH REPORT
-  const finalData = applications.map(app => {
+  const finalData = applications.map((app) => {
     const appId = app._id.toString();
 
     return {
       ...app,
       applicationId: appId,
-      report: reportMap[appId] || null
+      report: reportMap[appId] || null,
     };
   });
 
   return finalData;
 };
 
-export const assignMentorService = async (
-  user,
-  applicationId,
-  mentorId
-) => {
-
+export const assignMentorService = async (user, applicationId, mentorId) => {
   if (user.role !== "company") {
     throw new Error("Only company allowed");
   }
 
   const application = await Application.findOne({
     _id: applicationId,
-    company: user.referenceId
+    company: user.referenceId,
   });
 
   if (!application) {
     throw new Error("Application not found");
   }
 
-  // ✅ allow before + during internship
-  if (!["offer_accepted", "ongoing"].includes(application.status)) {
-    throw new Error(
-      "Mentor can only be assigned before or during internship"
-    );
+  // 🔒 Allow only before internship starts
+  if (application.status !== "offer_accepted") {
+    throw new Error("Mentor can only be assigned before internship starts");
   }
 
-  // ❌ prevent same mentor reassign
-  if (
-    application.mentor &&
-    application.mentor.toString() === mentorId
-  ) {
-    throw new Error("Mentor already assigned");
-  }
-
-  // ✅ store previous mentor in history
-  if (application.mentor) {
-    application.mentorHistory.push({
-      mentor: application.mentor,
-      assignedAt: application.updatedAt,
-      removedAt: new Date()
-    });
-  }
-
-  // ✅ assign new mentor
   application.mentor = mentorId;
 
   await application.save();
@@ -329,7 +276,6 @@ export const assignMentorService = async (
 };
 
 export const getInternProgressService = async (companyId, applicationId) => {
-
   const application = await Application.findById(applicationId)
     .populate("student", "fullName email phoneNo")
     .populate("mentor", "fullName email")
@@ -359,16 +305,15 @@ export const getInternProgressService = async (companyId, applicationId) => {
     application,
     tasks,
     logs,
-    reports
+    reports,
   };
 };
 
 export const issueCertificateService = async ({
   applicationId,
   file,
-  user
+  user,
 }) => {
-
   const application = await Application.findById(applicationId);
 
   if (!application) {
@@ -405,18 +350,13 @@ export const issueCertificateService = async ({
   return application;
 };
 
-
-
 /*
   ================= GET CERTIFICATE =================
 */
-export const getCertificateService = async ({
-  applicationId,
-  user
-}) => {
-
-  const application = await Application.findById(applicationId)
-    .select("certificateUrl student faculty company");
+export const getCertificateService = async ({ applicationId, user }) => {
+  const application = await Application.findById(applicationId).select(
+    "certificateUrl student faculty company",
+  );
 
   if (!application) {
     throw new Error("Application not found");
@@ -424,16 +364,13 @@ export const getCertificateService = async ({
 
   // 🔐 access control (FIXED with .equals())
   const isStudent =
-    user.role === "student" &&
-    application.student?.equals(user.referenceId);
+    user.role === "student" && application.student?.equals(user.referenceId);
 
   const isFaculty =
-    user.role === "faculty" &&
-    application.faculty?.equals(user.referenceId);
+    user.role === "faculty" && application.faculty?.equals(user.referenceId);
 
   const isCompany =
-    user.role === "company" &&
-    application.company?.equals(user.referenceId);
+    user.role === "company" && application.company?.equals(user.referenceId);
 
   if (!isStudent && !isFaculty && !isCompany) {
     throw new Error("Forbidden");
@@ -444,6 +381,54 @@ export const getCertificateService = async ({
   }
 
   return {
-    certificateUrl: application.certificateUrl
+    certificateUrl: application.certificateUrl,
+  };
+};
+
+export const getCompanyDashboardService = async (user) => {
+  const companyId = user.referenceId;
+
+  // 1️⃣ Internships
+  const totalInternships = await Internship.countDocuments({
+    company: companyId,
+  });
+
+  // 2️⃣ Applications
+  const applications = await Application.find({
+    company: companyId,
+  });
+
+  const totalApplications = applications.length;
+
+  // 3️⃣ Status counts
+  let offerAccepted = 0;
+  let ongoing = 0;
+  let completed = 0;
+  let certificatesIssued = 0;
+
+  applications.forEach((app) => {
+    if (app.status === "offer_accepted") offerAccepted++;
+    if (app.status === "ongoing") ongoing++;
+    if (app.status === "completed") completed++;
+
+    if (app.certificateUrl) certificatesIssued++;
+  });
+
+  const totalInterns = offerAccepted + ongoing + completed;
+
+  // 4️⃣ Mentors
+  const totalMentors = await MentorProfile.countDocuments({
+    company: companyId,
+    status: "active",
+  });
+
+  // ✅ IMPORTANT: return ALL fields
+  return {
+    totalInternships,
+    totalApplications,
+    totalInterns: totalInterns || 0,
+    totalMentors: totalMentors || 0,
+    completedInternships: completed || 0,
+    certificatesIssued: certificatesIssued || 0,
   };
 };

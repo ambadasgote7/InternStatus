@@ -152,7 +152,10 @@ export default function InviteStudent() {
   const generateRows = () => {
     const num = Number(count);
     if (!num || num <= 0) return;
-    const arr = Array.from({ length: num }, () => ({ email: "", fullName: "" }));
+    const arr = Array.from({ length: num }, () => ({
+      email: "",
+      fullName: "",
+    }));
     setRows(validateRows(arr));
   };
 
@@ -269,71 +272,95 @@ export default function InviteStudent() {
     }
   };
 
-  const errorRows = rows.filter((r) => Object.keys(r.errors || {}).length > 0).length;
-  const progressPercent = progress.total === 0 ? 0 : Math.round((progress.success / progress.total) * 100);
+  const errorRows = rows.filter(
+    (r) => Object.keys(r.errors || {}).length > 0,
+  ).length;
+  const progressPercent =
+    progress.total === 0
+      ? 0
+      : Math.round((progress.success / progress.total) * 100);
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] p-4 md:p-12 font-sans box-border text-white selection:bg-violet-500/30 selection:text-violet-200 relative overflow-hidden">
-      <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-violet-600/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen" aria-hidden="true" />
-      <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-fuchsia-600/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen" aria-hidden="true" />
-
-      <div className="max-w-5xl mx-auto bg-white/5 backdrop-blur-xl p-8 md:p-12 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] border border-white/10 relative z-10 transition-all duration-300 hover:border-white/20">
-        
-        <header className="mb-12 text-center md:text-left border-b border-white/10 pb-8">
-          <div className="text-[10px] font-bold text-violet-400 uppercase tracking-[0.3em] mb-3">Provisioning Terminal</div>
-          <h2 className="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 m-0 tracking-tight">
+    <div className="min-h-screen bg-[#f9f9f9] p-4 md:p-12 font-sans box-border text-[#111]">
+      <div className="max-w-5xl mx-auto bg-[#fff] p-8 md:p-12 rounded-[24px] shadow-sm border border-[#e5e5e5] transition-all duration-300 hover:border-[#ccc]">
+        <header className="mb-12 text-center md:text-left border-b border-[#e5e5e5] pb-8">
+          <div className="text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-[0.2em] mb-3">
+            Provisioning Terminal
+          </div>
+          <h2 className="text-3xl md:text-5xl font-black text-[#111] m-0 tracking-tighter uppercase">
             Invite Students
           </h2>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest ml-1">Academic Program</label>
+            <label className="text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-[0.15em] ml-1">
+              Academic Program
+            </label>
             {isFaculty ? (
-              <input 
-                className="w-full px-5 py-4 text-sm text-white/40 bg-white/5 border border-white/5 rounded-xl outline-none cursor-not-allowed italic"
-                value={form.courseName} 
-                disabled 
+              <input
+                className="w-full px-5 py-4 text-[13px] font-medium text-[#555] bg-[#f9f9f9] border border-[#e5e5e5] rounded-[14px] outline-none cursor-not-allowed italic"
+                value={form.courseName}
+                disabled
               />
             ) : (
               <div className="relative">
                 <select
-                  className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 cursor-pointer appearance-none [&>option]:bg-[#0B0F19]"
+                  className="w-full px-5 py-4 text-[13px] font-medium text-[#111] bg-[#fff] border border-[#e5e5e5] rounded-[14px] outline-none transition-all duration-300 focus:border-[#111] focus:ring-1 focus:ring-[#111] shadow-sm cursor-pointer appearance-none"
                   value={form.courseName}
                   onChange={(e) => handleCourseChange(e.target.value)}
                 >
-                  <option value="">Select Course</option>
+                  <option value="" className="text-[#999]">
+                    Select Course
+                  </option>
                   {courses.map((c) => (
-                    <option key={c.name} value={c.name}>{c.name}</option>
+                    <option key={c.name} value={c.name}>
+                      {c.name}
+                    </option>
                   ))}
                 </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">▼</div>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#999]">
+                  ▼
+                </div>
               </div>
             )}
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest ml-1">Specialization</label>
+            <label className="text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-[0.15em] ml-1">
+              Specialization
+            </label>
             {isFaculty ? (
-              <input 
-                className="w-full px-5 py-4 text-sm text-white/40 bg-white/5 border border-white/5 rounded-xl outline-none cursor-not-allowed italic"
-                value={form.specialization} 
-                disabled 
+              <input
+                className="w-full px-5 py-4 text-[13px] font-medium text-[#555] bg-[#f9f9f9] border border-[#e5e5e5] rounded-[14px] outline-none cursor-not-allowed italic"
+                value={form.specialization}
+                disabled
               />
             ) : (
               <div className="relative">
                 <select
-                  className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 transition-all duration-300 cursor-pointer appearance-none disabled:opacity-50 disabled:cursor-not-allowed [&>option]:bg-[#0B0F19]"
+                  className="w-full px-5 py-4 text-[13px] font-medium text-[#111] bg-[#fff] border border-[#e5e5e5] rounded-[14px] outline-none transition-all duration-300 focus:border-[#111] focus:ring-1 focus:ring-[#111] shadow-sm cursor-pointer appearance-none disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-[#f9f9f9]"
                   value={form.specialization}
-                  onChange={(e) => setForm((prev) => ({ ...prev, specialization: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      specialization: e.target.value,
+                    }))
+                  }
                   disabled={!form.courseName}
                 >
-                  <option value="">Select Specialization</option>
+                  <option value="" className="text-[#999]">
+                    Select Specialization
+                  </option>
                   {specializations.map((s) => (
-                    <option key={s} value={s}>{s}</option>
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
                   ))}
                 </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">▼</div>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#999]">
+                  ▼
+                </div>
               </div>
             )}
           </div>
@@ -341,58 +368,78 @@ export default function InviteStudent() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest ml-1">Cycle Start</label>
+            <label className="text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-[0.15em] ml-1">
+              Cycle Start
+            </label>
             <div className="relative">
               <select
-                className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 transition-all duration-300 cursor-pointer appearance-none [&>option]:bg-[#0B0F19]"
+                className="w-full px-5 py-4 text-[13px] font-medium text-[#111] bg-[#fff] border border-[#e5e5e5] rounded-[14px] outline-none transition-all duration-300 focus:border-[#111] focus:ring-1 focus:ring-[#111] shadow-sm cursor-pointer appearance-none"
                 value={form.courseStartYear}
                 onChange={(e) => handleStartYearChange(e.target.value)}
               >
-                <option value="">Start Year</option>
+                <option value="" className="text-[#999]">
+                  Start Year
+                </option>
                 {startYearOptions.map((y) => (
-                  <option key={y} value={y}>{y}</option>
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
                 ))}
               </select>
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">▼</div>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#999]">
+                ▼
+              </div>
             </div>
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest ml-1">Cycle End (Calculated)</label>
-            <input 
-              className="w-full px-5 py-4 text-sm text-white/40 bg-white/5 border border-white/5 rounded-xl outline-none cursor-not-allowed italic"
-              value={form.courseEndYear || "Auto"} 
+            <label className="text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-[0.15em] ml-1">
+              Cycle End (Calculated)
+            </label>
+            <input
+              className="w-full px-5 py-4 text-[13px] font-medium text-[#555] bg-[#f9f9f9] border border-[#e5e5e5] rounded-[14px] outline-none cursor-not-allowed italic"
+              value={form.courseEndYear || "Auto"}
               disabled
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold text-white/50 uppercase tracking-widest ml-1">Current Year Level</label>
+            <label className="text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-[0.15em] ml-1">
+              Current Year Level
+            </label>
             <div className="relative">
               <select
-                className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 transition-all duration-300 cursor-pointer appearance-none [&>option]:bg-[#0B0F19]"
+                className="w-full px-5 py-4 text-[13px] font-medium text-[#111] bg-[#fff] border border-[#e5e5e5] rounded-[14px] outline-none transition-all duration-300 focus:border-[#111] focus:ring-1 focus:ring-[#111] shadow-sm cursor-pointer appearance-none"
                 value={form.Year}
-                onChange={(e) => setForm((prev) => ({ ...prev, Year: e.target.value }))}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, Year: e.target.value }))
+                }
               >
-                <option value="">Year</option>
+                <option value="" className="text-[#999]">
+                  Year
+                </option>
                 {YearOptions.map((y) => (
-                  <option key={y} value={y}>{y}</option>
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
                 ))}
               </select>
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">▼</div>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#999]">
+                ▼
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex bg-[#0B0F19]/50 p-1.5 rounded-2xl border border-white/10 w-fit mb-8">
+        <div className="flex bg-[#f9f9f9] p-1.5 rounded-[14px] border border-[#e5e5e5] w-fit mb-8">
           <button
-            className={`px-8 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${mode === "count" ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg" : "text-white/40 hover:text-white"}`}
+            className={`px-8 py-2.5 rounded-[10px] text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 outline-none cursor-pointer ${mode === "count" ? "bg-[#111] text-[#fff] shadow-sm" : "text-[#555] hover:text-[#111] bg-transparent border-none"}`}
             onClick={() => setMode("count")}
           >
             Manual Matrix
           </button>
           <button
-            className={`px-8 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${mode === "csv" ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg" : "text-white/40 hover:text-white"}`}
+            className={`px-8 py-2.5 rounded-[10px] text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300 outline-none cursor-pointer ${mode === "csv" ? "bg-[#111] text-[#fff] shadow-sm" : "text-[#555] hover:text-[#111] bg-transparent border-none"}`}
             onClick={() => setMode("csv")}
           >
             Bulk CSV Upload
@@ -400,14 +447,14 @@ export default function InviteStudent() {
         </div>
 
         {mode === "csv" && (
-          <div className="flex flex-col md:flex-row items-center gap-6 mb-8 p-8 bg-[#0B0F19]/30 border-2 border-white/5 border-dashed rounded-3xl">
-            <button 
-              className="px-6 py-3 text-[10px] font-bold text-violet-300 bg-violet-500/10 border border-violet-500/30 rounded-xl hover:bg-violet-500/20 transition-all uppercase tracking-widest whitespace-nowrap outline-none" 
+          <div className="flex flex-col md:flex-row items-center gap-6 mb-8 p-8 bg-[#f9f9f9] border-2 border-[#e5e5e5] border-dashed rounded-[24px]">
+            <button
+              className="px-6 py-3 text-[10px] font-black text-[#111] bg-[#fff] border border-[#e5e5e5] rounded-[12px] hover:bg-[#f9f9f9] hover:border-[#ccc] transition-all uppercase tracking-widest whitespace-nowrap outline-none cursor-pointer"
               onClick={downloadTemplate}
             >
               Get Template
             </button>
-            
+
             <div className="flex-1 flex flex-col sm:flex-row items-center gap-4 w-full">
               <input
                 type="file"
@@ -416,13 +463,16 @@ export default function InviteStudent() {
                 onChange={handleCSV}
                 className="hidden"
               />
-              <label htmlFor="csv-upload" className="w-full flex-1 flex items-center justify-center px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold uppercase tracking-widest text-white/60 cursor-pointer hover:bg-white/10 transition-all">
+              <label
+                htmlFor="csv-upload"
+                className="w-full flex-1 flex items-center justify-center px-6 py-3 bg-[#fff] border border-[#e5e5e5] rounded-[14px] text-[10px] font-black uppercase tracking-[0.15em] text-[#555] cursor-pointer hover:bg-[#f9f9f9] transition-all shadow-sm"
+              >
                 {fileName || "Select CSV File"}
               </label>
               {fileName && (
                 <button
                   onClick={removeFile}
-                  className="px-4 py-3 text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl text-[10px] font-black uppercase hover:bg-red-500/20 transition-all"
+                  className="px-4 py-3 text-[#991b1b] bg-[#fff] border border-[#fecaca] rounded-[14px] text-[10px] font-black uppercase tracking-[0.15em] hover:bg-[#fef2f2] transition-all cursor-pointer outline-none"
                 >
                   Clear
                 </button>
@@ -432,16 +482,16 @@ export default function InviteStudent() {
         )}
 
         {mode === "count" && (
-          <div className="flex flex-col sm:flex-row items-center gap-4 mb-8 p-8 bg-[#0B0F19]/30 border border-white/5 rounded-3xl shadow-inner">
+          <div className="flex flex-col sm:flex-row items-center gap-4 mb-8 p-8 bg-[#f9f9f9] border border-[#e5e5e5] rounded-[24px] shadow-sm">
             <input
-              className="w-full sm:w-64 px-5 py-3.5 text-sm text-white bg-[#0B0F19]/80 border border-white/10 rounded-xl outline-none focus:border-violet-500 transition-all placeholder:text-white/20"
+              className="w-full sm:w-64 px-5 py-3.5 text-[13px] font-medium text-[#111] bg-[#fff] border border-[#e5e5e5] rounded-[14px] outline-none focus:border-[#111] focus:ring-1 focus:ring-[#111] transition-all placeholder:text-[#999] shadow-sm"
               type="number"
               placeholder="Quantity of students"
               value={count}
               onChange={(e) => setCount(e.target.value)}
             />
-            <button 
-              className="w-full sm:w-auto px-10 py-3.5 text-[10px] font-black text-white bg-white/10 border border-white/10 rounded-xl hover:bg-white/20 transition-all uppercase tracking-[0.2em] outline-none" 
+            <button
+              className="w-full sm:w-auto px-10 py-3.5 text-[10px] font-black text-[#fff] bg-[#111] border border-[#111] rounded-[14px] hover:bg-[#333] hover:border-[#333] transition-all uppercase tracking-[0.2em] outline-none cursor-pointer"
               onClick={generateRows}
             >
               Generate Map
@@ -450,53 +500,79 @@ export default function InviteStudent() {
         )}
 
         {errorRows > 0 && (
-          <div className="mb-8 px-6 py-4 text-[11px] font-bold text-red-300 bg-red-500/10 border border-red-500/20 rounded-xl uppercase tracking-widest text-center animate-pulse">
-            Validation Failed: {errorRows} record{errorRows > 1 ? "s" : ""} require attention.
+          <div className="mb-8 px-6 py-4 text-[11px] font-bold text-[#991b1b] bg-[#fef2f2] border border-[#fecaca] rounded-[14px] uppercase tracking-widest text-center animate-pulse">
+            Validation Failed: {errorRows} record{errorRows > 1 ? "s" : ""}{" "}
+            require attention.
           </div>
         )}
 
         {rows.length > 0 && (
           <div className="space-y-8">
-            <div className="bg-[#0B0F19]/30 border border-white/10 rounded-2xl overflow-hidden shadow-inner w-full max-w-full">
+            <div className="bg-[#fff] border border-[#e5e5e5] rounded-[24px] overflow-hidden shadow-sm w-full max-w-full">
               <div className="overflow-x-auto no-scrollbar">
                 <table className="w-full text-left border-collapse whitespace-nowrap min-w-max">
-                  <thead className="bg-white/5 border-b border-white/10">
+                  <thead className="bg-[#f9f9f9] border-b border-[#e5e5e5]">
                     <tr>
-                      <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest w-16 text-center">ID</th>
-                      <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest">Email Address</th>
-                      <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest">Full Name</th>
-                      <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest text-right">Actions</th>
+                      <th className="px-6 py-5 text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-[0.15em] w-16 text-center">
+                        ID
+                      </th>
+                      <th className="px-6 py-5 text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-[0.15em]">
+                        Email Address
+                      </th>
+                      <th className="px-6 py-5 text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-[0.15em]">
+                        Full Name
+                      </th>
+                      <th className="px-6 py-5 text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-[0.15em] text-right">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
+                  <tbody className="divide-y divide-[#e5e5e5]">
                     {rows.map((row, i) => (
-                      <tr key={i} className="hover:bg-white/5 transition-colors duration-300 group">
-                        <td className="px-6 py-5 text-[11px] font-bold text-white/30 text-center">{i + 1}</td>
+                      <tr
+                        key={i}
+                        className="hover:bg-[#fcfcfc] transition-colors duration-300 group"
+                      >
+                        <td className="px-6 py-5 text-[11px] font-bold text-[#999] text-center">
+                          {i + 1}
+                        </td>
                         <td className="px-6 py-4">
-                          <div className="flex flex-col gap-1">
+                          <div className="flex flex-col gap-1.5">
                             <input
-                              className={`bg-[#0B0F19]/50 border px-4 py-2.5 rounded-lg text-sm text-white/90 outline-none transition-all focus:ring-1 focus:ring-violet-500 ${row.errors?.email ? "border-red-500/50" : "border-white/10"}`}
+                              className={`bg-[#f9f9f9] border px-4 py-2.5 rounded-[10px] text-[13px] font-medium text-[#111] outline-none transition-all focus:ring-1 focus:ring-[#111] ${row.errors?.email ? "border-[#fecaca] bg-[#fef2f2]" : "border-[#e5e5e5]"}`}
                               value={row.email}
-                              onChange={(e) => updateRow(i, "email", e.target.value)}
+                              onChange={(e) =>
+                                updateRow(i, "email", e.target.value)
+                              }
                               placeholder="student@uplink.edu"
                             />
-                            {row.errors?.email && <span className="text-[9px] font-black text-red-400 uppercase tracking-tighter ml-1">ERR: {row.errors.email}</span>}
+                            {row.errors?.email && (
+                              <span className="text-[9px] font-black text-[#991b1b] uppercase tracking-widest ml-1">
+                                ERR: {row.errors.email}
+                              </span>
+                            )}
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex flex-col gap-1">
+                          <div className="flex flex-col gap-1.5">
                             <input
-                              className={`bg-[#0B0F19]/50 border px-4 py-2.5 rounded-lg text-sm text-white/90 outline-none transition-all focus:ring-1 focus:ring-violet-500 ${row.errors?.fullName ? "border-red-500/50" : "border-white/10"}`}
+                              className={`bg-[#f9f9f9] border px-4 py-2.5 rounded-[10px] text-[13px] font-medium text-[#111] outline-none transition-all focus:ring-1 focus:ring-[#111] ${row.errors?.fullName ? "border-[#fecaca] bg-[#fef2f2]" : "border-[#e5e5e5]"}`}
                               value={row.fullName}
-                              onChange={(e) => updateRow(i, "fullName", e.target.value)}
+                              onChange={(e) =>
+                                updateRow(i, "fullName", e.target.value)
+                              }
                               placeholder="Name"
                             />
-                            {row.errors?.fullName && <span className="text-[9px] font-black text-red-400 uppercase tracking-tighter ml-1">ERR: {row.errors.fullName}</span>}
+                            {row.errors?.fullName && (
+                              <span className="text-[9px] font-black text-[#991b1b] uppercase tracking-widest ml-1">
+                                ERR: {row.errors.fullName}
+                              </span>
+                            )}
                           </div>
                         </td>
                         <td className="px-6 py-4 text-right">
                           <button
-                            className="p-2 text-white/20 hover:text-red-400 transition-colors outline-none bg-transparent border-none cursor-pointer text-xs font-black uppercase tracking-tighter"
+                            className="p-2 text-[#999] hover:text-[#991b1b] transition-colors outline-none bg-transparent border-none cursor-pointer text-[10px] font-black uppercase tracking-widest"
                             onClick={() => removeRow(i)}
                           >
                             Purge
@@ -511,13 +587,13 @@ export default function InviteStudent() {
 
             <div className="flex justify-end pt-4">
               <button
-                className="w-full md:w-auto px-12 py-5 text-[10px] font-black text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 border-none rounded-2xl cursor-pointer transition-all duration-300 hover:shadow-[0_12px_24px_-8px_rgba(217,70,239,0.6)] hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-[0.2em] flex items-center justify-center gap-4"
+                className="w-full md:w-auto px-12 py-5 text-[11px] font-black text-[#fff] bg-[#111] border border-[#111] rounded-[16px] cursor-pointer transition-all duration-300 hover:bg-[#333] hover:border-[#333] hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-[0.2em] flex items-center justify-center gap-4 outline-none"
                 onClick={submitBulk}
                 disabled={loading || errorRows > 0}
               >
                 {loading ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <div className="w-4 h-4 border-2 border-[#fff]/30 border-t-[#fff] rounded-full animate-spin" />
                     Transmitting...
                   </>
                 ) : (
@@ -529,36 +605,47 @@ export default function InviteStudent() {
         )}
 
         {progress.total > 0 && (
-          <div className="mt-12 p-8 bg-[#0B0F19]/30 border border-white/10 rounded-3xl shadow-inner">
+          <div className="mt-12 p-8 bg-[#f9f9f9] border border-[#e5e5e5] rounded-[24px] shadow-sm">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-6">
               <div className="flex gap-8">
                 <div className="flex flex-col">
-                  <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Payload</span>
-                  <span className="text-xl font-black text-white">{progress.total}</span>
+                  <span className="text-[9px] font-bold text-[#555] uppercase tracking-widest mb-1">
+                    Payload
+                  </span>
+                  <span className="text-[20px] font-black text-[#111]">
+                    {progress.total}
+                  </span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mb-1">Delivered</span>
-                  <span className="text-xl font-black text-emerald-400">{progress.success}</span>
+                  <span className="text-[9px] font-bold text-[#166534] uppercase tracking-widest mb-1">
+                    Delivered
+                  </span>
+                  <span className="text-[20px] font-black text-[#166534]">
+                    {progress.success}
+                  </span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[9px] font-bold text-red-400 uppercase tracking-widest mb-1">Dropped</span>
-                  <span className="text-xl font-black text-red-400">{progress.failed}</span>
+                  <span className="text-[9px] font-bold text-[#991b1b] uppercase tracking-widest mb-1">
+                    Dropped
+                  </span>
+                  <span className="text-[20px] font-black text-[#991b1b]">
+                    {progress.failed}
+                  </span>
                 </div>
               </div>
-              <div className="text-[10px] font-black text-violet-400 uppercase tracking-widest bg-white/5 px-4 py-2 rounded-lg border border-white/5">
+              <div className="text-[10px] font-black text-[#111] uppercase tracking-[0.15em] bg-[#fff] px-4 py-2 rounded-[10px] border border-[#e5e5e5]">
                 {progressPercent}% Total Uplink
               </div>
             </div>
-            
-            <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
+
+            <div className="w-full bg-[#e5e5e5] rounded-full h-2 overflow-hidden">
               <div
-                className="bg-gradient-to-r from-violet-600 to-fuchsia-600 h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(217,70,239,0.5)]"
+                className="bg-[#111] h-full rounded-full transition-all duration-1000 ease-out"
                 style={{ width: `${progressPercent}%` }}
               ></div>
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

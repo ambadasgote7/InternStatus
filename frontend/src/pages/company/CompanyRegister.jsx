@@ -16,7 +16,7 @@ export default function CompanyRegister() {
     emailDomain: "",
     industry: "",
     companySize: "",
-    verificationDocument: null
+    verificationDocument: null,
   });
 
   const [loading, setLoading] = useState(false);
@@ -41,9 +41,9 @@ export default function CompanyRegister() {
     const { name, value, files } = e.target;
 
     if (name === "verificationDocument") {
-      setForm(prev => ({
+      setForm((prev) => ({
         ...prev,
-        verificationDocument: files[0]
+        verificationDocument: files[0],
       }));
       return;
     }
@@ -51,24 +51,24 @@ export default function CompanyRegister() {
     if (name === "selectedCompany") {
       if (value === "other") {
         setIsOther(true);
-        setForm(prev => ({
+        setForm((prev) => ({
           ...prev,
           selectedCompany: "",
-          companyName: ""
+          companyName: "",
         }));
       } else {
         setIsOther(false);
-        setForm(prev => ({
+        setForm((prev) => ({
           ...prev,
-          selectedCompany: value
+          selectedCompany: value,
         }));
       }
       return;
     }
 
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -102,23 +102,20 @@ export default function CompanyRegister() {
         {
           city: form.city,
           state: form.state,
-          country: form.country
-        }
+          country: form.country,
+        },
       ];
 
       formData.append("locations", JSON.stringify(locations));
 
       if (form.verificationDocument) {
-        formData.append(
-          "verificationDocument",
-          form.verificationDocument
-        );
+        formData.append("verificationDocument", form.verificationDocument);
       }
 
       await API.post("/onboarding/company", formData, {
         headers: {
-          "Content-Type": "multipart/form-data"
-        }
+          "Content-Type": "multipart/form-data",
+        },
       });
 
       setSuccess("Company request submitted. Please wait for admin approval.");
@@ -134,15 +131,11 @@ export default function CompanyRegister() {
         emailDomain: "",
         industry: "",
         companySize: "",
-        verificationDocument: null
+        verificationDocument: null,
       });
       setIsOther(false);
-
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-        "Error submitting request"
-      );
+      setError(err.response?.data?.message || "Error submitting request");
     } finally {
       setLoading(false);
     }
@@ -212,8 +205,10 @@ export default function CompanyRegister() {
               onChange={handleChange}
               className="w-full px-5 py-4 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-xl outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all duration-300 box-border appearance-none cursor-pointer [&>option]:bg-[#0B0F19]"
             >
-              <option value="" disabled className="text-white/40">Select Company</option>
-              {companies.map(c => (
+              <option value="" disabled className="text-white/40">
+                Select Company
+              </option>
+              {companies.map((c) => (
                 <option key={c._id} value={c._id}>
                   {c.name}
                 </option>

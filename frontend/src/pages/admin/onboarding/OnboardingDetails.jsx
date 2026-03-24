@@ -14,7 +14,7 @@ export default function VerifiedOnboardings() {
   const [counts, setCounts] = useState({
     all: 0,
     college: 0,
-    company: 0
+    company: 0,
   });
 
   const [loading, setLoading] = useState(true);
@@ -25,9 +25,7 @@ export default function VerifiedOnboardings() {
     try {
       setLoading(true);
 
-      const res = await API.get(
-        `/admin/onboarding/verified?type=${filter}`
-      );
+      const res = await API.get(`/admin/onboarding/verified?type=${filter}`);
 
       const collegeList = res.data?.data?.colleges || [];
       const companyList = res.data?.data?.companies || [];
@@ -38,9 +36,8 @@ export default function VerifiedOnboardings() {
       setCounts({
         all: collegeList.length + companyList.length,
         college: collegeList.length,
-        company: companyList.length
+        company: companyList.length,
       });
-
     } catch (err) {
       console.error(err);
     } finally {
@@ -55,64 +52,54 @@ export default function VerifiedOnboardings() {
   /* ================= MERGE ================= */
 
   const list = [
-    ...colleges.map(c => ({ ...c, type: "college" })),
-    ...companies.map(c => ({ ...c, type: "company" }))
+    ...colleges.map((c) => ({ ...c, type: "college" })),
+    ...companies.map((c) => ({ ...c, type: "company" })),
   ];
 
   /* ================= SEARCH ================= */
 
-  const filteredList = list.filter(item =>
-    item.requesterName?.toLowerCase().includes(search.toLowerCase()) ||
-    item.requesterEmail?.toLowerCase().includes(search.toLowerCase()) ||
-    item.collegeName?.toLowerCase().includes(search.toLowerCase()) ||
-    item.companyName?.toLowerCase().includes(search.toLowerCase())
+  const filteredList = list.filter(
+    (item) =>
+      item.requesterName?.toLowerCase().includes(search.toLowerCase()) ||
+      item.requesterEmail?.toLowerCase().includes(search.toLowerCase()) ||
+      item.collegeName?.toLowerCase().includes(search.toLowerCase()) ||
+      item.companyName?.toLowerCase().includes(search.toLowerCase()),
   );
 
   /* ================= UI ================= */
 
   return (
     <div className="p-6">
-
-      <h2 className="text-2xl font-semibold mb-4">
-        Verified Onboardings
-      </h2>
+      <h2 className="text-2xl font-semibold mb-4">Verified Onboardings</h2>
 
       {/* FILTER BUTTONS */}
       <div className="flex gap-3 mb-4">
-
         <button
           onClick={() => setFilter("all")}
           className={`px-4 py-2 rounded ${
-            filter === "all"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200"
+            filter === "all" ? "bg-blue-600 text-white" : "bg-gray-200"
           }`}
         >
-          All 
+          All
         </button>
 
         <button
           onClick={() => setFilter("college")}
           className={`px-4 py-2 rounded ${
-            filter === "college"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200"
+            filter === "college" ? "bg-blue-600 text-white" : "bg-gray-200"
           }`}
         >
-          Colleges 
+          Colleges
         </button>
 
         <button
           onClick={() => setFilter("company")}
           className={`px-4 py-2 rounded ${
-            filter === "company"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200"
+            filter === "company" ? "bg-blue-600 text-white" : "bg-gray-200"
           }`}
         >
-          Companies 
+          Companies
         </button>
-
       </div>
 
       {/* SEARCH */}
@@ -131,14 +118,12 @@ export default function VerifiedOnboardings() {
         <p>No verified onboardings</p>
       ) : (
         <div className="grid gap-4">
-
-          {filteredList.map(item => (
+          {filteredList.map((item) => (
             <div
               key={item._id}
               className="border p-4 rounded shadow-sm bg-white"
             >
               <div className="flex justify-between">
-
                 <div>
                   <p className="font-semibold">
                     {item.type === "college"
@@ -146,9 +131,7 @@ export default function VerifiedOnboardings() {
                       : item.companyName}
                   </p>
 
-                  <p className="text-sm text-gray-600">
-                    {item.requesterEmail}
-                  </p>
+                  <p className="text-sm text-gray-600">{item.requesterEmail}</p>
 
                   <p className="text-xs text-gray-500 mt-1">
                     Type: {item.type}
@@ -165,14 +148,11 @@ export default function VerifiedOnboardings() {
                     View Details
                   </button>
                 </div>
-
               </div>
             </div>
           ))}
-
         </div>
       )}
-
     </div>
   );
 }

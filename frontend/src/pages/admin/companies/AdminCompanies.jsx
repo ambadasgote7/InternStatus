@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../../api/api";
+import AdminNavBar from "../../../components/navbars/AdminNavBar";
 
 export default function AdminCompanies() {
   const navigate = useNavigate();
@@ -40,139 +41,152 @@ export default function AdminCompanies() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0B0F19]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-white/10 border-t-fuchsia-500 rounded-full animate-spin"></div>
-          <p className="text-fuchsia-400 font-medium tracking-widest uppercase text-xs animate-pulse m-0">
-            Loading Companies
+      <div className="min-h-screen w-full bg-[#f9f9f9] flex flex-col font-sans">
+  
+        <main className="flex-grow flex items-center justify-center">
+          <p className="text-[#333] font-bold text-[14px] animate-pulse m-0">
+            Loading Companies...
           </p>
-        </div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] p-4 md:p-8 font-sans text-white selection:bg-fuchsia-500/30 selection:text-fuchsia-200">
-      <div className="max-w-7xl mx-auto">
-        <header className="flex flex-col sm:flex-row justify-between sm:items-center gap-6 mb-10 border-b border-white/10 pb-6">
-          <h2 className="text-3xl md:text-4xl font-black m-0 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60">
-            Companies
-          </h2>
+    <div className="min-h-screen bg-[#f9f9f9] text-[#333] flex flex-col font-sans pb-10">
+
+
+      <main className="max-w-7xl mx-auto w-full px-4 md:px-6 py-6 flex flex-col gap-6">
+        <header className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-[#e5e5e5] pb-5">
+          <div>
+            <h1 className="text-[23px] font-black text-[#333] m-0 tracking-tight leading-tight">
+              Companies
+            </h1>
+            <p className="text-[13px] font-bold text-[#333] opacity-60 m-0 mt-1 uppercase tracking-widest">
+              Industry Partners
+            </p>
+          </div>
           <button
             onClick={() => navigate("/admin/companies/new")}
-            className="px-8 py-3.5 text-xs font-bold text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 border-none rounded-xl cursor-pointer transition-all duration-300 hover:shadow-[0_8px_20px_-6px_rgba(217,70,239,0.5)] hover:-translate-y-0.5 whitespace-nowrap uppercase tracking-widest"
+            className="px-6 py-2.5 text-[13px] font-bold text-[#fff] bg-[#111] border-none rounded-[14px] cursor-pointer hover:opacity-80 transition-opacity uppercase tracking-widest"
           >
             Add Company
           </button>
         </header>
 
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] overflow-hidden box-border transition-all duration-300 hover:border-white/20">
-          <div className="overflow-x-auto bg-[#0B0F19]/30 shadow-inner">
+        <div className="bg-[#fff] border border-[#e5e5e5] rounded-[20px] shadow-sm overflow-hidden box-border transition-all">
+          <div className="overflow-x-auto no-scrollbar">
             <table className="w-full text-left border-collapse whitespace-nowrap">
-              <thead className="bg-white/5 border-b border-white/10">
+              <thead className="bg-[#f9f9f9] border-b border-[#e5e5e5]">
                 <tr>
-                  <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest">
+                  <th className="px-5 py-3 text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
                     Name
                   </th>
-                  <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest">
+                  <th className="px-5 py-3 text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
                     Industry
                   </th>
-                  <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest">
+                  <th className="px-5 py-3 text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
                     Website
                   </th>
-                  <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest">
+                  <th className="px-5 py-3 text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
                     Status
                   </th>
-                  <th className="px-6 py-5 text-[10px] font-bold text-violet-400 uppercase tracking-widest">
+                  <th className="px-5 py-3 text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest text-center">
                     Actions
                   </th>
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-white/5">
-                {companies.length === 0 && (
+              <tbody className="divide-y divide-[#e5e5e5]">
+                {companies.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan="5"
-                      className="px-6 py-12 text-center text-sm font-medium text-white/40"
-                    >
-                      No companies found
+                    <td colSpan="5" className="px-5 py-10 text-center">
+                      <p className="text-[13px] font-bold text-[#333] opacity-40 m-0">
+                        No companies found
+                      </p>
                     </td>
                   </tr>
-                )}
+                ) : (
+                  companies.map((company) => (
+                    <tr
+                      key={company._id}
+                      className="hover:bg-[#f9f9f9] transition-colors duration-200"
+                    >
+                      <td className="px-5 py-3 text-[13px] font-bold text-[#333]">
+                        {company.name}
+                      </td>
 
-                {companies.map((company) => (
-                  <tr
-                    key={company._id}
-                    className="hover:bg-white/5 transition-colors duration-300 group"
-                  >
-                    <td className="px-6 py-5 text-sm font-bold text-white/90 group-hover:text-fuchsia-300 transition-colors">
-                      {company.name}
-                    </td>
+                      <td className="px-5 py-3 text-[13px] font-medium text-[#333] opacity-70">
+                        {company.industry || "—"}
+                      </td>
 
-                    <td className="px-6 py-5 text-sm text-white/70 font-medium">
-                      {company.industry || "—"}
-                    </td>
-
-                    <td className="px-6 py-5 text-xs text-fuchsia-400 font-medium tracking-wide">
-                      {company.website || "—"}
-                    </td>
-
-                    <td className="px-6 py-5">
-                      <span
-                        className={`inline-block px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest border ${
-                          company.status === "active"
-                            ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
-                            : "bg-red-500/10 text-red-400 border-red-500/20 opacity-80"
-                        }`}
-                      >
-                        {company.status}
-                      </span>
-                    </td>
-
-                    <td className="px-6 py-5">
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() =>
-                            navigate(`/admin/companies/${company._id}`)
-                          }
-                          className="px-4 py-2 text-[10px] font-bold tracking-widest uppercase text-white/80 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 hover:border-white/20 transition-all duration-300 cursor-pointer hover:-translate-y-0.5 outline-none"
+                      <td className="px-5 py-3">
+                        <a
+                          href={company.website}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[13px] font-bold text-[#111] underline hover:opacity-70 transition-opacity"
                         >
-                          View
-                        </button>
+                          {company.website ? "Visit Website" : "—"}
+                        </a>
+                      </td>
 
-                        <button
-                          onClick={() =>
-                            navigate(`/admin/companies/edit/${company._id}`)
-                          }
-                          className="px-4 py-2 text-[10px] font-bold tracking-widest uppercase text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 border-none rounded-lg hover:shadow-[0_4px_15px_-3px_rgba(217,70,239,0.5)] transition-all duration-300 cursor-pointer hover:-translate-y-0.5 outline-none"
-                        >
-                          Edit
-                        </button>
-
-                        <button
-                          onClick={() =>
-                            toggleStatus(company._id, company.status)
-                          }
-                          className={`px-4 py-2 text-[10px] font-bold tracking-widest uppercase rounded-lg border transition-all duration-300 cursor-pointer hover:-translate-y-0.5 outline-none ${
+                      <td className="px-5 py-3">
+                        <span
+                          className={`inline-block px-2.5 py-1 rounded-[10px] text-[10px] font-bold uppercase tracking-widest border ${
                             company.status === "active"
-                              ? "bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20"
-                              : "bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20"
+                              ? "bg-[#111] text-[#fff] border-[#111]"
+                              : "bg-[#fff] text-[#cc0000] border-[#cc0000]"
                           }`}
                         >
-                          {company.status === "active"
-                            ? "Deactivate"
-                            : "Activate"}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                          {company.status}
+                        </span>
+                      </td>
+
+                      <td className="px-5 py-3">
+                        <div className="flex justify-center gap-2">
+                          <button
+                            onClick={() =>
+                              navigate(`/admin/companies/${company._id}`)
+                            }
+                            className="px-3 py-1.5 text-[11px] font-bold text-[#333] uppercase tracking-widest bg-[#f9f9f9] border border-[#e5e5e5] rounded-[10px] hover:border-[#333] transition-colors cursor-pointer"
+                          >
+                            View
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              navigate(`/admin/companies/edit/${company._id}`)
+                            }
+                            className="px-3 py-1.5 text-[11px] font-bold text-[#fff] bg-[#111] border-none rounded-[10px] hover:opacity-80 transition-opacity cursor-pointer"
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              toggleStatus(company._id, company.status)
+                            }
+                            className={`px-3 py-1.5 text-[11px] font-bold uppercase tracking-widest border rounded-[10px] transition-colors cursor-pointer ${
+                              company.status === "active"
+                                ? "bg-[#fff] border-[#cc0000] text-[#cc0000] hover:bg-[#cc0000] hover:text-[#fff]"
+                                : "bg-[#f9f9f9] border-[#008000] text-[#008000] hover:bg-[#008000] hover:text-[#fff]"
+                            }`}
+                          >
+                            {company.status === "active"
+                              ? "Deactivate"
+                              : "Activate"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

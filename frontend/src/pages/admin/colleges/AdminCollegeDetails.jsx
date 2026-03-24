@@ -26,169 +26,191 @@ export default function AdminCollegeDetails() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0B0F19]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-white/10 border-t-fuchsia-500 rounded-full animate-spin"></div>
-          <p className="text-fuchsia-400 font-medium tracking-widest uppercase text-xs animate-pulse m-0">
-            Loading Details
-          </p>
-        </div>
+      <div className="min-h-screen bg-[#f9f9f9] flex items-center justify-center font-sans">
+        <p className="text-[14px] font-bold text-[#333] animate-pulse m-0 uppercase tracking-widest">
+          Syncing Institutional Records...
+        </p>
       </div>
     );
   }
 
   if (!college) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0B0F19]">
-        <div className="bg-[#0B0F19]/50 border border-white/10 rounded-2xl p-12 text-center shadow-inner">
-          <p className="text-white/40 m-0 text-base font-medium">
-            College not found
-          </p>
+      <div className="min-h-screen bg-[#f9f9f9] flex items-center justify-center p-4 font-sans text-[#333]">
+        <div className="w-full max-w-md bg-[#fff] border border-[#cc0000] p-8 md:p-12 rounded-[20px] text-center shadow-sm">
+          <header className="mb-6">
+            <h2 className="text-[23px] font-black tracking-tight m-0 uppercase">
+              Record Not Found
+            </h2>
+            <p className="text-[11px] font-bold opacity-60 uppercase tracking-widest mt-1">
+              Database Error
+            </p>
+          </header>
+          <button
+            onClick={() => navigate("/admin/colleges")}
+            className="px-6 py-3 bg-[#111] text-[#fff] text-[11px] font-black rounded-[14px] uppercase tracking-widest border-none cursor-pointer"
+          >
+            Return to Directory
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] p-4 md:p-8 font-sans text-white selection:bg-fuchsia-500/30 selection:text-fuchsia-200">
-      <div className="max-w-5xl mx-auto flex flex-col gap-6 md:gap-8">
-        <header className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-white/5 backdrop-blur-xl p-6 md:p-8 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] border border-white/10 transition-all duration-300 hover:border-white/20">
-          <h2 className="text-3xl font-black m-0 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60">
-            College Details
-          </h2>
+    <div className="min-h-screen bg-[#f9f9f9] text-[#333] font-sans pb-10">
+      <main className="max-w-5xl mx-auto w-full px-4 md:px-6 py-6 flex flex-col gap-6">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#e5e5e5] pb-4">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-[23px] font-black text-[#333] m-0 tracking-tight leading-tight">
+              Institutional Profile
+            </h1>
+            <p className="text-[13px] font-bold text-[#333] opacity-60 m-0 uppercase tracking-widest">
+              Verified College Data
+            </p>
+          </div>
           <button
             onClick={() => navigate(`/admin/colleges/edit/${college._id}`)}
-            className="px-8 py-3.5 text-xs font-bold text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 border-none rounded-xl cursor-pointer transition-all duration-300 hover:shadow-[0_8px_20px_-6px_rgba(217,70,239,0.5)] hover:-translate-y-0.5 uppercase tracking-widest"
+            className="px-6 py-2.5 text-[11px] font-black text-[#fff] bg-[#111] border-none rounded-[12px] hover:opacity-80 transition-opacity cursor-pointer uppercase tracking-widest"
           >
-            Edit College
+            Modify Records
           </button>
         </header>
 
-        <div className="bg-white/5 backdrop-blur-xl p-6 md:p-8 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] border border-white/10 transition-all duration-300 hover:border-white/20">
-          <h3 className="text-sm font-bold text-violet-400 mt-0 mb-6 border-b border-white/10 pb-4 uppercase tracking-widest">
-            Basic Information
+        <section className="bg-[#fff] border border-[#e5e5e5] rounded-[20px] p-6 md:p-8 shadow-sm">
+          <h3 className="text-[11px] font-black opacity-40 uppercase tracking-widest mb-6 border-b border-[#f9f9f9] pb-3">
+            Core Information
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex flex-col gap-1.5 bg-[#0B0F19]/30 p-5 rounded-2xl border border-white/5">
-              <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
-                Name
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5 p-4 bg-[#f9f9f9] border border-[#e5e5e5] rounded-[14px]">
+              <span className="text-[10px] font-black opacity-40 uppercase tracking-widest">
+                Formal Name
               </span>
-              <span className="text-sm font-bold text-white/90">
+              <span className="text-[14px] font-black text-[#111]">
                 {college.name}
               </span>
             </div>
-            <div className="flex flex-col gap-1.5 bg-[#0B0F19]/30 p-5 rounded-2xl border border-white/5">
-              <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
-                Status
+
+            <div className="flex flex-col gap-1.5 p-4 bg-[#f9f9f9] border border-[#e5e5e5] rounded-[14px]">
+              <span className="text-[10px] font-black opacity-40 uppercase tracking-widest">
+                Account Status
               </span>
               <span
-                className={`text-xs font-bold tracking-widest uppercase w-max ${
+                className={`text-[11px] font-black tracking-widest uppercase px-2 py-1 rounded-[8px] w-max border ${
                   college.status === "active"
-                    ? "text-emerald-400"
-                    : "text-red-400"
+                    ? "bg-[#fff] border-[#008000] text-[#008000]"
+                    : "bg-[#fff] border-[#cc0000] text-[#cc0000]"
                 }`}
               >
                 {college.status}
               </span>
             </div>
-            <div className="flex flex-col gap-1.5 bg-[#0B0F19]/30 p-5 rounded-2xl border border-white/5">
-              <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
-                Phone
+
+            <div className="flex flex-col gap-1.5 p-4 bg-[#f9f9f9] border border-[#e5e5e5] rounded-[14px]">
+              <span className="text-[10px] font-black opacity-40 uppercase tracking-widest">
+                Contact Channel
               </span>
-              <span className="text-sm font-medium text-white/90">
-                {college.phone || "—"}
+              <span className="text-[13px] font-bold">
+                {college.phone || "Not Specified"}
               </span>
             </div>
-            <div className="flex flex-col gap-1.5 bg-[#0B0F19]/30 p-5 rounded-2xl border border-white/5">
-              <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
-                Website
+
+            <div className="flex flex-col gap-1.5 p-4 bg-[#f9f9f9] border border-[#e5e5e5] rounded-[14px]">
+              <span className="text-[10px] font-black opacity-40 uppercase tracking-widest">
+                Official Website
               </span>
-              <span className="text-sm font-medium text-fuchsia-400">
+              <a
+                href={college.website}
+                target="_blank"
+                rel="noreferrer"
+                className="text-[13px] font-bold text-[#111] underline truncate"
+              >
                 {college.website || "—"}
-              </span>
+              </a>
             </div>
-            <div className="flex flex-col gap-1.5 bg-[#0B0F19]/30 p-5 rounded-2xl border border-white/5">
-              <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
-                Email Domain
+
+            <div className="flex flex-col gap-1.5 p-4 bg-[#f9f9f9] border border-[#e5e5e5] rounded-[14px]">
+              <span className="text-[10px] font-black opacity-40 uppercase tracking-widest">
+                Whitelisted Domain
               </span>
-              <span className="text-sm font-medium text-white/90">
+              <span className="text-[13px] font-mono font-bold text-[#111]">
                 {college.emailDomain || "—"}
               </span>
             </div>
-            <div className="flex flex-col gap-1.5 bg-[#0B0F19]/30 p-5 rounded-2xl border border-white/5 md:col-span-2">
-              <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
-                Address
+
+            <div className="flex flex-col gap-1.5 p-4 bg-[#f9f9f9] border border-[#e5e5e5] rounded-[14px] md:col-span-2">
+              <span className="text-[10px] font-black opacity-40 uppercase tracking-widest">
+                Physical Address
               </span>
-              <span className="text-sm font-medium text-white/90">
-                {college.address || "—"}
+              <span className="text-[13px] font-medium leading-relaxed">
+                {college.address || "No address documented"}
               </span>
             </div>
-            <div className="flex flex-col gap-1.5 bg-[#0B0F19]/30 p-5 rounded-2xl border border-white/5 md:col-span-2">
-              <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
-                Description
+
+            <div className="flex flex-col gap-1.5 p-4 bg-[#f9f9f9] border border-[#e5e5e5] rounded-[14px] md:col-span-2">
+              <span className="text-[10px] font-black opacity-40 uppercase tracking-widest">
+                Organizational Brief
               </span>
-              <span className="text-sm font-medium text-white/70 leading-relaxed">
-                {college.description || "—"}
+              <span className="text-[13px] font-medium leading-relaxed opacity-80">
+                {college.description || "No description provided"}
               </span>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div className="bg-white/5 backdrop-blur-xl p-6 md:p-8 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] border border-white/10 transition-all duration-300 hover:border-white/20">
-          <h3 className="text-sm font-bold text-violet-400 mt-0 mb-6 border-b border-white/10 pb-4 uppercase tracking-widest">
-            Courses
+        <section className="bg-[#fff] border border-[#e5e5e5] rounded-[20px] p-6 md:p-8 shadow-sm">
+          <h3 className="text-[11px] font-black opacity-40 uppercase tracking-widest mb-6 border-b border-[#f9f9f9] pb-3">
+            Academic Programs
           </h3>
 
-          {(!college.courses || college.courses.length === 0) && (
-            <div className="px-6 py-12 text-center bg-[#0B0F19]/30 border border-white/5 rounded-2xl">
-              <p className="text-white/40 m-0 text-sm font-medium">
-                No courses added
+          {!college.courses || college.courses.length === 0 ? (
+            <div className="px-6 py-10 text-center border-2 border-dashed border-[#e5e5e5] rounded-[20px]">
+              <p className="text-[13px] font-bold opacity-30 uppercase tracking-widest">
+                No programs registered
               </p>
             </div>
-          )}
-
-          {college.courses && college.courses.length > 0 && (
-            <div className="flex flex-col gap-5">
+          ) : (
+            <div className="flex flex-col gap-4">
               {college.courses.map((course, index) => (
                 <div
                   key={index}
-                  className="bg-[#0B0F19]/30 border border-white/5 p-6 rounded-2xl flex flex-col gap-5 transition-all hover:border-white/10"
+                  className="bg-[#f9f9f9] border border-[#e5e5e5] p-5 rounded-[18px] flex flex-col gap-5 transition-all hover:border-[#111]"
                 >
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-4">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[10px] font-bold text-fuchsia-400 uppercase tracking-widest">
-                        Course Name
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#e5e5e5] pb-4">
+                    <div className="flex flex-col">
+                      <span className="text-[9px] font-black text-[#111] opacity-40 uppercase tracking-widest">
+                        Title
                       </span>
-                      <span className="text-lg font-bold text-white/90">
+                      <span className="text-[16px] font-black text-[#111]">
                         {course.name}
                       </span>
                     </div>
-                    <div className="flex flex-col md:items-end gap-1">
-                      <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
-                        Duration
+                    <div className="flex flex-col md:items-end">
+                      <span className="text-[9px] font-black text-[#111] opacity-40 uppercase tracking-widest">
+                        Cycle Duration
                       </span>
-                      <span className="text-sm font-bold text-white/90">
-                        {course.durationYears} years
+                      <span className="text-[13px] font-bold text-[#111]">
+                        {course.durationYears} Years
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-3">
-                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
-                      Specializations
+                  <div className="flex flex-col gap-2">
+                    <span className="text-[10px] font-black opacity-40 uppercase tracking-widest">
+                      Fields of Specialization
                     </span>
                     {!course.specializations ||
                     course.specializations.length === 0 ? (
-                      <span className="text-xs text-white/30 italic font-medium">
-                        None specified
+                      <span className="text-[12px] font-bold opacity-30 italic">
+                        No specializations specified
                       </span>
                     ) : (
-                      <div className="flex flex-wrap gap-2.5">
+                      <div className="flex flex-wrap gap-2">
                         {course.specializations.map((sp, i) => (
                           <span
                             key={i}
-                            className="px-3 py-1.5 text-xs font-bold text-white/80 bg-white/5 border border-white/10 rounded-lg tracking-wide"
+                            className="px-3 py-1 text-[11px] font-bold bg-[#fff] border border-[#e5e5e5] rounded-[8px] uppercase tracking-tighter"
                           >
                             {sp}
                           </span>
@@ -200,8 +222,8 @@ export default function AdminCollegeDetails() {
               ))}
             </div>
           )}
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
 }

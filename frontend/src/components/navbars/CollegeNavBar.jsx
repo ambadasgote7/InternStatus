@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import API from "../../api/api";
@@ -7,78 +8,54 @@ const CollegeNavBar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((s) => s.user?.user) || {};
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const handleLogout = () => {
-     logoutUser(dispatch, navigate);
-   };
+    logoutUser(dispatch, navigate);
+  };
 
   const showRegister = !user.isRegistered;
   const showPending = user.isRegistered && !user.isVerified;
   const showCore = user.isRegistered && user.isVerified;
 
+  const navLinkClass =
+    "px-3 py-2.5 rounded-[14px] text-[13px] font-bold text-[#333] hover:bg-[#f9f9f9] transition-colors no-underline tracking-wide";
+
   return (
-    <nav className="sticky top-0 z-50 w-full bg-[#0B0F19]/80 backdrop-blur-2xl border-b border-white/10 font-sans box-border transition-all selection:bg-fuchsia-500/30 selection:text-fuchsia-200">
+    <nav className="sticky top-0 z-50 w-full bg-[#fff] border-b border-[#e5e5e5] box-border transition-all">
       <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col xl:flex-row xl:justify-between xl:items-center gap-5">
-        <div className="flex flex-wrap items-center gap-2 md:gap-3 text-sm font-medium">
+        <div className="flex flex-wrap items-center gap-2 md:gap-3 text-sm font-medium flex-1">
           <Link
             to="/faculty/dashboard"
-            className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400 mr-2 xl:mr-6 whitespace-nowrap no-underline transition-transform hover:scale-105"
+            className="text-[23px] font-black tracking-tighter text-[#333] mr-2 xl:mr-6 whitespace-nowrap no-underline flex items-center"
           >
             InternStatus
-            <span className="text-white/40 font-medium text-lg ml-3 tracking-wide">
+            <span className="text-[14px] font-bold text-[#333] opacity-50 ml-3 tracking-wide uppercase">
               College
             </span>
           </Link>
 
           {showCore && (
-            <div className="flex flex-wrap items-center gap-1.5 xl:border-l border-white/10 xl:pl-6">
-              <Link
-                to="/faculty/dashboard"
-                className="px-3 py-2.5 rounded-xl text-white/70 font-bold hover:text-fuchsia-300 hover:bg-white/5 transition-all duration-300 no-underline tracking-wide"
-              >
+            <div className="flex flex-wrap items-center gap-1 xl:border-l border-[#e5e5e5] xl:pl-6">
+              <Link to="/faculty/dashboard" className={navLinkClass}>
                 Dashboard
               </Link>
-              <Link
-                to="/college/profile"
-                className="px-3 py-2.5 rounded-xl text-white/70 font-bold hover:text-fuchsia-300 hover:bg-white/5 transition-all duration-300 no-underline tracking-wide"
-              >
-                Profile
-              </Link>
-              <Link
-                to="/college/faculty"
-                className="px-3 py-2.5 rounded-xl text-white/70 font-bold hover:text-fuchsia-300 hover:bg-white/5 transition-all duration-300 no-underline tracking-wide"
-              >
+              <Link to="/college/faculty" className={navLinkClass}>
                 Faculty List
               </Link>
-              <Link
-                to="/college/students"
-                className="px-3 py-2.5 rounded-xl text-white/70 font-bold hover:text-fuchsia-300 hover:bg-white/5 transition-all duration-300 no-underline tracking-wide"
-              >
+              <Link to="/college/students" className={navLinkClass}>
                 Student List
               </Link>
-              <Link
-                to="/college/invite-faculty"
-                className="px-3 py-2.5 rounded-xl text-white/70 font-bold hover:text-fuchsia-300 hover:bg-white/5 transition-all duration-300 no-underline tracking-wide"
-              >
+              <Link to="/college/invite-faculty" className={navLinkClass}>
                 Add Faculty
               </Link>
-              <Link
-                to="/college/invite-student"
-                className="px-3 py-2.5 rounded-xl text-white/70 font-bold hover:text-fuchsia-300 hover:bg-white/5 transition-all duration-300 no-underline tracking-wide"
-              >
+              <Link to="/college/invite-student" className={navLinkClass}>
                 Add Student
               </Link>
-              <Link
-                to="/college/courses"
-                className="px-3 py-2.5 rounded-xl text-white/70 font-bold hover:text-fuchsia-300 hover:bg-white/5 transition-all duration-300 no-underline tracking-wide"
-              >
+              <Link to="/college/courses" className={navLinkClass}>
                 Courses
               </Link>
-
-              <Link
-                to="/credits"
-                className="px-3 py-2.5 rounded-xl text-white/70 font-bold hover:text-fuchsia-300 hover:bg-white/5 transition-all duration-300 no-underline tracking-wide"
-              >
+              <Link to="/credits" className={navLinkClass}>
                 Assign Credits
               </Link>
             </div>
@@ -88,7 +65,7 @@ const CollegeNavBar = () => {
             {showPending && (
               <Link
                 to="/pending-verification"
-                className="px-4 py-2.5 rounded-xl text-violet-300 font-bold bg-violet-500/20 border border-violet-500/30 transition-all duration-300 no-underline tracking-wide hover:bg-violet-500/30"
+                className="px-4 py-2.5 rounded-[14px] text-[#333] font-bold bg-[#f9f9f9] border border-[#333] transition-colors no-underline tracking-wide hover:bg-[#e5e5e5] text-[13px]"
               >
                 Verification Pending
               </Link>
@@ -97,7 +74,7 @@ const CollegeNavBar = () => {
             {showRegister && (
               <Link
                 to="/faculty/register"
-                className="px-5 py-2.5 rounded-xl text-white font-bold bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:shadow-[0_4px_20px_-4px_rgba(217,70,239,0.5)] transition-all duration-300 no-underline tracking-wide hover:-translate-y-0.5 border-none"
+                className="px-5 py-2.5 rounded-[14px] text-[#fff] font-bold bg-[#111] hover:opacity-80 transition-opacity no-underline tracking-wide border-none text-[13px]"
               >
                 Complete Registration
               </Link>
@@ -105,13 +82,35 @@ const CollegeNavBar = () => {
           </div>
         </div>
 
-        <div className="flex items-center xl:justify-end">
+        {/* Profile Dropdown */}
+        <div className="flex items-center xl:justify-end relative">
           <button
-            onClick={handleLogout}
-            className="w-full xl:w-auto px-6 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/80 font-bold tracking-widest uppercase text-xs hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 transition-all duration-300 cursor-pointer outline-none hover:-translate-y-0.5"
+            onClick={() => setIsProfileOpen(!isProfileOpen)}
+            className="w-10 h-10 rounded-full bg-[#f9f9f9] border border-[#e5e5e5] flex items-center justify-center text-[#333] font-bold text-[14px] hover:bg-[#e5e5e5] transition-colors focus:outline-none cursor-pointer"
           >
-            Logout
+            C
           </button>
+
+          {isProfileOpen && (
+            <div className="absolute right-0 top-full mt-2 w-48 bg-[#fff] border border-[#e5e5e5] rounded-[14px] shadow-sm z-50 overflow-hidden flex flex-col">
+              <Link
+                to="/college/profile"
+                onClick={() => setIsProfileOpen(false)}
+                className="px-4 py-3 text-[13px] font-bold text-[#333] hover:bg-[#f9f9f9] no-underline border-b border-[#e5e5e5]"
+              >
+                Profile
+              </Link>
+              <button
+                onClick={() => {
+                  setIsProfileOpen(false);
+                  handleLogout();
+                }}
+                className="px-4 py-3 text-[13px] font-bold text-[#cc0000] hover:bg-[#f9f9f9] text-left border-none bg-transparent cursor-pointer"
+              >
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </nav>

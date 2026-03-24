@@ -1,16 +1,11 @@
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import API from "../../api/api";
 
-export default function ResetPassword() {
-
-  const location = useLocation();
+export default function ForgotPassword() {
   const navigate = useNavigate();
 
-  const email = location.state?.email || "";
-
-  const [otp, setOtp] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -19,81 +14,52 @@ export default function ResetPassword() {
     try {
       setLoading(true);
 
-      await API.post("/auth/reset-password", {
-        email,
-        otp,
-        password
+      await API.post("/auth/forgot-password", { email });
+
+      alert("OTP sent to your email");
+
+      navigate("/reset-password", {
+        state: { email },
       });
-
-      alert("Password reset successful");
-      navigate("/login");
-
     } catch (err) {
-      alert(err.response?.data?.message || "Reset failed");
+      alert(err.response?.data?.message || "Error sending OTP");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen flex items-center justify-center">
-
+    <div className="min-h-screen bg-[#f9f9f9] flex items-center justify-center p-4">
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 shadow-xl rounded-xl w-[380px] border"
+        className="w-full max-w-[360px] bg-[#fff] p-8 rounded-[20px] border border-[#e5e5e5] shadow-sm flex flex-col gap-3"
       >
-
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
-          Reset Password
+        <h2 className="text-[23px] font-black text-[#333] text-center m-0 mb-4">
+          Forgot Password
         </h2>
 
-        {/* Email */}
-        <label className="block text-sm font-semibold mb-1 text-gray-700">
-          Email
-        </label>
-        <input
-          type="email"
-          value={email}
-          disabled
-          className="border border-gray-400 p-3 rounded-lg w-full mb-4 bg-gray-100 text-gray-700"
-        />
-
-        {/* OTP */}
-        <label className="block text-sm font-semibold mb-1 text-gray-700">
-          OTP
-        </label>
-        <input
-          type="text"
-          placeholder="Enter OTP"
-          className="border border-gray-400 p-3 rounded-lg w-full mb-4 focus:outline-none focus:ring-2 focus:ring-red-400"
-          value={otp}
-          onChange={(e) => setOtp(e.target.value)}
-          required
-        />
-
-        {/* Password */}
-        <label className="block text-sm font-semibold mb-1 text-gray-700">
-          New Password
-        </label>
-        <input
-          type="password"
-          placeholder="Enter new password"
-          className="border border-gray-400 p-3 rounded-lg w-full mb-6 focus:outline-none focus:ring-2 focus:ring-red-400"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[13px] font-bold text-[#333]">
+            Email Address
+          </label>
+          <input
+            type="email"
+            placeholder="Enter your email"
+            className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
 
         <button
           type="submit"
-          className="bg-red-500 text-white py-3 w-full rounded-lg hover:bg-red-600 transition"
+          className="w-full mt-3 py-3 text-[14px] font-bold text-[#fff] bg-[#111] border-none rounded-[14px] cursor-pointer hover:opacity-80 flex justify-center items-center"
           disabled={loading}
         >
-          {loading ? "Resetting..." : "Reset Password"}
+          {loading ? "Sending OTP..." : "Send OTP"}
         </button>
-
       </form>
-
     </div>
   );
 }

@@ -22,12 +22,10 @@ const Internships = () => {
   const fetchInternships = async () => {
     try {
       setLoading(true);
-
       const res = await axios.get(`${BASE_URL}/api/internships`, {
         params: filters,
         withCredentials: true,
       });
-
       setInternships(res.data.data);
       setTotalPages(res.data.pages);
     } catch (err) {
@@ -41,18 +39,13 @@ const Internships = () => {
     try {
       const res = await axios.get(
         `${BASE_URL}/api/application/student/applied`,
-        { withCredentials: true }
+        { withCredentials: true },
       );
-
       const apps = res.data.data || [];
-
-      const ids = new Set(
-        apps.map((app) => app.internship?._id?.toString())
-      );
-
+      const ids = new Set(apps.map((app) => app.internship?._id?.toString()));
       setAppliedSet(ids);
     } catch (err) {
-      console.error("Applied fetch error:", err);
+      console.error(err);
     }
   };
 
@@ -71,140 +64,159 @@ const Internships = () => {
 
   const renderStipend = (internship) => {
     if (internship.stipendType === "paid") {
-      return `₹${internship.stipendAmount}`;
+      return `INR ${internship.stipendAmount}`;
     }
     if (internship.stipendType === "unpaid") {
       return "Unpaid";
     }
-    return "Not Disclosed";
+    return "N/A";
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] p-4 md:p-8 font-sans text-white selection:bg-fuchsia-500/30 selection:text-fuchsia-200">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8 border-b border-white/10 pb-6">
-          <h1 className="text-3xl md:text-4xl font-black m-0 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 mb-2">
-            Explore Internships
-          </h1>
-          <p className="text-white/40 text-sm font-medium m-0">
-            Find your next career opportunity across top companies
-          </p>
-        </div>
+    <div className="min-h-screen bg-[#f9f9f9] text-[#333] font-sans pb-10">
+      <main className="max-w-7xl mx-auto w-full px-4 md:px-6 py-6 flex flex-col gap-6">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#e5e5e5] pb-4">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-[23px] font-black text-[#333] m-0 tracking-tight leading-tight">
+              Explore Internships
+            </h1>
+            <p className="text-[13px] font-bold text-[#333] opacity-60 m-0 uppercase tracking-widest">
+              Available Career Opportunities
+            </p>
+          </div>
+        </header>
 
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 md:p-6 mb-8 grid grid-cols-1 md:grid-cols-4 gap-4 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]">
-          <input
-            type="text"
-            name="search"
-            placeholder="Search by title..."
-            value={filters.search}
-            onChange={handleFilterChange}
-            className="w-full px-4 py-3 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-lg outline-none transition-all duration-300 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 placeholder:text-white/20"
-          />
+        <section className="bg-[#fff] border border-[#e5e5e5] rounded-[20px] p-4 md:p-6 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-black opacity-40 uppercase tracking-widest ml-1">
+              Search Keywords
+            </label>
+            <input
+              type="text"
+              name="search"
+              placeholder="e.g. Frontend Developer"
+              value={filters.search}
+              onChange={handleFilterChange}
+              className="w-full px-4 py-2.5 text-[13px] bg-[#fff] border border-[#333] rounded-[12px] outline-none"
+            />
+          </div>
 
-          <select
-            name="mode"
-            value={filters.mode}
-            onChange={handleFilterChange}
-            className="w-full px-4 py-3 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-lg outline-none transition-all duration-300 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 cursor-pointer appearance-none [&>option]:bg-[#0B0F19]"
-          >
-            <option value="">All Modes</option>
-            <option value="remote">Remote</option>
-            <option value="onsite">Onsite</option>
-            <option value="hybrid">Hybrid</option>
-          </select>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-black opacity-40 uppercase tracking-widest ml-1">
+              Work Mode
+            </label>
+            <select
+              name="mode"
+              value={filters.mode}
+              onChange={handleFilterChange}
+              className="w-full px-4 py-2.5 text-[13px] border border-[#333] rounded-[12px] outline-none appearance-none cursor-pointer"
+            >
+              <option value="">All Modes</option>
+              <option value="remote">Remote</option>
+              <option value="onsite">Onsite</option>
+              <option value="hybrid">Hybrid</option>
+            </select>
+          </div>
 
-          <input
-            type="text"
-            name="skill"
-            placeholder="Filter by skill..."
-            value={filters.skill}
-            onChange={handleFilterChange}
-            className="w-full px-4 py-3 text-sm text-white bg-[#0B0F19]/50 border border-white/10 rounded-lg outline-none transition-all duration-300 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 placeholder:text-white/20"
-          />
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-black opacity-40 uppercase tracking-widest ml-1">
+              Stack Filter
+            </label>
+            <input
+              type="text"
+              name="skill"
+              placeholder="e.g. React, Python"
+              value={filters.skill}
+              onChange={handleFilterChange}
+              className="w-full px-4 py-2.5 text-[13px] border border-[#333] rounded-[12px] outline-none"
+            />
+          </div>
 
-          <button
-            onClick={fetchInternships}
-            className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold py-3 rounded-lg shadow-lg hover:shadow-[0_8px_20px_-6px_rgba(217,70,239,0.5)] hover:-translate-y-0.5 transition-all duration-300 tracking-wider uppercase text-xs border-none cursor-pointer"
-          >
-            Apply Filters
-          </button>
-        </div>
+          <div className="flex items-end">
+            <button
+              onClick={fetchInternships}
+              className="w-full py-2.5 bg-[#111] text-[#fff] text-[11px] font-black uppercase tracking-widest rounded-[12px] border-none cursor-pointer hover:opacity-80 transition-opacity"
+            >
+              Refresh Listings
+            </button>
+          </div>
+        </section>
 
         {loading ? (
-          <div className="py-20 flex flex-col items-center justify-center gap-4">
-            <div className="w-10 h-10 border-4 border-white/10 border-t-fuchsia-500 rounded-full animate-spin"></div>
-            <p className="text-fuchsia-400 font-medium tracking-widest uppercase text-xs animate-pulse m-0">
-              Scanning opportunities
+          <div className="py-20 text-center">
+            <p className="text-[14px] font-bold text-[#333] animate-pulse uppercase tracking-widest">
+              Scanning Opportunities...
             </p>
           </div>
         ) : internships.length === 0 ? (
-          <div className="bg-[#0B0F19]/50 border border-white/10 rounded-2xl p-12 text-center shadow-inner">
-            <p className="text-white/40 m-0 text-base font-medium">
-              No internships found matching your criteria.
+          <div className="bg-[#fff] border-2 border-dashed border-[#e5e5e5] rounded-[20px] p-20 text-center">
+            <p className="text-[13px] font-bold text-[#333] opacity-40 m-0 uppercase tracking-widest">
+              No matching internship records found
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {internships.map((internship) => {
               const isApplied = appliedSet.has(internship._id.toString());
-
               return (
                 <div
                   key={internship._id}
-                  className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col transition-all duration-300 hover:border-white/20 hover:-translate-y-1 hover:shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] group"
+                  className="bg-[#fff] border border-[#e5e5e5] rounded-[20px] shadow-sm hover:border-[#333] transition-all flex flex-col overflow-hidden"
                 >
-                  <div className="p-5 md:p-6 flex-grow">
-                    <div className="flex justify-between items-start mb-3 gap-3">
-                      <div className="flex-1">
-                        <h2 className="text-lg font-bold text-white/90 mt-0 mb-1 leading-tight group-hover:text-fuchsia-300 transition-colors">
+                  <div className="p-6 flex-grow flex flex-col">
+                    <div className="flex justify-between items-start mb-4 gap-2">
+                      <div className="flex-1 min-w-0">
+                        <h2 className="text-[17px] font-black text-[#333] m-0 leading-tight truncate">
                           {internship.title}
                         </h2>
-                        <p className="text-fuchsia-400 font-medium text-xs m-0 tracking-wide uppercase">
+                        <p className="text-[11px] font-bold opacity-50 uppercase tracking-widest mt-1">
                           {internship.company?.companyName}
                         </p>
                       </div>
-
                       {isApplied && (
-                        <span className="shrink-0 bg-white/10 border border-white/20 text-white/90 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md">
+                        <span className="px-2 py-1 rounded-[8px] text-[9px] font-black uppercase tracking-widest bg-[#f9f9f9] border border-[#008000] text-[#008000]">
                           Applied
                         </span>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2 mb-6">
-                      <span className="text-[11px] font-bold text-violet-400 uppercase tracking-widest">
+                    <div className="mb-6">
+                      <span className="text-[10px] font-bold opacity-40 uppercase tracking-widest block mb-1">
+                        Hub Location
+                      </span>
+                      <span className="text-[13px] font-bold">
                         {internship.location || "Remote"}
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 pt-5 border-t border-white/10">
-                      <div className="flex flex-col gap-1.5 bg-[#0B0F19]/30 p-3 rounded-lg border border-white/5">
-                        <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
+                    <div className="grid grid-cols-2 gap-3 mt-auto pt-5 border-t border-[#f9f9f9]">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[9px] font-bold opacity-40 uppercase tracking-widest">
                           Mode
                         </span>
-                        <span className="text-xs font-bold text-white/90 capitalize">
+                        <span className="text-[12px] font-black text-[#111] capitalize">
                           {internship.mode}
                         </span>
                       </div>
-                      <div className="flex flex-col gap-1.5 bg-[#0B0F19]/30 p-3 rounded-lg border border-white/5">
-                        <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
-                          Stipend
+                      <div className="flex flex-col gap-1 text-right">
+                        <span className="text-[9px] font-bold opacity-40 uppercase tracking-widest">
+                          Compensation
                         </span>
-                        <span className="text-xs font-bold text-emerald-400">
+                        <span className="text-[12px] font-black text-[#008000]">
                           {renderStipend(internship)}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-5 md:p-6 pt-0 mt-auto">
+                  <div className="p-4 bg-[#fcfcfc] border-t border-[#f9f9f9]">
                     <button
                       onClick={() =>
                         navigate(`/student/internships/${internship._id}`)
                       }
-                      className="w-full bg-white/5 text-white font-bold py-2.5 rounded-lg border border-white/10 hover:bg-white/10 transition-all duration-300 text-[11px] tracking-widest uppercase cursor-pointer outline-none hover:-translate-y-0.5"
+                      className="w-full py-2.5 bg-[#f9f9f9] border border-[#333] text-[#333] text-[11px] font-black uppercase tracking-widest rounded-[10px] hover:bg-[#333] hover:text-[#fff] transition-all cursor-pointer"
                     >
-                      View Details
+                      Analyze Opportunity
                     </button>
                   </div>
                 </div>
@@ -214,15 +226,18 @@ const Internships = () => {
         )}
 
         {totalPages > 1 && (
-          <div className="flex justify-center mt-10 gap-2.5">
+          <div className="flex justify-center mt-6 gap-2">
             {Array.from({ length: totalPages }, (_, i) => (
               <button
                 key={i}
-                onClick={() => setFilters({ ...filters, page: i + 1 })}
-                className={`w-10 h-10 rounded-lg font-bold text-sm transition-all duration-300 flex items-center justify-center cursor-pointer outline-none ${
+                onClick={() => {
+                  setFilters({ ...filters, page: i + 1 });
+                  window.scrollTo(0, 0);
+                }}
+                className={`w-10 h-10 rounded-[10px] font-black text-[12px] transition-all cursor-pointer border ${
                   filters.page === i + 1
-                    ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white border-none shadow-[0_4px_15px_-3px_rgba(217,70,239,0.5)]"
-                    : "bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white"
+                    ? "bg-[#111] text-[#fff] border-[#111]"
+                    : "bg-[#fff] border-[#e5e5e5] text-[#333] hover:border-[#333]"
                 }`}
               >
                 {i + 1}
@@ -230,7 +245,7 @@ const Internships = () => {
             ))}
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 };
