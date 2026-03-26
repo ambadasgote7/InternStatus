@@ -2,48 +2,30 @@ import axios from "axios";
 
 const API = axios.create({
   baseURL: "http://localhost:7777/api",
-  withCredentials: true,
+  withCredentials: true, // ✅ REQUIRED FOR COOKIES
 });
 
-/* RESPONSE INTERCEPTOR */
+// ❌ REMOVE request interceptor (no need for token header)
 
 API.interceptors.response.use(
   (response) => response,
 
-  async (error) => {
+  (error) => {
+    const status = error.response?.status;
 
-    if (error.response) {
-      const status = error.response.status;
-      const data = error.response.data;
+    if (status === 401) {
+      const path = window.location.pathname;
 
-      // 🔥 LOG ONLY IMPORTANT ERRORS
-      if (status !== 404 && status !== 400) {
-        console.error("API Error:", data || error.message);
+      const isPublic =
+        path.startsWith("/login") ||
+        path.startsWith("/admin/login") ||
+        path.startsWith("/setup-account") ||
+        path.startsWith("/reset-password");
+
+      // ✅ avoid infinite redirect loop
+      if (!isPublic) {
+        window.location.href = "/login";
       }
-
-      // 🔐 HANDLE AUTH ERROR
-      if (status === 401) {
-
-        localStorage.removeItem("token");
-        delete API.defaults.headers.common.Authorization;
-
-        try {
-          const { default: store } = await import("../store/appStore");
-          const { removeUser } = await import("../store/userSlice");
-          store.dispatch(removeUser());
-        } catch (e) {
-          console.warn("Redux clear failed:", e);
-        }
-
-        // avoid redirect loops
-        if (window.location.pathname !== "/login") {
-          window.location.href = "/login";
-        }
-      }
-
-    } else {
-      // 🌐 NETWORK ERROR
-      console.error("Network Error:", error.message);
     }
 
     return Promise.reject(error);

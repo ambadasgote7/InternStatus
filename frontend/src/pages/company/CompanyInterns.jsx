@@ -33,7 +33,9 @@ export default function CompanyInterns() {
     };
 
     return (
-      <span className={`px-3 py-1 text-xs rounded ${map[status] || "bg-gray-100"}`}>
+      <span
+        className={`px-3 py-1 text-xs rounded ${map[status] || "bg-gray-100"}`}
+      >
         {status}
       </span>
     );
@@ -42,7 +44,7 @@ export default function CompanyInterns() {
   const filteredData = data.filter((item) =>
     (item?.student?.fullName || "")
       .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+      .includes(searchTerm.toLowerCase()),
   );
 
   if (loading) {
@@ -55,10 +57,7 @@ export default function CompanyInterns() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <CompanyNavBar />
-
       <div className="max-w-5xl mx-auto p-6">
-
         <div className="flex justify-between mb-6">
           <h1 className="text-2xl font-bold">Company Interns</h1>
 
@@ -92,9 +91,7 @@ export default function CompanyInterns() {
                   {getStatusBadge(item.status)}
 
                   <button
-                    onClick={() =>
-                      navigate(`/company/intern/${item._id}`)
-                    }
+                    onClick={() => navigate(`/company/intern/${item._id}`)}
                     className="bg-black text-white px-3 py-1 rounded"
                   >
                     View

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import API from "../../api/api";
 
-export default function AdminCollegeProfile() {
+export default function AdminDashboard() {
   const { id } = useParams();
 
   const [college, setCollege] = useState(null);

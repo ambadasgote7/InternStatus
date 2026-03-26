@@ -45,7 +45,7 @@ export default function StudentCredits() {
 
   return (
     <>
-      <StudentNavBar />
+
 
       <div className="min-h-screen bg-[#f9f9f9] text-[#333] font-sans pb-10">
         <main className="max-w-5xl mx-auto w-full px-4 md:px-6 py-6 flex flex-col gap-6">

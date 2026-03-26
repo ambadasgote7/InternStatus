@@ -24,30 +24,30 @@ const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-/* LOGIN */
 export const login = async (req, res) => {
   try {
-
     const result = await loginService(req.body);
 
     res.cookie("token", result.token, {
       httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // ✅ important
       sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/", // ✅ ensure global access
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Login successful",
       data: result.user,
-      token: result.token
+      // ❌ REMOVE token from response if using cookies
     });
 
   } catch (err) {
+    console.error("LOGIN ERROR:", err.message);
 
-    res.status(400).json({
-      message: err.message
+    return res.status(400).json({
+      message: err.message,
     });
-
   }
 };
 

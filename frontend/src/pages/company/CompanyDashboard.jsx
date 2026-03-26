@@ -95,8 +95,6 @@ const CompanyDashboard = () => {
 
   return (
     <div className="min-h-screen bg-[#f9f9f9] text-[#111] font-sans pb-12">
-      <CompanyNavBar />
-
       <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
         {/* HEADER */}
         <header className="border-b border-[#e5e5e5] pb-6">

@@ -53,6 +53,10 @@ export default function CollegeSidebar() {
           <span className="text-[13px] font-bold">Dashboard</span>
         </NavLink>
 
+         <NavLink to="/college/profile" className={linkClass} end>
+          <span className="text-[13px] font-bold">Profile</span>
+        </NavLink>
+
         <NavLink to="/college/faculty" className={linkClass}>
           <span className="text-[13px] font-bold">Faculty</span>
         </NavLink>

@@ -101,7 +101,6 @@ export default function CompanyProfile() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#f9f9f9] flex flex-col font-sans">
-        <AdminNavBar />
         <div className="flex-grow flex items-center justify-center">
           <p className="text-[14px] font-bold text-[#333] animate-pulse">
             Loading Profile...
@@ -114,7 +113,6 @@ export default function CompanyProfile() {
   if (!profile) {
     return (
       <div className="min-h-screen bg-[#f9f9f9] flex flex-col font-sans">
-        <AdminNavBar />
         <div className="flex-grow flex items-center justify-center p-4">
           <div className="bg-[#fff] border-2 border-dashed border-[#e5e5e5] rounded-[20px] p-10 text-center">
             <p className="text-[13px] font-bold text-[#333] opacity-60 m-0">
@@ -128,7 +126,6 @@ export default function CompanyProfile() {
 
   return (
     <div className="min-h-screen bg-[#f9f9f9] text-[#333] flex flex-col font-sans pb-10">
-      <AdminNavBar />
 
       <main className="max-w-6xl mx-auto w-full px-4 md:px-6 py-6 flex flex-col md:flex-row gap-6">
         <aside className="w-full md:w-[320px] flex-shrink-0 flex flex-col gap-6">

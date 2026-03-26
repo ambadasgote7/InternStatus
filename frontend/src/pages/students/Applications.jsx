@@ -79,7 +79,6 @@ const Applications = () => {
 
   return (
     <>
-      <StudentNavBar />
       <div className="min-h-screen bg-[#f9f9f9] text-[#333] font-sans pb-10">
         <main className="max-w-7xl mx-auto w-full px-4 md:px-6 py-6 flex flex-col gap-6">
           <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#e5e5e5] pb-4">

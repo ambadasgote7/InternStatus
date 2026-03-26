@@ -1,13 +1,11 @@
-import React from 'react'
-import StudentNvaBar from '../../components/navbars/StudentNavBar'
+import React from "react";
 
 const StudentDashboard = () => {
   return (
     <div>
-      <StudentNvaBar />
       <h1>Student Dashboard</h1>
     </div>
-  )
-}
+  );
+};
 
-export default StudentDashboard
+export default StudentDashboard;

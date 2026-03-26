@@ -1,15 +1,15 @@
 import { Outlet } from "react-router-dom";
-import CompanyNavBar from "../components/navbars/CompanyNavBar";
-import CompanySidebar from "../components/sidebar/CompanySidebar";
+import MentorNavBar from "../components/navbars/MentorNavBar";
+import MentorSidebar from "../components/sidebar/MentorSidebar";
 
-const CompanyLayout = () => {
+const MentorLayout = () => {
   return (
     <div className="h-screen flex flex-col bg-black text-white overflow-hidden">
       <div className="flex-none">
-        <CompanyNavBar />
+        <MentorNavBar />
       </div>
       <div className="flex flex-1 overflow-hidden">
-        <CompanySidebar />
+        <MentorSidebar />
         <main className="flex-1 bg-black overflow-y-auto p-6">
           <Outlet />
         </main>
@@ -18,4 +18,4 @@ const CompanyLayout = () => {
   );
 };
 
-export default CompanyLayout;
+export default MentorLayout;

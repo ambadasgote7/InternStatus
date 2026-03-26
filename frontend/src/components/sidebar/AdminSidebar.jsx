@@ -52,7 +52,7 @@ export default function AdminSidebar() {
       </div>
 
       <nav className="flex-1 overflow-y-auto no-scrollbar p-3 flex flex-col gap-1">
-        <NavLink to="/admin" className={linkClass} end>
+        <NavLink to="/admin/dashboard" className={linkClass}>
           <span className="text-[13px] font-bold">Dashboard</span>
         </NavLink>
 

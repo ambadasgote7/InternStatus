@@ -11,7 +11,7 @@ export default function Login() {
 
   const [form, setForm] = useState({
     email: "",
-    password: "",
+    password: "Ambadas@123",
   });
 
   const [loading, setLoading] = useState(false);
@@ -20,13 +20,13 @@ export default function Login() {
   const redirectByRole = (role) => {
     const r = String(role || "").toLowerCase();
 
-    if (r === "admin") return "/admin";
-    if (r === "student") return "/student";
-    if (r === "faculty") return "/faculty";
-    if (r === "company") return "/company";
+    if (r === "student") return "/student/dashboard";
+    if (r === "faculty") return "/faculty/dashboard";
+    if (r === "company") return "/company/dashboard";
     if (r === "mentor") return "/mentor/dashboard";
-
-    return "/";
+    if (r === "college") return "/college/dashboard";
+    
+    return null; // 🚨 important
   };
 
   const handleSubmit = async (e) => {
@@ -37,12 +37,26 @@ export default function Login() {
 
       const res = await API.post("/auth/login", form);
 
-      const token = res.data?.token || res.data?.data?.token;
-
-      const user = res.data?.user || res.data?.data?.user || res.data?.data;
+      const user =
+        res.data?.user || res.data?.data?.user || res.data?.data;
 
       if (!user) {
         alert("Invalid login response");
+        return;
+      }
+
+      const role = String(user.role || "").toLowerCase();
+
+      // 🚨 HARD BLOCK ADMIN
+      if (role === "admin") {
+        alert("Admins must login from admin portal");
+        return;
+      }
+
+      const redirectPath = redirectByRole(role);
+
+      if (!redirectPath) {
+        alert("Unauthorized role");
         return;
       }
 
@@ -53,10 +67,11 @@ export default function Login() {
           user,
           profile: profileRes.data?.profile,
           token: null,
-        }),
+        })
       );
 
-      navigate(redirectByRole(user.role), { replace: true });
+      navigate(redirectPath, { replace: true });
+
     } catch (err) {
       alert(err.response?.data?.message || "Login failed");
     } finally {
@@ -80,7 +95,9 @@ export default function Login() {
               type="email"
               placeholder="name@example.com"
               value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, email: e.target.value })
+              }
               required
               className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
             />
@@ -95,14 +112,16 @@ export default function Login() {
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
                 value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, password: e.target.value })
+                }
                 required
                 className="w-full pl-4 pr-16 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-[13px] font-bold text-[#333] bg-transparent border-none cursor-pointer outline-none p-0 hover:opacity-80"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-[13px] font-bold text-[#333]"
               >
                 {showPassword ? "Hide" : "Show"}
               </button>
@@ -111,7 +130,7 @@ export default function Login() {
 
           <button
             disabled={loading}
-            className="w-full mt-3 py-3 text-[14px] font-bold text-[#fff] bg-[#111] border-none rounded-[14px] cursor-pointer hover:opacity-80 flex justify-center items-center"
+            className="w-full mt-3 py-3 text-[14px] font-bold text-[#fff] bg-[#111] rounded-[14px]"
           >
             {loading ? "Authenticating..." : "Sign In"}
           </button>
@@ -120,10 +139,7 @@ export default function Login() {
         <div className="mt-2 text-center">
           <p className="text-[13px] text-[#333] m-0">
             Forgot your password?{" "}
-            <Link
-              to="/forgot-password"
-              className="text-[#111] hover:opacity-80 no-underline font-bold"
-            >
+            <Link to="/forgot-password" className="font-bold">
               Reset it
             </Link>
           </p>
@@ -132,10 +148,7 @@ export default function Login() {
         <div className="mt-2 text-center">
           <p className="text-[13px] text-[#333] m-0">
             Don't have an account?{" "}
-            <Link
-              to="/signup"
-              className="text-[#111] hover:opacity-80 no-underline font-bold"
-            >
+            <Link to="/signup" className="font-bold">
               Sign up
             </Link>
           </p>

@@ -3,47 +3,49 @@ import User from "../models/User.js";
 
 export const authenticate = async (req, res, next) => {
   try {
-    let token;
+    let token = null;
 
-    // 1️⃣ Get token from cookie or header
-    token = req.cookies?.token;
+    // ✅ COOKIE FIRST
+    if (req.cookies?.token) {
+      token = req.cookies.token;
+    }
 
-    if (!token && req.headers.authorization?.startsWith("Bearer")) {
+    // ✅ FALLBACK HEADER
+    else if (req.headers.authorization?.startsWith("Bearer")) {
       token = req.headers.authorization.split(" ")[1];
     }
 
     if (!token) {
       return res.status(401).json({
-        message: "Authentication required"
+        message: "No token provided",
       });
     }
 
-    // 2️⃣ Verify token
+    // ✅ VERIFY
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // 3️⃣ Fetch user
     const user = await User.findById(decoded.id);
 
     if (!user) {
       return res.status(401).json({
-        message: "User not found"
+        message: "User not found",
       });
     }
 
-    // 4️⃣ Account status check
     if (user.accountStatus !== "active") {
       return res.status(403).json({
-        message: "Account is not active"
+        message: "Account inactive",
       });
     }
 
-    // 5️⃣ Attach user
     req.user = user;
-
     next();
+
   } catch (err) {
+    console.error("AUTH ERROR:", err.message); // 🔥 IMPORTANT FOR DEBUG
+
     return res.status(401).json({
-      message: "Invalid or expired token"
+      message: "Invalid or expired token",
     });
   }
 };
