@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../utils/logoutUser";
+import Logo from "../../assets/OG_LOGO.png";
 
 const FacultyNavBar = () => {
   const dispatch = useDispatch();
@@ -18,9 +19,9 @@ const FacultyNavBar = () => {
         <div className="flex flex-wrap items-center gap-2 md:gap-3 text-sm font-medium flex-1">
           <Link
             to="/faculty/dashboard"
-            className="text-[23px] font-black tracking-tighter text-[#6C5CE7] mr-2 xl:mr-6 whitespace-nowrap no-underline flex items-center transition-all duration-300 hover:opacity-80"
+            className="ml-4 text-[23px] font-black tracking-tighter text-[#6C5CE7] mr-2 xl:mr-6 whitespace-nowrap no-underline flex items-center transition-all duration-300 hover:opacity-80"
           >
-            Intersatus
+            <img src={Logo} alt="InternStatus" className="h-10" />
             <span className="text-[14px] font-bold text-[#2D3436] opacity-50 ml-3 tracking-wide uppercase">
               Faculty
             </span>

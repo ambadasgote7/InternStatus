@@ -8,8 +8,12 @@ export default function BrowseInternships() {
   const navigate = useNavigate();
 
   const fetchData = async () => {
-    const res = await API.get("/internships/browse");
-    setData(res.data.data);
+    try {
+      const res = await API.get("/internships/browse");
+      setData(res.data.data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   useEffect(() => {
@@ -29,117 +33,123 @@ export default function BrowseInternships() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] p-4 md:p-8 font-sans text-white selection:bg-fuchsia-500/30 selection:text-fuchsia-200">
-      <div className="max-w-7xl mx-auto">
-        <header className="mb-10 border-b border-white/10 pb-6">
-          <h2 className="text-3xl md:text-4xl font-black m-0 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60 mb-2">
+    <div className="min-h-screen bg-[#FFFFFF] p-4 md:p-8 lg:p-10 font-['Nunito'] text-[#2D3436] transition-all duration-500 selection:bg-[#6C5CE7]/20 selection:text-[#6C5CE7]">
+      <main className="max-w-7xl mx-auto w-full flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <header className="flex flex-col gap-3 border-b border-[#F5F6FA] pb-8">
+          <h2 className="text-3xl md:text-5xl font-black m-0 tracking-tighter text-[#2D3436] uppercase leading-tight">
             Browse Internships
           </h2>
-          <p className="text-white/40 text-base font-medium m-0">
+          <p className="text-[13px] font-black text-[#6C5CE7] opacity-80 m-0 uppercase tracking-[0.2em]">
             Explore and apply for opportunities that match your skills
           </p>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-          {data.map((item) => (
-            <div
-              key={item._id}
-              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 md:p-6 flex flex-col transition-all duration-300 hover:border-white/20 hover:-translate-y-1 hover:shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] group"
-            >
-              <div className="mb-4">
-                <h3 className="text-lg font-bold text-white/90 mt-0 mb-1 leading-tight group-hover:text-fuchsia-300 transition-colors">
-                  {item.title}
-                </h3>
-                <p className="text-fuchsia-400 font-medium text-xs m-0 tracking-wide uppercase">
-                  {item.company?.name}
-                </p>
-              </div>
+        {data.length === 0 ? (
+          <div className="bg-[#F5F6FA] border-2 border-dashed border-[#6C5CE7]/20 rounded-[32px] p-20 text-center animate-in zoom-in duration-500">
+            <p className="text-[14px] font-black text-[#2D3436] opacity-40 m-0 uppercase tracking-[0.15em]">
+              No internships currently available
+            </p>
+          </div>
+        ) : (
+          <div className="bg-[#FFFFFF] border border-[#F5F6FA] rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden box-border hover:shadow-[0_20px_50px_rgba(0,0,0,0.06)] transition-all duration-500">
+            <div className="overflow-x-auto no-scrollbar">
+              <table className="w-full text-left border-collapse whitespace-nowrap">
+                <thead className="bg-[#F5F6FA] bg-opacity-50 border-b border-[#F5F6FA]">
+                  <tr>
+                    <th className="px-8 py-6 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.15em]">
+                      Opportunity Name
+                    </th>
+                    <th className="px-8 py-6 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.15em]">
+                      Organization
+                    </th>
+                    <th className="px-8 py-6 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.15em]">
+                      Deadline
+                    </th>
+                    <th className="px-8 py-6 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.15em] text-right">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#F5F6FA]">
+                  {data.map((item, idx) => (
+                    <tr
+                      key={item._id}
+                      style={{ animationDelay: `${idx * 50}ms` }}
+                      className="hover:bg-[#F5F6FA]/40 transition-colors duration-300 group animate-in fade-in fill-mode-both"
+                    >
+                      {/* Name */}
+                      <td className="px-8 py-6">
+                        <div className="text-[15px] font-black text-[#2D3436] group-hover:text-[#6C5CE7] transition-colors duration-300">
+                          {item.title}
+                        </div>
+                      </td>
 
-              <div className="flex flex-col gap-3 mb-5 flex-grow">
-                <div className="flex items-center gap-2.5 text-xs text-white/80 bg-[#0B0F19]/30 p-2.5 rounded-lg border border-white/5">
-                  <span className="font-bold text-violet-400 uppercase text-[11px] tracking-widest w-14">
-                    Mode
-                  </span>
-                  <span className="capitalize font-medium">{item.mode}</span>
-                  <span className="text-white/20">|</span>
-                  <span className="font-medium">{item.durationMonths} months</span>
-                </div>
+                      {/* Company Name */}
+                      <td className="px-8 py-6">
+                        <div className="text-[14px] font-bold text-[#2D3436] opacity-80">
+                          {item.company?.name || "Unknown"}
+                        </div>
+                      </td>
 
-                <div className="flex items-center gap-2.5 text-xs text-white/80 bg-[#0B0F19]/30 p-2.5 rounded-lg border border-white/5">
-                  <span className="font-bold text-violet-400 uppercase text-[11px] tracking-widest w-14">
-                    Stipend
-                  </span>
-                  <span className="font-bold text-emerald-400">
-                    {item.stipendType === "paid"
-                      ? `₹${item.stipendAmount}`
-                      : item.stipendType}
-                  </span>
-                </div>
+                      {/* Deadline */}
+                      <td className="px-8 py-6">
+                        <span className="text-[13px] font-bold text-[#2D3436] bg-[#F5F6FA] px-3 py-1.5 rounded-[10px] group-hover:bg-[#FFFFFF] transition-colors">
+                          {new Date(
+                            item.applicationDeadline,
+                          ).toLocaleDateString("en-IN", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </span>
+                      </td>
 
-                <div className="flex flex-col gap-1.5 mt-1.5">
-                  <span className="font-bold text-white/40 uppercase text-[11px] tracking-widest">
-                    Skills Required
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {item.skillsRequired?.slice(0, 3).map((skill, index) => (
-                      <span
-                        key={index}
-                        className="px-2.5 py-1 bg-gradient-to-br from-white/5 to-white/10 border border-white/10 rounded-md text-[11px] font-medium text-white/80 shadow-sm"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+                      {/* Actions */}
+                      <td className="px-8 py-6">
+                        <div className="flex justify-end gap-3">
+                          <button
+                            onClick={() =>
+                              navigate(`/student/internships/${item._id}`)
+                            }
+                            className="px-5 py-2.5 text-[10px] font-black text-[#2D3436] bg-[#FFFFFF] border border-[#F5F6FA] rounded-[12px] hover:border-[#6C5CE7] hover:text-[#6C5CE7] hover:shadow-sm transition-all duration-300 cursor-pointer uppercase tracking-widest outline-none transform hover:-translate-y-0.5"
+                          >
+                            View Details
+                          </button>
 
-                <div className="mt-auto pt-3 text-[11px] font-medium text-white/40 flex justify-between items-center border-t border-white/5">
-                  <span className="uppercase tracking-widest">Deadline</span>
-                  <span className="text-white/60">
-                    {new Date(item.applicationDeadline).toLocaleDateString(
-                      undefined,
-                      {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      }
-                    )}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-5 border-t border-white/10">
-                <button
-                  onClick={() => navigate(`/student/internships/${item._id}`)}
-                  className="flex-1 px-3 py-2.5 text-xs font-bold text-white bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-all duration-300 hover:-translate-y-0.5"
-                >
-                  View Details
-                </button>
-
-                <button
-                  disabled={item.alreadyApplied || loadingId === item._id}
-                  onClick={() => apply(item._id)}
-                  className={`flex-1 px-3 py-2.5 text-xs font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2
-                    ${
-                      item.alreadyApplied
-                        ? "bg-white/5 border border-white/10 text-white/40 cursor-not-allowed"
-                        : "bg-gradient-to-r from-violet-600 to-fuchsia-600 border-none text-white hover:shadow-[0_4px_15px_-3px_rgba(217,70,239,0.5)] hover:-translate-y-0.5 disabled:opacity-50"
-                    }
-                  `}
-                >
-                  {loadingId === item._id && (
-                    <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                  )}
-                  {item.alreadyApplied
-                    ? "Applied"
-                    : loadingId === item._id
-                    ? "Applying..."
-                    : "Apply Now"}
-                </button>
-              </div>
+                          <button
+                            disabled={
+                              item.alreadyApplied || loadingId === item._id
+                            }
+                            onClick={() => apply(item._id)}
+                            className={`px-6 py-2.5 text-[10px] font-black rounded-[12px] transition-all duration-300 uppercase tracking-widest outline-none transform flex items-center justify-center min-w-[120px] shadow-sm
+                              ${
+                                item.alreadyApplied
+                                  ? "bg-[#F5F6FA] text-[#2D3436] opacity-50 cursor-not-allowed border-none shadow-none"
+                                  : "bg-[#6C5CE7] text-[#FFFFFF] border-none hover:shadow-md hover:-translate-y-0.5 hover:bg-opacity-90 cursor-pointer"
+                              }
+                            `}
+                          >
+                            {loadingId === item._id ? (
+                              <div className="flex items-center gap-2">
+                                <span className="w-3 h-3 border-2 border-[#FFFFFF]/30 border-t-[#FFFFFF] rounded-full animate-spin"></span>
+                                Applying...
+                              </div>
+                            ) : item.alreadyApplied ? (
+                              "Applied"
+                            ) : (
+                              "Apply Now"
+                            )}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 }

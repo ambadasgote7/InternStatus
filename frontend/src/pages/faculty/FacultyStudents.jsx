@@ -96,106 +96,134 @@ export default function FacultyStudents() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f9f9f9] flex items-center justify-center font-sans">
-        <p className="text-[14px] font-bold text-[#333] animate-pulse m-0">
-          Syncing Student Records...
-        </p>
+      <div className="min-h-screen bg-[#FFFFFF] flex items-center justify-center font-['Nunito'] transition-all duration-300">
+        <div className="flex flex-col items-center gap-4 animate-in fade-in duration-700">
+          <div className="w-12 h-12 border-4 border-[#F5F6FA] border-t-[#6C5CE7] rounded-full animate-spin"></div>
+          <p className="text-[11px] font-black text-[#6C5CE7] animate-pulse m-0 uppercase tracking-widest">
+            Syncing Student Records...
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f9f9f9] text-[#333] font-sans pb-10">
-      <main className="max-w-7xl mx-auto w-full px-4 md:px-6 py-6 flex flex-col gap-6">
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#e5e5e5] pb-4">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-[23px] font-black text-[#333] m-0 tracking-tight leading-tight">
+    <div className="min-h-screen bg-[#FFFFFF] text-[#2D3436] font-['Nunito'] pb-12 transition-all duration-500 selection:bg-[#6C5CE7]/20 selection:text-[#6C5CE7]">
+      <main className="max-w-7xl mx-auto w-full px-4 md:px-8 lg:px-10 py-8 md:py-10 flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#F5F6FA] pb-6">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-3xl md:text-5xl font-black text-[#2D3436] m-0 tracking-tighter leading-tight uppercase">
               My Students
             </h1>
-            <p className="text-[13px] font-bold text-[#333] opacity-60 m-0 uppercase tracking-widest">
+            <p className="text-[13px] font-black text-[#6C5CE7] opacity-80 m-0 uppercase tracking-[0.2em]">
               Institutional Enrollment List
             </p>
           </div>
-          <div className="text-[11px] font-black text-[#111] bg-[#fff] border border-[#e5e5e5] px-3 py-1.5 rounded-[10px] uppercase tracking-widest">
-            Total Students: {students.length}
+          <div className="text-[11px] font-black text-[#2D3436] bg-[#F5F6FA] border border-transparent px-4 py-2.5 rounded-[12px] uppercase tracking-widest shadow-sm">
+            Total Enrolled:{" "}
+            <span className="text-[#6C5CE7] ml-1">{students.length}</span>
           </div>
         </header>
 
         {students.length === 0 ? (
-          <div className="bg-[#fff] border-2 border-dashed border-[#e5e5e5] rounded-[20px] p-10 text-center">
-            <p className="text-[13px] font-bold text-[#333] opacity-60 m-0">
+          <div className="bg-[#F5F6FA] border-2 border-dashed border-[#6C5CE7]/20 rounded-[32px] p-16 text-center animate-in zoom-in duration-500">
+            <p className="text-[13px] font-black text-[#2D3436] opacity-40 m-0 uppercase tracking-[0.15em]">
               No registered students found.
             </p>
           </div>
         ) : (
-          <div className="bg-[#fff] border border-[#e5e5e5] rounded-[20px] shadow-sm overflow-hidden box-border">
+          <div className="bg-[#FFFFFF] border border-[#F5F6FA] rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden box-border hover:shadow-[0_20px_50px_rgba(0,0,0,0.06)] transition-all duration-500">
             <div className="overflow-x-auto no-scrollbar">
               <table className="w-full text-left border-collapse whitespace-nowrap">
-                <thead className="bg-[#f9f9f9] border-b border-[#e5e5e5]">
+                <thead className="bg-[#F5F6FA] bg-opacity-50 border-b border-[#F5F6FA]">
                   <tr>
-                    <th className="px-5 py-3 text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                    <th className="px-8 py-6 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.15em]">
                       Name
                     </th>
-                    <th className="px-5 py-3 text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                    <th className="px-8 py-6 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.15em]">
                       Course / Spec
                     </th>
-                    <th className="px-5 py-3 text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                    <th className="px-8 py-6 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.15em]">
                       PRN
                     </th>
-                    <th className="px-5 py-3 text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest text-center">
+                    <th className="px-8 py-6 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.15em] text-center">
                       Year
                     </th>
-                    <th className="px-5 py-3 text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                    <th className="px-8 py-6 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.15em]">
                       Status
                     </th>
-                    <th className="px-5 py-3 text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest text-right">
-                      Actions
+                    <th className="px-8 py-6 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.15em] text-right">
+                      Management
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#e5e5e5]">
+                <tbody className="divide-y divide-[#F5F6FA]">
                   {students.map((s) => (
                     <tr
                       key={s._id}
-                      className="hover:bg-[#fcfcfc] transition-colors"
+                      className="hover:bg-[#F5F6FA]/40 transition-colors duration-300 group"
                     >
-                      <td className="px-5 py-3">
-                        <div className="text-[13px] font-bold text-[#333]">
+                      <td className="px-8 py-5">
+                        <div className="text-[14px] font-black text-[#2D3436] group-hover:text-[#6C5CE7] transition-colors duration-300">
                           {s.fullName}
                         </div>
                       </td>
-                      <td className="px-5 py-3">
-                        <div className="text-[13px] font-bold text-[#333] opacity-80">
+                      <td className="px-8 py-5">
+                        <div className="text-[14px] font-bold text-[#2D3436] opacity-80">
                           {s.courseName || "—"}
                         </div>
-                        <div className="text-[11px] font-bold text-[#333] opacity-50 uppercase tracking-tighter">
+                        <div className="text-[10px] font-black text-[#2D3436] opacity-40 uppercase tracking-widest mt-1">
                           {s.specialization || "—"}
                         </div>
                       </td>
-                      <td className="px-5 py-3 text-[12px] font-mono text-[#333] opacity-70">
-                        {s.prn || "—"}
+                      <td className="px-8 py-5">
+                        <span className="text-[13px] font-mono font-bold text-[#2D3436] opacity-60 bg-[#F5F6FA] px-2 py-1 rounded-md group-hover:bg-[#FFFFFF] transition-colors">
+                          {s.prn || "—"}
+                        </span>
                       </td>
-                      <td className="px-5 py-3 text-[13px] font-bold text-[#333] text-center">
+                      <td className="px-8 py-5 text-[14px] font-black text-[#2D3436] text-center">
                         {s.Year || "—"}
                       </td>
-                      <td className="px-5 py-3">
-                        <span className="inline-block px-2.5 py-1 rounded-[10px] text-[10px] font-black uppercase tracking-widest bg-[#f9f9f9] border border-[#e5e5e5]">
+                      <td className="px-8 py-5">
+                        {/* Status colors preserved as requested, integrated with palette */}
+                        <span
+                          className={`inline-flex items-center px-3 py-1.5 rounded-[12px] text-[9px] font-black uppercase tracking-widest border shadow-sm transition-all duration-300 ${
+                            s.status === "completed"
+                              ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+                              : s.status === "active"
+                                ? "bg-blue-50 text-blue-600 border-blue-200"
+                                : s.status === "pending"
+                                  ? "bg-rose-50 text-rose-600 border-rose-200"
+                                  : "bg-[#FFFFFF] text-[#2D3436] border-[#F5F6FA]"
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full mr-2 ${
+                              s.status === "completed"
+                                ? "bg-emerald-500"
+                                : s.status === "active"
+                                  ? "bg-blue-500"
+                                  : s.status === "pending"
+                                    ? "bg-rose-500"
+                                    : "bg-[#2D3436] opacity-50"
+                            }`}
+                          ></span>
                           {s.status}
                         </span>
                       </td>
-                      <td className="px-5 py-3">
-                        <div className="flex gap-2 justify-end">
+                      <td className="px-8 py-5">
+                        <div className="flex gap-3 justify-end">
                           <button
                             onClick={() =>
                               navigate(`/faculty/students/${s._id}`)
                             }
-                            className="px-3 py-1.5 text-[11px] font-bold text-[#333] bg-[#f9f9f9] border border-[#e5e5e5] rounded-[10px] hover:border-[#333] transition-colors cursor-pointer uppercase tracking-widest"
+                            className="px-4 py-2 text-[10px] font-black text-[#2D3436] bg-[#FFFFFF] border border-[#F5F6FA] rounded-[12px] hover:border-[#6C5CE7] hover:text-[#6C5CE7] hover:shadow-sm transition-all duration-300 cursor-pointer uppercase tracking-widest outline-none transform hover:-translate-y-0.5"
                           >
                             View
                           </button>
                           <button
                             onClick={() => openEdit(s)}
-                            className="px-3 py-1.5 text-[11px] font-bold text-[#fff] bg-[#111] border-none rounded-[10px] hover:opacity-80 transition-opacity cursor-pointer uppercase tracking-widest"
+                            className="px-4 py-2 text-[10px] font-black text-[#FFFFFF] bg-[#6C5CE7] border border-[#6C5CE7] rounded-[12px] hover:bg-opacity-90 hover:shadow-md transition-all duration-300 cursor-pointer uppercase tracking-widest outline-none transform hover:-translate-y-0.5"
                           >
                             Modify
                           </button>
@@ -210,78 +238,102 @@ export default function FacultyStudents() {
         )}
       </main>
 
+      {/* EDIT MODAL */}
       {editingStudent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#333]/40 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-[#fff] rounded-[20px] shadow-sm border border-[#e5e5e5] p-6 box-border flex flex-col gap-5">
-            <header className="flex items-center justify-between border-b border-[#f9f9f9] pb-3">
-              <h3 className="text-[18px] font-black text-[#333] m-0 tracking-tight">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2D3436]/40 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="w-full max-w-md bg-[#FFFFFF] rounded-[32px] shadow-2xl border border-[#F5F6FA] p-8 box-border flex flex-col gap-6 animate-in zoom-in-95 duration-300">
+            <header className="flex items-center justify-between border-b border-[#F5F6FA] pb-5">
+              <h3 className="text-[22px] font-black text-[#6C5CE7] m-0 tracking-tight uppercase">
                 Update Record
               </h3>
               <button
                 onClick={() => setEditingStudent(null)}
-                className="text-[11px] font-bold text-[#333] opacity-50 uppercase tracking-widest bg-transparent border-none cursor-pointer hover:opacity-100"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-[#F5F6FA] text-[#2D3436] opacity-50 hover:opacity-100 hover:bg-[#2D3436] hover:text-[#FFFFFF] transition-all cursor-pointer border-none outline-none"
+                aria-label="Close"
               >
-                Close
+                ✕
               </button>
             </header>
 
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-bold opacity-60 uppercase tracking-widest">
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-black text-[#2D3436] opacity-50 uppercase tracking-widest px-1">
                   Course Start Year
                 </label>
-                <select
-                  name="courseStartYear"
-                  value={form.courseStartYear}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2.5 text-[13px] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
-                >
-                  <option value="">Select Year</option>
-                  {Array.from(
-                    { length: 10 },
-                    (_, i) => CURRENT_YEAR - 5 + i,
-                  ).map((year) => (
-                    <option key={year} value={year}>
-                      {year}
+                <div className="relative">
+                  <select
+                    name="courseStartYear"
+                    value={form.courseStartYear}
+                    onChange={handleChange}
+                    className="w-full px-5 py-3.5 text-[14px] font-bold text-[#2D3436] bg-[#F5F6FA] border border-transparent rounded-[16px] outline-none focus:bg-[#FFFFFF] focus:border-[#6C5CE7] focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all duration-300 appearance-none cursor-pointer"
+                  >
+                    <option
+                      value=""
+                      disabled
+                      className="text-[#2D3436] opacity-40"
+                    >
+                      Select Year
                     </option>
-                  ))}
-                </select>
+                    {Array.from(
+                      { length: 10 },
+                      (_, i) => CURRENT_YEAR - 5 + i,
+                    ).map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-[#2D3436] opacity-40 font-black text-[10px]">
+                    ▼
+                  </div>
+                </div>
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-bold opacity-60 uppercase tracking-widest">
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-black text-[#2D3436] opacity-50 uppercase tracking-widest px-1">
                   Academic Year
                 </label>
-                <select
-                  name="Year"
-                  value={form.Year}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2.5 text-[13px] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
-                >
-                  <option value="">Select Stage</option>
-                  {[...Array(COURSE_DURATION)].map((_, i) => (
-                    <option key={i} value={i + 1}>
-                      Year {i + 1}
+                <div className="relative">
+                  <select
+                    name="Year"
+                    value={form.Year}
+                    onChange={handleChange}
+                    className="w-full px-5 py-3.5 text-[14px] font-bold text-[#2D3436] bg-[#F5F6FA] border border-transparent rounded-[16px] outline-none focus:bg-[#FFFFFF] focus:border-[#6C5CE7] focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all duration-300 appearance-none cursor-pointer"
+                  >
+                    <option
+                      value=""
+                      disabled
+                      className="text-[#2D3436] opacity-40"
+                    >
+                      Select Stage
                     </option>
-                  ))}
-                </select>
+                    {[...Array(COURSE_DURATION)].map((_, i) => (
+                      <option key={i} value={i + 1}>
+                        Year {i + 1}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-[#2D3436] opacity-40 font-black text-[10px]">
+                    ▼
+                  </div>
+                </div>
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-bold opacity-60 uppercase tracking-widest">
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-black text-[#2D3436] opacity-50 uppercase tracking-widest px-1">
                   PRN Number
                 </label>
                 <input
                   name="prn"
                   value={form.prn}
                   onChange={handleChange}
-                  placeholder="PRN"
-                  className="w-full px-4 py-2.5 text-[13px] font-mono border border-[#333] rounded-[14px] outline-none"
+                  placeholder="Enter PRN"
+                  className="w-full px-5 py-3.5 text-[14px] font-mono font-bold text-[#2D3436] bg-[#F5F6FA] border border-transparent rounded-[16px] outline-none focus:bg-[#FFFFFF] focus:border-[#6C5CE7] focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all duration-300 placeholder-[#2D3436] placeholder-opacity-30"
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-bold opacity-60 uppercase tracking-widest">
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-black text-[#2D3436] opacity-50 uppercase tracking-widest px-1">
                   ABC ID
                 </label>
                 <input
@@ -289,41 +341,50 @@ export default function FacultyStudents() {
                   value={form.abcId}
                   onChange={handleChange}
                   placeholder="12 Digit ID"
-                  className="w-full px-4 py-2.5 text-[13px] font-mono border border-[#333] rounded-[14px] outline-none"
+                  className="w-full px-5 py-3.5 text-[14px] font-mono font-bold text-[#2D3436] bg-[#F5F6FA] border border-transparent rounded-[16px] outline-none focus:bg-[#FFFFFF] focus:border-[#6C5CE7] focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all duration-300 placeholder-[#2D3436] placeholder-opacity-30"
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-bold opacity-60 uppercase tracking-widest">
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-black text-[#2D3436] opacity-50 uppercase tracking-widest px-1">
                   Account Status
                 </label>
-                <select
-                  name="status"
-                  value={form.status}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2.5 text-[13px] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
-                >
-                  <option value="active">Active</option>
-                  <option value="graduated">Graduated</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="unassigned">Unassigned</option>
-                </select>
+                <div className="relative">
+                  <select
+                    name="status"
+                    value={form.status}
+                    onChange={handleChange}
+                    className="w-full px-5 py-3.5 text-[14px] font-bold text-[#2D3436] bg-[#F5F6FA] border border-transparent rounded-[16px] outline-none focus:bg-[#FFFFFF] focus:border-[#6C5CE7] focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all duration-300 appearance-none cursor-pointer"
+                  >
+                    <option value="active">Active</option>
+                    <option value="graduated">Graduated</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="unassigned">Unassigned</option>
+                  </select>
+                  <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-[#2D3436] opacity-40 font-black text-[10px]">
+                    ▼
+                  </div>
+                </div>
               </div>
             </div>
 
-            <footer className="flex justify-end gap-2 pt-4 border-t border-[#f9f9f9]">
+            <footer className="flex justify-end gap-3 pt-6 border-t border-[#F5F6FA] mt-2">
               <button
                 onClick={() => setEditingStudent(null)}
-                className="px-5 py-2 text-[12px] font-bold text-[#333] bg-[#f9f9f9] border border-[#e5e5e5] rounded-[12px] hover:bg-[#e5e5e5] transition-colors cursor-pointer uppercase tracking-widest"
+                className="px-6 py-3.5 text-[11px] font-black text-[#2D3436] bg-[#F5F6FA] border border-transparent rounded-[14px] hover:border-[#6C5CE7] hover:text-[#6C5CE7] transition-all duration-300 cursor-pointer uppercase tracking-widest outline-none active:scale-95"
               >
                 Cancel
               </button>
               <button
                 onClick={handleUpdate}
                 disabled={saving}
-                className="px-6 py-2 text-[12px] font-bold text-[#fff] bg-[#111] border-none rounded-[12px] hover:opacity-80 transition-opacity disabled:opacity-50 cursor-pointer uppercase tracking-widest"
+                className="px-8 py-3.5 text-[11px] font-black text-[#FFFFFF] bg-[#6C5CE7] border-none rounded-[14px] hover:shadow-[0_10px_25px_-5px_rgba(108,92,231,0.4)] transition-all duration-300 disabled:opacity-50 disabled:transform-none cursor-pointer uppercase tracking-widest outline-none active:scale-95 shadow-md flex items-center justify-center min-w-[140px]"
               >
-                {saving ? "Saving..." : "Save Changes"}
+                {saving ? (
+                  <div className="w-4 h-4 border-2 border-[#FFFFFF]/30 border-t-[#FFFFFF] rounded-full animate-spin"></div>
+                ) : (
+                  "Save Changes"
+                )}
               </button>
             </footer>
           </div>

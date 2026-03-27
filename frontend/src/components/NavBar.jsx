@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
+import Logo from "../assets/OG_LOGO.png";
 
 const NavBar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -22,9 +23,9 @@ const NavBar = () => {
         {/* Logo */}
         <Link
           to="/"
-          className="text-[24px] font-black tracking-tighter text-[#6C5CE7] no-underline flex items-center gap-2 uppercase transition-opacity duration-300 hover:opacity-80"
+          className="ml-4 text-[24px] font-black tracking-tighter text-[#6C5CE7] no-underline flex items-center gap-2 uppercase transition-opacity duration-300 hover:opacity-80"
         >
-          InternStatus
+          <img src={Logo} alt="InternStatus" className="h-10" />
         </Link>
 
         {/* Navigation Actions */}
@@ -54,7 +55,9 @@ const NavBar = () => {
             {/* Dropdown Menu */}
             <div
               className={`absolute right-0 mt-3 w-56 bg-[#FFFFFF] border border-[#F5F6FA] rounded-[16px] shadow-lg flex flex-col z-50 overflow-hidden transform origin-top-right transition-all duration-300 ease-out ${
-                isDropdownOpen ? "opacity-100 scale-100 visible" : "opacity-0 scale-95 invisible"
+                isDropdownOpen
+                  ? "opacity-100 scale-100 visible"
+                  : "opacity-0 scale-95 invisible"
               }`}
             >
               {/* Links to your Register Routes */}

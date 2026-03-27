@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logoutUser } from "../../utils/logoutUser";
+import Logo from "../../assets/OG_LOGO.png";
 
 const AdminNavBar = () => {
   const dispatch = useDispatch();
@@ -15,8 +16,8 @@ const AdminNavBar = () => {
   return (
     <nav className="sticky top-0 z-50 w-full bg-[#FFFFFF] border-b border-[#F5F6FA] font-['Nunito'] shadow-sm transition-all duration-300">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center gap-5">
-        <h1 className="text-[23px] font-black tracking-tighter text-[#6C5CE7] m-0 flex items-center transition-all duration-300">
-          InternStatus
+        <h1 className="ml-4 text-[23px] font-black tracking-tighter text-[#6C5CE7] m-0 flex items-center transition-all duration-300">
+          <img src={Logo} alt="InternStatus" className="h-10" />
           <span className="text-[14px] font-bold text-[#2D3436] opacity-50 ml-3 tracking-wide uppercase">
             Admin
           </span>
