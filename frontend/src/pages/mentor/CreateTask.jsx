@@ -2,11 +2,14 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import API from "../../api/api";
 
-export default function CreateTask() {
-  const { applicationId } = useParams();
+export default function CreateTask({ applicationId: propAppId, onSuccess }) {
+  const { applicationId: paramAppId } = useParams();
   const navigate = useNavigate();
 
+  const applicationId = propAppId || paramAppId;
+
   const [loading, setLoading] = useState(false);
+  const [files, setFiles] = useState([]); // ✅ FILE STATE
 
   const [form, setForm] = useState({
     title: "",
@@ -24,7 +27,7 @@ export default function CreateTask() {
   };
 
   const createTask = async () => {
-    if (!form.title) {
+    if (!form.title.trim()) {
       alert("Task title required");
       return;
     }
@@ -32,12 +35,29 @@ export default function CreateTask() {
     try {
       setLoading(true);
 
-      await API.post("/tasks", {
-        ...form,
-        application: applicationId,
+      const formData = new FormData();
+
+      Object.keys(form).forEach((key) => {
+        formData.append(key, form[key]);
       });
 
-      navigate(`/mentor/intern/${applicationId}/track`);
+      formData.append("application", applicationId);
+
+      for (let i = 0; i < files.length; i++) {
+        formData.append("resources", files[i]);
+      }
+
+      await API.post("/tasks", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate(`/mentor/intern/${applicationId}/track`);
+      }
     } catch (err) {
       alert(err.response?.data?.message || "Failed to create task");
     } finally {
@@ -46,105 +66,123 @@ export default function CreateTask() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f9f9f9] text-[#333] font-sans pb-10 flex items-center justify-center p-4">
-      <main className="max-w-3xl w-full px-4 md:px-6 py-6 flex flex-col gap-6">
-        <div className="bg-[#fff] border border-[#e5e5e5] p-6 md:p-10 rounded-[20px] shadow-sm">
-          <header className="mb-8 border-b border-[#e5e5e5] pb-4 text-center">
-            <h1 className="text-[23px] font-black text-[#333] m-0 tracking-tight leading-tight">
-              Create New Task
-            </h1>
-            <p className="text-[13px] font-bold text-[#333] opacity-60 m-0 mt-1 uppercase tracking-widest">
-              Milestone Provisioning
-            </p>
-          </header>
+    <div className="bg-white rounded-[2.5rem] p-6 md:p-10 font-['Nunito'] text-[#2D3436] animate-in fade-in zoom-in duration-500 shadow-2xl shadow-[#6C5CE7]/10 border border-[#F5F6FA]">
+      
+      {/* HEADER */}
+      <div className="text-center mb-10">
+        <h1 className="text-3xl font-black tracking-tight">
+          Assign New <span className="text-[#6C5CE7]">Task</span>
+        </h1>
+        <p className="text-[#2D3436]/60 font-semibold mt-2">
+          Fill in the details to set internship goals
+        </p>
+      </div>
 
-          <div className="flex flex-col gap-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
-                  Task Title
-                </label>
-                <input
-                  name="title"
-                  placeholder="e.g. Database Schema Design"
-                  value={form.title}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
-                />
-              </div>
+      <div className="flex flex-col gap-5">
+        
+        {/* TITLE */}
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-black uppercase tracking-widest text-[#2D3436]/50 ml-2">Task Title</label>
+          <input
+            name="title"
+            placeholder="e.g. Build API Endpoints"
+            value={form.title}
+            onChange={handleChange}
+            className="p-4 bg-[#F5F6FA] border-2 border-transparent focus:border-[#6C5CE7] focus:bg-white rounded-2xl outline-none transition-all duration-300 font-bold placeholder:text-gray-400"
+          />
+        </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
-                  Submission Deadline
-                </label>
-                <input
-                  name="deadline"
-                  type="date"
-                  value={form.deadline}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none uppercase"
-                />
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* DEADLINE */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-black uppercase tracking-widest text-[#2D3436]/50 ml-2">Deadline Date</label>
+            <input
+              type="date"
+              name="deadline"
+              value={form.deadline}
+              onChange={handleChange}
+              className="p-4 bg-[#F5F6FA] border-2 border-transparent focus:border-[#6C5CE7] focus:bg-white rounded-2xl outline-none transition-all duration-300 font-bold"
+            />
+          </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
-                  Classification
-                </label>
-                <select
-                  name="taskType"
-                  value={form.taskType}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none appearance-none cursor-pointer"
-                >
-                  <option value="internal">Internal Assignment</option>
-                  <option value="external">External Link / Doc</option>
-                </select>
-              </div>
-
-              {form.taskType === "external" && (
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
-                    Resource Link
-                  </label>
-                  <input
-                    name="externalLink"
-                    placeholder="https://resource-url.com"
-                    value={form.externalLink}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
-                  />
-                </div>
-              )}
-            </div>
-
-            {form.taskType === "internal" && (
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
-                  Requirements & Description
-                </label>
-                <textarea
-                  name="description"
-                  placeholder="Detail the technical requirements and deliverables..."
-                  value={form.description}
-                  onChange={handleChange}
-                  rows="5"
-                  className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none resize-none"
-                />
-              </div>
-            )}
-
-            <div className="pt-6 border-t border-[#f9f9f9] flex justify-end">
-              <button
-                onClick={createTask}
-                disabled={loading}
-                className="w-full md:w-auto px-10 py-4 text-[13px] font-black text-[#fff] bg-[#111] border-none rounded-[14px] cursor-pointer hover:opacity-80 transition-opacity disabled:opacity-30 uppercase tracking-widest"
-              >
-                {loading ? "Processing..." : "Deploy Task"}
-              </button>
-            </div>
+          {/* TYPE */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-black uppercase tracking-widest text-[#2D3436]/50 ml-2">Task Category</label>
+            <select
+              name="taskType"
+              value={form.taskType}
+              onChange={handleChange}
+              className="p-4 bg-[#F5F6FA] border-2 border-transparent focus:border-[#6C5CE7] focus:bg-white rounded-2xl outline-none transition-all duration-300 font-bold appearance-none cursor-pointer"
+            >
+              <option value="internal">Internal Project</option>
+              <option value="external">External Link / Resource</option>
+            </select>
           </div>
         </div>
-      </main>
+
+        {/* EXTERNAL LINK */}
+        {form.taskType === "external" && (
+          <div className="flex flex-col gap-2 animate-in slide-in-from-top-2 duration-300">
+            <label className="text-xs font-black uppercase tracking-widest text-[#2D3436]/50 ml-2">Resource Link</label>
+            <input
+              name="externalLink"
+              placeholder="https://github.com/resource-link"
+              value={form.externalLink}
+              onChange={handleChange}
+              className="p-4 bg-[#F5F6FA] border-2 border-transparent focus:border-[#6C5CE7] focus:bg-white rounded-2xl outline-none transition-all duration-300 font-bold"
+            />
+          </div>
+        )}
+
+        {/* DESCRIPTION */}
+        {form.taskType === "internal" && (
+          <div className="flex flex-col gap-2 animate-in slide-in-from-top-2 duration-300">
+            <label className="text-xs font-black uppercase tracking-widest text-[#2D3436]/50 ml-2">Task Description</label>
+            <textarea
+              rows="4"
+              name="description"
+              placeholder="Explain the technical requirements clearly..."
+              value={form.description}
+              onChange={handleChange}
+              className="p-4 bg-[#F5F6FA] border-2 border-transparent focus:border-[#6C5CE7] focus:bg-white rounded-2xl outline-none transition-all duration-300 font-bold resize-none"
+            />
+          </div>
+        )}
+
+        {/* ✅ FILE UPLOAD */}
+        <div className="flex flex-col gap-3 p-5 bg-[#F5F6FA] rounded-2xl border-2 border-dashed border-gray-200 hover:border-[#6C5CE7]/50 transition-colors">
+          <label className="text-sm font-black text-[#2D3436]">
+            Reference Attachments
+          </label>
+          <input
+            type="file"
+            multiple
+            onChange={(e) => setFiles(e.target.files)}
+            className="text-sm font-bold text-[#6C5CE7] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-[#6C5CE7] file:text-white hover:file:bg-[#5b4cc4] cursor-pointer"
+          />
+          <p className="text-[10px] text-gray-400 font-bold italic uppercase">Upload documents, images, or assets (Multi-select enabled)</p>
+        </div>
+
+        {/* BUTTON */}
+        <button
+          onClick={createTask}
+          disabled={loading}
+          className={`mt-4 w-full py-4 rounded-2xl font-black text-lg transition-all transform active:scale-95 shadow-xl ${
+            loading 
+            ? "bg-gray-200 text-gray-400 cursor-not-allowed" 
+            : "bg-[#6C5CE7] text-white hover:bg-[#5b4cc4] shadow-[#6C5CE7]/30"
+          }`}
+        >
+          {loading ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+              Deploying Task...
+            </span>
+          ) : (
+            "Assign Task to Intern"
+          )}
+        </button>
+      </div>
     </div>
   );
 }

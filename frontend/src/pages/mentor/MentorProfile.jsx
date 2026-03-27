@@ -14,7 +14,7 @@ export default function MentorProfile() {
       const res = await API.get("/mentor/profile");
       setProfile(res.data.data);
     } catch {
-      setError("Failed to load profile");
+      setError("Failed to load. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -23,13 +23,6 @@ export default function MentorProfile() {
   useEffect(() => {
     fetchProfile();
   }, []);
-
-  useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => setSuccess(""), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [success]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -52,9 +45,10 @@ export default function MentorProfile() {
 
       const res = await API.patch("/mentor/profile", payload);
       setProfile(res.data.data);
-      setSuccess("Profile updated successfully");
+      setSuccess("Profile updated!");
+      setTimeout(() => setSuccess(""), 3000);
     } catch {
-      setError("Update failed");
+      setError("Update failed.");
     } finally {
       setSaving(false);
     }
@@ -62,27 +56,14 @@ export default function MentorProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f9f9f9] flex items-center justify-center font-sans">
-        <p className="text-[14px] font-bold text-[#333] animate-pulse m-0">
-          Syncing Profile Data...
-        </p>
+      <div className="h-screen bg-white flex flex-col items-center justify-center font-['Nunito']">
+        <div className="w-8 h-8 border-4 border-[#F5F6FA] border-t-[#6C5CE7] rounded-full animate-spin mb-3" />
+        <p className="text-[14px] font-bold text-[#2D3436] opacity-50">Loading profile...</p>
       </div>
     );
   }
 
-  if (!profile) {
-    return (
-      <div className="min-h-screen bg-[#f9f9f9] flex items-center justify-center p-4 font-sans">
-        <div className="bg-[#fff] border-2 border-dashed border-[#e5e5e5] rounded-[20px] p-10 text-center">
-          <p className="text-[13px] font-bold text-[#333] opacity-60 m-0">
-            No profile data found
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  const initials = (profile.fullName || "M")
+  const initials = (profile?.fullName || "M")
     .split(" ")
     .map((n) => n[0])
     .slice(0, 2)
@@ -90,121 +71,108 @@ export default function MentorProfile() {
     .toUpperCase();
 
   return (
-    <div className="min-h-screen bg-[#f9f9f9] text-[#333] font-sans pb-10">
-      <main className="max-w-6xl mx-auto w-full px-4 md:px-6 py-6 flex flex-col md:flex-row gap-6">
-        <aside className="w-full md:w-[320px] flex-shrink-0 flex flex-col gap-6">
-          <div className="bg-[#fff] border border-[#e5e5e5] rounded-[20px] p-6 shadow-sm flex flex-col items-center text-center">
-            <div className="w-24 h-24 bg-[#f9f9f9] border border-[#e5e5e5] rounded-full flex items-center justify-center text-[28px] font-black mb-4">
+    <div className="min-h-screen bg-white text-[#2D3436] font-['Nunito'] overflow-hidden">
+      {/* Added some global CSS to hide the scrollbar for a clean look */}
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
+
+      <main className="max-w-6xl mx-auto flex flex-col lg:flex-row h-screen p-4 lg:p-10 gap-8">
+        
+        {/* LEFT CARD - THIS IS NOW PROPERLY FIXED */}
+        <aside className="w-full lg:w-[320px] flex-shrink-0">
+          <div className="lg:sticky lg:top-0 bg-[#F5F6FA] rounded-[30px] p-8 flex flex-col items-center text-center border border-white shadow-sm">
+            <div className="w-24 h-24 bg-white rounded-full shadow-lg flex items-center justify-center text-[32px] font-black text-[#6C5CE7] mb-5 border-2 border-white">
               {initials}
             </div>
-            <h2 className="text-[20px] font-black m-0 leading-tight mb-1">
-              {profile.fullName}
-            </h2>
-            <p className="text-[12px] font-bold opacity-50 uppercase tracking-widest m-0 mb-4">
-              {profile.company?.name || "Corporate Associate"}
-            </p>
-            <span className="px-3 py-1 rounded-[10px] text-[10px] font-black uppercase tracking-widest bg-[#f9f9f9] border border-[#008000] text-[#008000]">
-              {profile.profileStatus || "Active"}
-            </span>
-          </div>
 
-          <div className="bg-[#fff] border border-[#e5e5e5] rounded-[20px] p-5 shadow-sm flex flex-col gap-4">
-            <div className="flex flex-col border-b border-[#f9f9f9] pb-2 last:pb-0 last:border-0">
-              <span className="text-[10px] font-bold opacity-40 uppercase tracking-widest">
-                Employee Identifier
-              </span>
-              <span className="text-[13px] font-mono font-bold text-[#111]">
-                {profile.employeeId || "—"}
-              </span>
+            <h2 className="text-[22px] font-black mb-1">{profile?.fullName}</h2>
+            <p className="text-[12px] font-bold text-[#6C5CE7] uppercase tracking-wider mb-8">
+              {profile?.company?.name || "Member"}
+            </p>
+
+            <div className="w-full space-y-3">
+              <div className="bg-white/60 p-4 rounded-2xl text-left border border-white">
+                <span className="text-[10px] font-bold opacity-30 uppercase block">Employee ID</span>
+                <span className="text-[14px] font-bold">{profile?.employeeId || "—"}</span>
+              </div>
+              <div className="bg-white/60 p-4 rounded-2xl text-left border border-white">
+                <span className="text-[10px] font-bold opacity-30 uppercase block">Role Status</span>
+                <span className="text-[12px] font-black text-[#008000] uppercase">Verified</span>
+              </div>
             </div>
           </div>
         </aside>
 
-        <section className="flex-1">
-          <div className="bg-[#fff] border border-[#e5e5e5] rounded-[20px] p-6 md:p-8 shadow-sm">
-            <header className="mb-8 border-b border-[#e5e5e5] pb-4">
-              <h1 className="text-[23px] font-black m-0 tracking-tight">
-                Edit Professional Profile
-              </h1>
-              <p className="text-[13px] font-bold opacity-60 m-0 mt-1 uppercase tracking-widest">
-                Credentials & Bio Management
-              </p>
-            </header>
+        {/* RIGHT CARD - THIS WILL SCROLL */}
+        <section className="flex-1 h-full overflow-y-auto no-scrollbar pb-20">
+          <div className="bg-white border-2 border-[#F5F6FA] rounded-[40px] p-6 lg:p-12 shadow-sm">
+            <div className="mb-10">
+              <h1 className="text-[30px] font-black tracking-tight">Profile Settings</h1>
+              <p className="text-[14px] font-bold opacity-40">Keep your details up to date.</p>
+            </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-              {error && (
-                <div className="px-4 py-3 text-[12px] font-bold text-[#cc0000] bg-[#fff] border border-[#cc0000] rounded-[14px] uppercase tracking-widest text-center">
-                  {error}
-                </div>
-              )}
+            <form onSubmit={handleSubmit} className="space-y-8">
               {success && (
-                <div className="px-4 py-3 text-[12px] font-bold text-[#008000] bg-[#fff] border border-[#008000] rounded-[14px] uppercase tracking-widest text-center">
+                <div className="bg-[#008000]/10 border border-[#008000]/20 text-[#008000] text-[13px] font-bold py-4 px-6 rounded-2xl text-center animate-bounce">
                   {success}
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-bold opacity-60 uppercase tracking-widest">
-                    Phone Number
-                  </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[12px] font-bold opacity-50 ml-1">Mobile Number</label>
                   <input
                     name="phoneNo"
-                    value={profile.phoneNo || ""}
+                    value={profile?.phoneNo || ""}
                     onChange={handleChange}
-                    placeholder="+91"
-                    className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+                    className="w-full px-6 py-4 bg-[#F5F6FA] border-2 border-transparent rounded-2xl outline-none focus:bg-white focus:border-[#6C5CE7]/30 transition-all font-bold"
+                    placeholder="Enter phone"
                   />
                 </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-bold opacity-60 uppercase tracking-widest">
-                    Designation
-                  </label>
+                <div className="space-y-2">
+                  <label className="text-[12px] font-bold opacity-50 ml-1">Designation</label>
                   <input
                     name="designation"
-                    value={profile.designation || ""}
+                    value={profile?.designation || ""}
                     onChange={handleChange}
-                    placeholder="e.g. Lead Engineer"
-                    className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+                    className="w-full px-6 py-4 bg-[#F5F6FA] border-2 border-transparent rounded-2xl outline-none focus:bg-white focus:border-[#6C5CE7]/30 transition-all font-bold"
+                    placeholder="e.g. Mentor"
                   />
                 </div>
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-bold opacity-60 uppercase tracking-widest">
-                  Department
-                </label>
+              <div className="space-y-2">
+                <label className="text-[12px] font-bold opacity-50 ml-1">Department</label>
                 <input
                   name="department"
-                  value={profile.department || ""}
+                  value={profile?.department || ""}
                   onChange={handleChange}
-                  placeholder="e.g. Core Systems"
-                  className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+                  className="w-full px-6 py-4 bg-[#F5F6FA] border-2 border-transparent rounded-2xl outline-none focus:bg-white focus:border-[#6C5CE7]/30 transition-all font-bold"
+                  placeholder="e.g. Computer Science"
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-bold opacity-60 uppercase tracking-widest">
-                  Professional Bio
-                </label>
+              <div className="space-y-2">
+                <label className="text-[12px] font-bold opacity-50 ml-1">About Me</label>
                 <textarea
                   name="bio"
-                  rows={4}
-                  value={profile.bio || ""}
+                  rows={6}
+                  value={profile?.bio || ""}
                   onChange={handleChange}
-                  placeholder="Tell us about your expertise..."
-                  className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none resize-none"
+                  className="w-full px-6 py-4 bg-[#F5F6FA] border-2 border-transparent rounded-[24px] outline-none focus:bg-white focus:border-[#6C5CE7]/30 transition-all font-bold resize-none leading-relaxed"
+                  placeholder="Tell us about yourself..."
                 />
               </div>
 
-              <div className="pt-6 border-t border-[#f9f9f9] flex justify-end">
+              <div className="pt-6 flex justify-end">
                 <button
                   type="submit"
                   disabled={saving}
-                  className="w-full md:w-auto px-12 py-3.5 text-[13px] font-bold text-[#fff] bg-[#111] border-none rounded-[14px] cursor-pointer hover:opacity-80 transition-opacity disabled:opacity-30 uppercase tracking-widest"
+                  className="w-full md:w-auto px-16 py-4 bg-[#6C5CE7] text-white text-[14px] font-black rounded-2xl shadow-xl shadow-[#6C5CE7]/20 hover:scale-105 transition-transform active:scale-95 disabled:opacity-50"
                 >
-                  {saving ? "Saving Changes..." : "Save Profile"}
+                  {saving ? "Saving..." : "Save Profile"}
                 </button>
               </div>
             </form>

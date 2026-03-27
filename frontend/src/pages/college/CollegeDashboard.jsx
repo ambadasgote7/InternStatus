@@ -1,259 +1,237 @@
-import React, { useEffect, useState, useRef } from "react";
-import API from "../../api/api";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Cell
-} from "recharts";
-import CollegeNavBar from "../../components/navbars/CollegeNavBar";
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { fetchDashboard } from '../../store/dashboardSlice';
+import { 
+  Users, Briefcase, Award, AlertCircle, 
+  ArrowUpRight, Clock, CheckCircle, ChevronRight 
+} from 'lucide-react';
 
 const CollegeDashboard = () => {
-  const [students, setStudents] = useState([]);
-  const [faculty, setFaculty] = useState([]);
-  const [courses, setCourses] = useState([]);
-  const [view, setView] = useState("students");
-  const [loading, setLoading] = useState(true);
-
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [selectedFaculty, setSelectedFaculty] = useState(null);
-
-  const tableRef = useRef(null);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const [sRes, fRes, cRes] = await Promise.all([
-        API.get("/college/students"),
-        API.get("/college/faculty"),
-        API.get("/college/courses"),
-      ]);
-      setStudents(sRes.data?.data || []);
-      setFaculty(fRes.data?.data || []);
-      setCourses(cRes.data?.data || []);
-    } catch (err) {
-      console.error("Dashboard Fetch Error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { data, loading, error } = useSelector((state) => state.dashboard);
 
   useEffect(() => {
-    fetchData();
+    dispatch(fetchDashboard());
   }, []);
 
-  const handleViewChange = (type) => {
-    setView(type);
-    setTimeout(() => {
-      tableRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }, 100);
-  };
+  if (loading) return <div className="flex h-screen items-center justify-center bg-gray-50">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  </div>;
 
-  const chartData = [
-    { name: "STUDENTS", count: students.length },
-    { name: "FACULTY", count: faculty.length },
-    { name: "COURSES", count: courses.length },
-  ];
+  if (error) return <div className="p-10 text-red-500 font-medium">Error: {error}</div>;
 
-  const CustomTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-[#2D3436] text-[#FFFFFF] px-4 py-3 rounded-[16px] shadow-2xl border border-[#6C5CE7]/30">
-          <p className="text-[9px] font-black uppercase tracking-[0.2em] opacity-60 m-0 mb-1">
-            {payload[0].payload.name}
-          </p>
-          <p className="text-[20px] font-black m-0 text-[#6C5CE7]">{payload[0].value}</p>
-        </div>
-      );
-    }
-    return null;
-  };
+  const {
+  kpis = {},
+  pipeline = {},
+  specializations = [],
+  facultyEngagement = { topFaculty: [], inactiveFaculty: [] },
+  atRisk = [],
+  credits = {},
+  recentActivity = [],
+  actionQueue = []
+} = data || {};
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-[#FFFFFF] font-['Nunito']">
-        <div className="flex flex-col items-center gap-6">
-          <div className="w-12 h-12 border-[3px] border-[#F5F6FA] border-t-[#6C5CE7] rounded-full animate-spin"></div>
-          <p className="text-[#2D3436] font-black tracking-[0.3em] uppercase text-[10px] animate-pulse m-0">
-            Mapping Repository...
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-[#FFFFFF] text-[#2D3436] font-['Nunito'] pb-20">
-
-      <div className="max-w-7xl mx-auto p-4 md:p-10 space-y-12 animate-in fade-in duration-700">
-        
-        {/* HEADER SECTION */}
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <div className="text-[11px] font-black text-[#6C5CE7] uppercase tracking-[0.4em] mb-3">
-              Institutional Overview
-            </div>
-            <h1 className="text-4xl md:text-5xl font-black text-[#2D3436] m-0 tracking-tighter uppercase leading-none">
-              Control <span className="text-[#6C5CE7]">Center</span>
-            </h1>
-          </div>
-          <div className="text-[12px] font-bold text-[#2D3436] opacity-40 uppercase tracking-widest border-b-2 border-[#F5F6FA] pb-1">
-            Academic Session 2026
-          </div>
-        </header>
-
-        {/* METRIC CARDS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            { id: "students", label: "Total Enrollment", count: students.length },
-            { id: "faculty", label: "Expert Faculty", count: faculty.length },
-            { id: "courses", label: "Active Programs", count: courses.length }
-          ].map((card) => (
-            <div
-              key={card.id}
-              onClick={() => handleViewChange(card.id)}
-              className={`group bg-[#FFFFFF] border-2 p-10 rounded-[35px] transition-all duration-500 cursor-pointer flex flex-col gap-4 relative overflow-hidden
-              ${view === card.id 
-                ? "border-[#6C5CE7] shadow-2xl shadow-[#6C5CE7]/20 -translate-y-2" 
-                : "border-[#F5F6FA] hover:border-[#6C5CE7]/30 hover:shadow-xl"}
-            `}
+    <div className="p-8 bg-gray-50 min-h-screen font-sans text-gray-900">
+      {/* HEADER SECTION */}
+      <div className="flex justify-between items-end mb-8">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight text-gray-900">Institutional Overview</h1>
+          <p className="text-gray-500 font-medium">Real-time placement and academic compliance data.</p>
+        </div>
+        <div className="flex gap-3">
+          {actionQueue.map((action, idx) => (
+            <button 
+              key={idx}
+              onClick={() => navigate(action.route)}
+              className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition-all text-sm font-bold text-gray-700"
             >
-              <div className={`absolute top-0 right-0 w-24 h-24 rounded-full -mr-10 -mt-10 transition-colors duration-500 ${view === card.id ? "bg-[#6C5CE7]/10" : "bg-[#F5F6FA]"}`}></div>
-              <p className="text-[11px] font-black text-[#2D3436] opacity-40 uppercase tracking-[0.2em] m-0 group-hover:text-[#6C5CE7] transition-colors">
-                {card.label}
-              </p>
-              <h2 className="text-[52px] font-black text-[#2D3436] m-0 leading-none tracking-tighter">
-                {card.count}
-              </h2>
-            </div>
-          ))}
-        </div>
-
-        {/* ANALYTICS SECTION */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 bg-[#F5F6FA] p-10 rounded-[40px] border border-white">
-            <h2 className="text-[13px] font-black text-[#2D3436] mb-10 uppercase tracking-[0.3em] flex items-center gap-3 m-0">
-              <span className="w-2 h-2 bg-[#6C5CE7] rounded-full animate-ping"></span>
-              Live Distribution
-            </h2>
-
-            <div className="w-full h-[350px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <XAxis 
-                    dataKey="name" 
-                    stroke="#2D3436" 
-                    fontSize={10} 
-                    fontWeight={900} 
-                    tickMargin={15} 
-                    axisLine={false} 
-                    tickLine={false} 
-                    opacity={0.3}
-                  />
-                  <YAxis hide />
-                  <Tooltip cursor={{ fill: "#FFFFFF", opacity: 0.5 }} content={<CustomTooltip />} />
-                  <Bar dataKey="count" radius={[15, 15, 15, 15]} barSize={55}>
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={view === entry.name.toLowerCase() ? "#6C5CE7" : "#2D3436"} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* SIDE INFO BOX */}
-          <div className="bg-[#2D3436] p-10 rounded-[40px] text-white flex flex-col justify-between relative overflow-hidden">
-            <div className="absolute bottom-0 left-0 w-full h-1 bg-[#6C5CE7]"></div>
-            <div>
-              <h3 className="text-[24px] font-black tracking-tighter leading-tight mb-4 uppercase">System<br/><span className="text-[#6C5CE7]">Integrity</span></h3>
-              <p className="text-[#FFFFFF]/40 text-[12px] font-medium leading-relaxed">
-                All academic records are currently synced with the central repository. No pending actions required for the current session.
-              </p>
-            </div>
-            <button className="mt-8 bg-[#6C5CE7] hover:bg-[#5b4bc4] text-white text-[10px] font-black uppercase tracking-widest py-4 px-6 rounded-2xl transition-all">
-              Export Report
+              {action.label}
+              <span className="bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full text-xs">{action.count}</span>
             </button>
-          </div>
-        </div>
-
-        {/* DATA DIRECTORY */}
-        <div ref={tableRef} className="bg-[#FFFFFF] border-2 border-[#F5F6FA] p-1 md:p-10 rounded-[45px] scroll-mt-10">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-10 px-6 gap-4">
-            <h2 className="text-[14px] font-black text-[#2D3436] uppercase tracking-[0.3em] m-0">
-              {view} <span className="text-[#6C5CE7]">Registry</span>
-            </h2>
-            <div className="flex items-center gap-2 bg-[#F5F6FA] px-5 py-2 rounded-full border border-[#FFFFFF]">
-              <div className="w-1.5 h-1.5 bg-[#6C5CE7] rounded-full"></div>
-              <span className="text-[9px] font-black text-[#2D3436]/60 uppercase tracking-widest">Active Filters: {view}</span>
-            </div>
-          </div>
-
-          <div className="overflow-hidden">
-            {view === "students" && (
-              <div className="overflow-x-auto rounded-[30px]">
-                <table className="w-full text-left border-collapse whitespace-nowrap">
-                  <thead>
-                    <tr className="bg-[#F5F6FA] border-b border-white">
-                      {["Full Name", "Identity (PRN)", "Program", "Academic Year", "Status"].map((h) => (
-                        <th key={h} className="px-8 py-6 text-[10px] font-black text-[#2D3436]/40 uppercase tracking-[0.2em]">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#F5F6FA]">
-                    {students.map((s) => (
-                      <tr key={s._id} onClick={() => setSelectedStudent(s)} className="group hover:bg-[#F5F6FA]/50 cursor-pointer transition-all">
-                        <td className="px-8 py-6 text-[14px] font-black text-[#2D3436] group-hover:text-[#6C5CE7] transition-colors">{s.fullName}</td>
-                        <td className="px-8 py-6 text-[12px] font-mono font-bold text-[#6C5CE7]">{s.prn}</td>
-                        <td className="px-8 py-6 text-[13px] font-bold text-[#2D3436]/60">{s.courseName}</td>
-                        <td className="px-8 py-6 text-[13px] font-black text-[#2D3436]">{s.Year}</td>
-                        <td className="px-8 py-6">
-                          <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${s.status === "active" ? "bg-[#6C5CE7] text-white" : "bg-[#2D3436] text-white"}`}>
-                            {s.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-            {/* Faculty & Courses logic follow same style... */}
-          </div>
+          ))}
         </div>
       </div>
 
-      {/* MODALS (Simplified for brevity, following the same theme) */}
-      {selectedStudent && (
-        <div className="fixed inset-0 bg-[#2D3436]/80 backdrop-blur-md flex justify-center items-center z-50 p-6 animate-in fade-in duration-300">
-          <div className="bg-[#FFFFFF] p-12 rounded-[50px] w-full max-w-lg shadow-2xl border-4 border-[#6C5CE7]">
-            <h2 className="text-[28px] font-black text-[#2D3436] mb-8 tracking-tighter uppercase leading-none">Record <span className="text-[#6C5CE7]">Details</span></h2>
-            <div className="space-y-6">
-               <ModalItem label="Identification" value={selectedStudent.fullName} />
-               <ModalItem label="Enrollment Key" value={selectedStudent.prn} isMono />
-               <ModalItem label="Status" value={selectedStudent.status} isStatus />
+      {/* KPI GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+        <KpiCard title="Total Students" value={kpis.totalStudents} sub={`${kpis.activeStudents} Active`} icon={<Users className="text-blue-600" />} color="blue" />
+        <KpiCard title="Placement Rate" value={`${kpis.placementRate}%`} sub={`${kpis.studentsWithInternships} Placed`} icon={<Briefcase className="text-green-600" />} color="green" />
+        <KpiCard title="Credits Earned" value={credits.totalCredits} sub={`${credits.completed} Verified`} icon={<Award className="text-purple-600" />} color="purple" />
+        <KpiCard title="Avg Score" value={kpis.avgStudentScore} sub="Out of 10.0" icon={<CheckCircle className="text-yellow-600" />} color="yellow" />
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        
+        {/* LEFT COLUMN: CRITICAL INTERVENTIONS */}
+        <div className="xl:col-span-2 space-y-8">
+          
+          {/* SPECIALIZATION TABLE */}
+          <SectionCard title="Departmental Performance" subtitle="Sorted by placement efficiency">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="border-b border-gray-100 text-xs uppercase text-gray-400 font-bold">
+                  <tr>
+                    <th className="pb-4 px-2">Specialization</th>
+                    <th className="pb-4">Total</th>
+                    <th className="pb-4">Placed</th>
+                    <th className="pb-4">Success Rate</th>
+                    <th className="pb-4 text-right">Avg Score</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {specializations.map((spec, i) => (
+                    <tr key={i} className="hover:bg-gray-50 transition-colors group cursor-pointer" onClick={() => navigate('/college/courses')}>
+                      <td className="py-4 px-2 font-bold text-gray-800">{spec.specialization}</td>
+                      <td className="py-4 text-gray-500">{spec.totalStudents}</td>
+                      <td className="py-4 font-semibold">{spec.placedStudents}</td>
+                      <td className="py-4">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-1.5 bg-gray-100 rounded-full max-w-[100px]">
+                            <div className="h-full bg-blue-600 rounded-full" style={{ width: `${spec.placementRate}%` }}></div>
+                          </div>
+                          <span className="text-xs font-bold">{spec.placementRate.toFixed(0)}%</span>
+                        </div>
+                      </td>
+                      <td className="py-4 text-right font-mono text-blue-600 font-bold">{spec.avgScore.toFixed(1)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <button onClick={() => setSelectedStudent(null)} className="mt-10 w-full bg-[#2D3436] text-white font-black text-[11px] uppercase tracking-[0.3em] py-5 rounded-[25px] hover:bg-[#6C5CE7] transition-all">
-              Close Profile
-            </button>
+          </SectionCard>
+
+          {/* FACULTY ENGAGEMENT */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <SectionCard title="Top Performing Faculty">
+              <div className="space-y-4">
+                {facultyEngagement.topFaculty.map((f, i) => (
+                  <div key={i} className="flex justify-between items-center p-3 rounded-xl bg-gray-50 border border-gray-100">
+                    <div>
+                      <p className="font-bold text-sm">{f.fullName}</p>
+                      <p className="text-xs text-gray-500">{f.activeInternships} Ongoing Internships</p>
+                    </div>
+                    <span className="text-lg font-black text-gray-300">#{i + 1}</span>
+                  </div>
+                ))}
+              </div>
+            </SectionCard>
+            <SectionCard title="Inactive Faculty">
+              <div className="space-y-4">
+                {facultyEngagement.inactiveFaculty.length > 0 ? (
+                  facultyEngagement.inactiveFaculty.map((f, i) => (
+                    <div key={i} className="flex justify-between items-center p-3 rounded-xl border border-dashed border-gray-200">
+                      <p className="font-medium text-sm text-gray-600">{f.fullName}</p>
+                      <StatusBadge status="unassigned" />
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-400 italic">All faculty currently assigned.</p>
+                )}
+              </div>
+            </SectionCard>
           </div>
         </div>
-      )}
+
+        {/* RIGHT COLUMN: ACTION & ACTIVITY */}
+        <div className="space-y-8">
+          
+          {/* AT-RISK HIGHLIGHT */}
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center gap-2 text-red-600 mb-4">
+              <AlertCircle size={20} />
+              <h3 className="font-black uppercase tracking-wider text-xs">High Risk: Requires Action</h3>
+            </div>
+            <div className="space-y-3">
+              {atRisk.map((s, i) => (
+                <div 
+                  key={i} 
+                  className="bg-white p-3 rounded-xl shadow-sm flex justify-between items-center cursor-pointer hover:translate-x-1 transition-transform border border-red-100"
+                  onClick={() => navigate(`/college/students`)}
+                >
+                  <div>
+                    <p className="text-sm font-bold text-gray-800">{s.name}</p>
+                    <p className="text-[10px] text-red-500 font-semibold uppercase">{s.reason}</p>
+                  </div>
+                  <ChevronRight size={14} className="text-gray-300" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* RECENT ACTIVITY */}
+          <SectionCard title="Recent Activity">
+            <div className="space-y-6 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-px before:bg-gray-100">
+              {recentActivity.map((act, i) => (
+                <div key={i} className="relative pl-8 group cursor-pointer" onClick={() => navigate(`/academic-internship-track/${act.id}`)}>
+                  <div className="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-white border-2 border-blue-500 z-10"></div>
+                  <p className="text-xs text-gray-400 font-bold mb-1">{new Date(act.date).toLocaleDateString()}</p>
+                  <p className="text-sm text-gray-800">
+                    <span className="font-bold">{act.student}</span> moved to <span className="text-blue-600 font-bold">{act.type}</span>
+                  </p>
+                </div>
+              ))}
+            </div>
+          </SectionCard>
+        </div>
+      </div>
     </div>
   );
 };
 
-const ModalItem = ({ label, value, isMono, isStatus }) => (
-  <div className="flex flex-col gap-1 border-b border-[#F5F6FA] pb-3">
-    <span className="text-[10px] font-black text-[#6C5CE7] uppercase tracking-widest">{label}</span>
-    <span className={`${isMono ? "font-mono" : "font-black"} ${isStatus ? "text-[#6C5CE7]" : "text-[#2D3436]"} text-[16px]`}>{value || "—"}</span>
+/* SHARED UI COMPONENTS */
+
+const KpiCard = ({ title, value, sub, icon, color }) => {
+  const navigate = useNavigate();
+  const colors = {
+    blue: 'bg-blue-50 text-blue-600',
+    green: 'bg-green-50 text-green-600',
+    purple: 'bg-purple-50 text-purple-600',
+    yellow: 'bg-yellow-50 text-yellow-600'
+  };
+  
+  return (
+    <div 
+      onClick={() => navigate('/college/students')}
+      className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-all cursor-pointer border border-transparent hover:border-gray-200"
+    >
+      <div className="flex justify-between items-start mb-4">
+        <div className={`p-3 rounded-xl ${colors[color]}`}>{icon}</div>
+        <ArrowUpRight size={16} className="text-gray-300" />
+      </div>
+      <h3 className="text-gray-500 text-xs font-bold uppercase tracking-widest">{title}</h3>
+      <div className="flex items-baseline gap-2 mt-1">
+        <span className="text-3xl font-black text-gray-900">{value}</span>
+        <span className="text-xs font-medium text-gray-400">{sub}</span>
+      </div>
+    </div>
+  );
+};
+
+const SectionCard = ({ title, subtitle, children }) => (
+  <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+    <div className="mb-6">
+      <h3 className="text-lg font-black text-gray-800">{title}</h3>
+      {subtitle && <p className="text-xs text-gray-400 font-medium">{subtitle}</p>}
+    </div>
+    {children}
   </div>
 );
+
+const StatusBadge = ({ status }) => {
+  const styles = {
+    unassigned: 'bg-gray-100 text-gray-500',
+    active: 'bg-green-100 text-green-600',
+    pending: 'bg-yellow-100 text-yellow-600'
+  };
+  return (
+    <span className={`px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-tight ${styles[status] || styles.active}`}>
+      {status}
+    </span>
+  );
+};
 
 export default CollegeDashboard;

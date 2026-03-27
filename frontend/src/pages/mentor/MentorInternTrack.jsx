@@ -1,6 +1,56 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../../api/api";
+import CreateTask from "./CreateTask";
+
+/* ---------------- HELPERS ---------------- */
+function getWeekNumber(startDate, currentDate) {
+  const diff = new Date(currentDate) - new Date(startDate);
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  return Math.floor(days / 7) + 1;
+}
+
+function formatDate(date) {
+  return new Date(date).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+  });
+}
+
+function groupTasksByWeek(tasks) {
+  if (!tasks?.length) return [];
+  const sorted = [...tasks].sort(
+    (a, b) =>
+      new Date(a.createdAt || a.deadline) -
+      new Date(b.createdAt || b.deadline)
+  );
+
+  const startDate = sorted[0].createdAt || sorted[0].deadline;
+  const weekMap = {};
+
+  for (const task of sorted) {
+    const week = getWeekNumber(
+      startDate,
+      task.createdAt || task.deadline
+    );
+
+    if (!weekMap[week]) {
+      weekMap[week] = {
+        weekNumber: week,
+        startDate: task.createdAt || task.deadline,
+        endDate: task.createdAt || task.deadline,
+        tasks: [],
+      };
+    }
+
+    weekMap[week].endDate = task.createdAt || task.deadline;
+    weekMap[week].tasks.push(task);
+  }
+
+  return Object.values(weekMap);
+}
+
+/* ---------------- MAIN ---------------- */
 
 export default function MentorInternTrack() {
   const { applicationId } = useParams();
@@ -8,41 +58,16 @@ export default function MentorInternTrack() {
 
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
-
-  // New Filter States
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
-  const [typeFilter, setTypeFilter] = useState("ALL");
-
-  const [form, setForm] = useState({
-    title: "",
-    description: "",
-    deadline: "",
-    taskType: "internal",
-    externalLink: "",
-  });
-
-  const [files, setFiles] = useState([]);
-
-  const resetForm = () => {
-    setForm({
-      title: "",
-      description: "",
-      deadline: "",
-      taskType: "internal",
-      externalLink: "",
-    });
-    setFiles([]);
-  };
 
   const fetchTasks = async () => {
     try {
       const res = await API.get(`/tasks/application/${applicationId}`);
       setTasks(res.data?.data || []);
     } catch (err) {
-      console.error("Task fetch error", err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -52,438 +77,210 @@ export default function MentorInternTrack() {
     fetchTasks();
   }, [applicationId]);
 
-  const handleChange = (e) => {
-    setForm((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
+  /* ---------------- ANALYTICS ---------------- */
+  const totalTasks = tasks.length;
+  const completedTasks = tasks.filter((t) => t.status === "completed").length;
+  const submittedTasks = tasks.filter((t) => t.status === "submitted").length;
+  const pendingTasks = totalTasks - completedTasks - submittedTasks;
 
-  const handleFileChange = (e) => {
-    if (e.target.files.length > 5) {
-      alert("Maximum 5 files allowed");
-      return;
-    }
-    setFiles(e.target.files);
-  };
+  const progressPercent =
+    totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-  const createTask = async () => {
-    if (!form.title.trim()) {
-      alert("Task title required");
-      return;
-    }
-
-    try {
-      setCreating(true);
-      const formData = new FormData();
-      formData.append("title", form.title);
-      formData.append("description", form.description);
-      formData.append("deadline", form.deadline);
-      formData.append("taskType", form.taskType);
-      formData.append("application", applicationId);
-
-      if (form.externalLink) {
-        formData.append("externalLink", form.externalLink);
-      }
-
-      for (let i = 0; i < files.length; i++) {
-        formData.append("resources", files[i]);
-      }
-
-      await API.post("/tasks", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      resetForm();
-      setShowCreate(false);
-      await fetchTasks();
-    } catch (err) {
-      alert(err.response?.data?.message || "Failed to create task");
-    } finally {
-      setCreating(false);
-    }
-  };
+  const weeklyTasks = groupTasksByWeek(
+    tasks.filter((t) => {
+      return (
+        t.title?.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (statusFilter === "ALL" || t.status === statusFilter)
+      );
+    })
+  );
 
   const getStatusBadge = (status) => {
-    let cls = "bg-[#f9f9f9] border-[#e5e5e5] text-[#333]";
-    if (status === "completed")
-      cls = "bg-[#f9f9f9] border-[#008000] text-[#008000]";
-    else if (status === "submitted")
-      cls = "bg-[#111] text-[#fff] border-[#111]";
-    else if (status === "revision_requested")
-      cls = "bg-[#fff] border-[#cc0000] text-[#cc0000]";
+    let style = "bg-white border border-gray-200 text-[#2D3436]";
+    if (status === "completed") style = "bg-[#6C5CE7] text-white";
+    else if (status === "submitted") style = "bg-[#2D3436] text-white";
+    else if (status === "revision_requested") style = "bg-red-500 text-white";
 
     return (
-      <span
-        className={`px-2.5 py-1 rounded-[10px] text-[9px] font-black uppercase tracking-widest border ${cls}`}
-      >
+      <span className={`px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-extrabold ${style}`}>
         {status.replace("_", " ")}
       </span>
     );
   };
 
-  // Filter Logic Calculation
-  const filteredTasks = tasks.filter((task) => {
-    const matchesSearch = task.title
-      ?.toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "ALL" || task.status === statusFilter;
-    const matchesType = typeFilter === "ALL" || task.taskType === typeFilter;
-
-    return matchesSearch && matchesStatus && matchesType;
-  });
-
-  // Dynamically extract unique values for the dropdowns
-  const uniqueStatuses = [
-    "ALL",
-    ...new Set(tasks.map((t) => t.status).filter(Boolean)),
-  ];
-  const uniqueTypes = [
-    "ALL",
-    ...new Set(tasks.map((t) => t.taskType).filter(Boolean)),
-  ];
-
-  if (loading) {
+  if (loading)
     return (
-      <div className="min-h-screen bg-[#f9f9f9] flex items-center justify-center font-sans">
-        <p className="text-[14px] font-bold text-[#333] animate-pulse m-0">
-          Syncing Assignment Records...
-        </p>
+      <div className="min-h-screen flex justify-center items-center bg-[#F5F6FA] font-['Nunito']">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#6C5CE7]"></div>
       </div>
     );
-  }
 
   return (
-    <div className="min-h-screen bg-[#f9f9f9] text-[#333] font-sans pb-10">
-      <main className="max-w-7xl mx-auto w-full px-4 md:px-6 py-6 flex flex-col gap-6">
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#e5e5e5] pb-4">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-[23px] font-black text-[#333] m-0 tracking-tight leading-tight">
-              Intern Task Tracking
+    <div className="min-h-screen bg-[#F5F6FA] p-4 md:p-8 font-['Nunito'] text-[#2D3436] animate-in fade-in duration-700">
+      <div className="max-w-6xl mx-auto flex flex-col gap-8">
+        
+        {/* HEADER */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+              Intern <span className="text-[#6C5CE7]">Progress</span>
             </h1>
-            <p className="text-[13px] font-bold text-[#333] opacity-60 m-0 uppercase tracking-widest">
-              Milestone Management & Review
-            </p>
           </div>
+
           <button
-            onClick={() => {
-              if (showCreate) resetForm();
-              setShowCreate(!showCreate);
-            }}
-            className={`px-6 py-2.5 text-[11px] font-black uppercase tracking-widest rounded-[14px] cursor-pointer transition-all border-none ${
-              showCreate
-                ? "bg-[#fff] border border-[#333] text-[#333]"
-                : "bg-[#111] text-[#fff]"
-            }`}
+            onClick={() => setShowCreate(true)}
+            className="bg-[#6C5CE7] hover:bg-[#5b4cc4] text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-[#6C5CE7]/20 transition-all transform hover:-translate-y-1 active:scale-95"
           >
-            {showCreate ? "Cancel Provisioning" : "Create New Task"}
+            + Assign New Task
           </button>
-        </header>
+        </div>
 
-        {showCreate && (
-          <div className="bg-[#fff] border border-[#e5e5e5] p-6 md:p-8 rounded-[20px] shadow-sm">
-            <h2 className="text-[11px] font-bold text-[#333] opacity-50 m-0 uppercase tracking-widest border-b border-[#f9f9f9] pb-3 mb-6">
-              New Assignment Parameters
-            </h2>
-
-            <div className="flex flex-col gap-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-bold opacity-60 uppercase tracking-widest">
-                    Task Title
-                  </label>
-                  <input
-                    name="title"
-                    placeholder="e.g. System Integration Module"
-                    value={form.title}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 text-[13px] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-bold opacity-60 uppercase tracking-widest">
-                    Submission Deadline
-                  </label>
-                  <input
-                    type="date"
-                    name="deadline"
-                    value={form.deadline}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 text-[13px] bg-[#fff] border border-[#333] rounded-[14px] outline-none uppercase"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-bold opacity-60 uppercase tracking-widest">
-                    Assignment Type
-                  </label>
-                  <select
-                    name="taskType"
-                    value={form.taskType}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 text-[13px] border border-[#333] rounded-[14px] outline-none appearance-none"
-                  >
-                    <option value="internal">Internal Deliverable</option>
-                    <option value="external">External Link / Repository</option>
-                  </select>
-                </div>
-
-                {form.taskType === "external" && (
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[11px] font-bold opacity-60 uppercase tracking-widest">
-                      External Resource URL
-                    </label>
-                    <input
-                      name="externalLink"
-                      placeholder="https://github.com/..."
-                      value={form.externalLink}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 text-[13px] border border-[#333] rounded-[14px] outline-none"
-                    />
-                  </div>
-                )}
-              </div>
-
-              {form.taskType === "internal" && (
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-bold opacity-60 uppercase tracking-widest">
-                    Description & Requirements
-                  </label>
-                  <textarea
-                    name="description"
-                    placeholder="Detailed instructions..."
-                    value={form.description}
-                    onChange={handleChange}
-                    rows={4}
-                    className="w-full px-4 py-3 text-[13px] border border-[#333] rounded-[14px] outline-none resize-none"
-                  />
-                </div>
-              )}
-
-              <div className="flex flex-col gap-3 p-5 bg-[#f9f9f9] border border-dashed border-[#e5e5e5] rounded-[20px]">
-                <label className="text-[11px] font-bold opacity-60 uppercase tracking-widest text-center">
-                  Reference Resources
-                </label>
-                <div className="relative flex flex-col items-center">
-                  <input
-                    type="file"
-                    multiple
-                    onChange={handleFileChange}
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                  />
-                  <div className="px-6 py-2 bg-[#fff] border border-[#333] rounded-[10px] text-[10px] font-black uppercase tracking-widest">
-                    {files.length > 0
-                      ? `${files.length} Files Selected`
-                      : "Upload Support Docs"}
-                  </div>
-                  <p className="text-[9px] font-bold opacity-40 uppercase mt-2">
-                    Maximum 5 items allowed
-                  </p>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-[#f9f9f9] flex justify-end">
-                <button
-                  onClick={createTask}
-                  disabled={creating}
-                  className="px-10 py-3.5 bg-[#111] text-[#fff] text-[12px] font-black uppercase tracking-widest rounded-[14px] border-none cursor-pointer hover:opacity-80 transition-opacity disabled:opacity-30"
-                >
-                  {creating ? "Processing..." : "Deploy Assignment"}
-                </button>
-              </div>
+        {/* ANALYTICS SECTION */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* PIE CHART / PROGRESS CARD */}
+          <div className="bg-white p-6 rounded-[2rem] shadow-sm flex items-center justify-between border border-white">
+            <div className="relative flex items-center justify-center w-24 h-24">
+              <svg className="w-full h-full transform -rotate-90">
+                <circle cx="48" cy="48" r="40" stroke="#F5F6FA" strokeWidth="8" fill="transparent" />
+                <circle
+                  cx="48" cy="48" r="40" stroke="#6C5CE7" strokeWidth="8"
+                  fill="transparent"
+                  strokeDasharray={251.2}
+                  strokeDashoffset={251.2 - (251.2 * progressPercent) / 100}
+                  strokeLinecap="round"
+                  className="transition-all duration-1000 ease-out"
+                />
+              </svg>
+              <span className="absolute text-xl font-black text-[#2D3436]">{progressPercent}%</span>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-gray-400 font-bold uppercase tracking-widest">Overall Completion</p>
+              <p className="text-2xl font-black text-[#6C5CE7]">{completedTasks} / {totalTasks}</p>
             </div>
           </div>
-        )}
 
-        {/* 3 Filters Bar - Only visible if there are tasks provisioned */}
-        {tasks.length > 0 && (
-          <div className="flex flex-col md:flex-row gap-4">
+          {/* STATS BREAKDOWN */}
+          <div className="lg:col-span-2 bg-white p-6 rounded-[2rem] shadow-sm border border-white flex flex-wrap items-center justify-around gap-4">
+            <div className="text-center">
+              <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Total</p>
+              <p className="text-2xl font-black">{totalTasks}</p>
+            </div>
+            <div className="h-10 w-[1px] bg-gray-100 hidden sm:block"></div>
+            <div className="text-center">
+              <p className="text-xs text-[#6C5CE7] font-bold uppercase tracking-widest mb-1">Done</p>
+              <p className="text-2xl font-black text-[#6C5CE7]">{completedTasks}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-xs text-gray-700 font-bold uppercase tracking-widest mb-1">In Review</p>
+              <p className="text-2xl font-black text-[#2D3436]">{submittedTasks}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-xs text-red-400 font-bold uppercase tracking-widest mb-1">Pending</p>
+              <p className="text-2xl font-black text-red-500">{pendingTasks}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* SEARCH & FILTER BAR */}
+        <div className="flex flex-col md:flex-row gap-4 bg-white p-4 rounded-3xl shadow-sm border border-white">
+          <div className="relative flex-grow">
             <input
-              type="text"
               placeholder="Search by task title..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 px-4 py-3 text-[13px] bg-[#fff] border border-[#e5e5e5] rounded-[14px] outline-none focus:border-[#333] transition-colors"
+              className="w-full pl-5 pr-4 py-3 bg-[#F5F6FA] border-none rounded-2xl focus:ring-2 focus:ring-[#6C5CE7]/20 outline-none transition-all font-medium"
             />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full md:w-56 px-4 py-3 text-[11px] font-bold text-[#333] bg-[#fff] border border-[#e5e5e5] rounded-[14px] outline-none focus:border-[#333] transition-colors appearance-none uppercase tracking-widest"
-            >
-              {uniqueStatuses.map((status) => (
-                <option key={status} value={status}>
-                  {status === "ALL" ? "All Statuses" : status.replace("_", " ")}
-                </option>
-              ))}
-            </select>
-            <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className="w-full md:w-56 px-4 py-3 text-[11px] font-bold text-[#333] bg-[#fff] border border-[#e5e5e5] rounded-[14px] outline-none focus:border-[#333] transition-colors appearance-none uppercase tracking-widest"
-            >
-              {uniqueTypes.map((type) => (
-                <option key={type} value={type}>
-                  {type === "ALL" ? "All Task Types" : type}
-                </option>
-              ))}
-            </select>
           </div>
-        )}
 
-        {tasks.length === 0 ? (
-          <div className="bg-[#fff] border-2 border-dashed border-[#e5e5e5] rounded-[20px] p-20 text-center">
-            <p className="text-[13px] font-bold text-[#333] opacity-40 m-0 uppercase tracking-widest">
-              No tasks provisioned for this internship
-            </p>
-          </div>
-        ) : filteredTasks.length === 0 ? (
-          <div className="bg-[#fff] border border-[#e5e5e5] rounded-[20px] p-20 text-center">
-            <p className="text-[13px] font-bold text-[#333] opacity-40 m-0 uppercase tracking-widest">
-              No tasks match your current filters
-            </p>
-            <button
-              onClick={() => {
-                setSearchTerm("");
-                setStatusFilter("ALL");
-                setTypeFilter("ALL");
-              }}
-              className="mt-4 px-4 py-2 bg-[#f9f9f9] border border-[#e5e5e5] text-[#333] text-[10px] font-black uppercase tracking-widest rounded-[10px] hover:border-[#333] transition-colors cursor-pointer"
-            >
-              Clear Filters
-            </button>
-          </div>
-        ) : (
-          <div className="bg-[#fff] border border-[#e5e5e5] rounded-[20px] shadow-sm overflow-x-auto">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-6 py-3 bg-[#F5F6FA] border-none rounded-2xl font-bold text-[#2D3436] focus:ring-2 focus:ring-[#6C5CE7]/20 outline-none cursor-pointer"
+          >
+            <option value="ALL">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="submitted">Submitted</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+
+        {/* DATA TABLE */}
+        <div className="bg-white rounded-[2rem] shadow-sm border border-white overflow-hidden">
+          <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-[#e5e5e5] bg-[#f9f9f9]">
-                  <th className="p-5 text-[10px] font-bold opacity-40 uppercase tracking-widest whitespace-nowrap">
-                    Task Info
-                  </th>
-                  <th className="p-5 text-[10px] font-bold opacity-40 uppercase tracking-widest">
-                    Description / Link
-                  </th>
-                  <th className="p-5 text-[10px] font-bold opacity-40 uppercase tracking-widest whitespace-nowrap">
-                    Timeline
-                  </th>
-                  <th className="p-5 text-[10px] font-bold opacity-40 uppercase tracking-widest whitespace-nowrap">
-                    Status
-                  </th>
-                  <th className="p-5 text-[10px] font-bold opacity-40 uppercase tracking-widest">
-                    Attachments
-                  </th>
-                  <th className="p-5 text-[10px] font-bold opacity-40 uppercase tracking-widest whitespace-nowrap">
-                    Actions
-                  </th>
+                <tr className="bg-[#F5F6FA]/50 border-b border-gray-50">
+                  <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-gray-400">Task Name</th>
+                  <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-gray-400">Deadline</th>
+                  <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-gray-400">Status</th>
+                  <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-gray-400 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody>
-                {filteredTasks.map((task) => (
-                  <tr
-                    key={task._id}
-                    className="border-b border-[#e5e5e5] last:border-none hover:bg-[#fafafa] transition-colors"
-                  >
-                    {/* Task Info Column */}
-                    <td className="p-5 align-middle">
-                      <span className="text-[15px] font-black text-[#333] m-0 leading-tight">
-                        {task.title}
-                      </span>
-                    </td>
-
-                    {/* Description / Link Column */}
-                    <td className="p-5 align-middle max-w-[250px] whitespace-normal">
-                      {task.taskType === "internal" ? (
-                        <p className="text-[12px] font-medium opacity-70 m-0 line-clamp-2">
-                          {task.description}
-                        </p>
-                      ) : (
-                        <a
-                          href={task.externalLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-[11px] font-black text-[#111] underline uppercase tracking-widest"
-                        >
-                          External Resource
-                        </a>
-                      )}
-                    </td>
-
-                    {/* Timeline Column */}
-                    <td className="p-5 align-middle whitespace-nowrap">
-                      <div className="flex flex-col gap-1.5">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-bold opacity-40 uppercase w-16">
-                            Assigned:
+              <tbody className="divide-y divide-gray-50">
+                {weeklyTasks.length > 0 ? (
+                  weeklyTasks.map((week) =>
+                    week.tasks.map((task) => (
+                      <tr key={task._id} className="group hover:bg-[#F5F6FA]/30 transition-colors">
+                        <td className="px-8 py-5">
+                          <p className="font-bold text-[#2D3436] group-hover:text-[#6C5CE7] transition-colors">
+                            {task.title}
+                          </p>
+                        </td>
+                        <td className="px-8 py-5">
+                          <span className="font-medium text-gray-500">
+                            {task.deadline ? formatDate(task.deadline) : "Not Set"}
                           </span>
-                          <span className="text-[11px] font-bold text-[#333]">
-                            {task.assignedAt
-                              ? new Date(task.assignedAt).toLocaleDateString(
-                                  "en-IN",
-                                )
-                              : "—"}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-bold opacity-40 uppercase w-16">
-                            Deadline:
-                          </span>
-                          <span className="text-[11px] font-bold text-[#cc0000]">
-                            {task.deadline
-                              ? new Date(task.deadline).toLocaleDateString(
-                                  "en-IN",
-                                )
-                              : "—"}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Status Column */}
-                    <td className="p-5 align-middle whitespace-nowrap">
-                      {getStatusBadge(task.status)}
-                    </td>
-
-                    {/* Attachments Column */}
-                    <td className="p-5 align-middle max-w-[200px]">
-                      {task.resourceFiles?.length > 0 ? (
-                        <div className="flex flex-wrap gap-1.5">
-                          {task.resourceFiles.map((file, idx) => (
-                            <a
-                              key={idx}
-                              href={file.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-[10px] font-bold text-[#333] bg-[#f9f9f9] border border-[#e5e5e5] px-2 py-1 rounded-[6px] hover:border-[#333] transition-colors truncate max-w-[120px] inline-block"
-                            >
-                              {file.fileName}
-                            </a>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-[10px] font-bold opacity-30 uppercase tracking-widest">
-                          None
-                        </span>
-                      )}
-                    </td>
-
-                    {/* Actions Column */}
-                    <td className="p-5 align-middle whitespace-nowrap">
-                      <button
-                        onClick={() => navigate(`/mentor/tasks/${task._id}`)}
-                        className="px-4 py-2 bg-[#f9f9f9] border border-[#333] text-[#333] text-[11px] font-black uppercase tracking-widest rounded-[10px] hover:bg-[#333] hover:text-[#fff] transition-all cursor-pointer"
-                      >
-                        Manage Deliverable
-                      </button>
+                        </td>
+                        <td className="px-8 py-5">{getStatusBadge(task.status)}</td>
+                        <td className="px-8 py-5 text-right">
+                          <button
+                            onClick={() => navigate(`/mentor/tasks/${task._id}`)}
+                            className="bg-[#F5F6FA] hover:bg-[#6C5CE7] text-[#2D3436] hover:text-white px-5 py-2 rounded-xl font-bold text-sm transition-all shadow-sm"
+                          >
+                            Review
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="px-8 py-20 text-center text-gray-400 font-bold">
+                      No tasks found for this criteria.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
-        )}
-      </main>
+        </div>
+      </div>
+
+      {/* 🔥 MODAL CREATE TASK */}
+      {showCreate && (
+        <div className="fixed inset-0 bg-[#2D3436]/60 backdrop-blur-sm flex justify-center items-center z-50 p-4 animate-in fade-in zoom-in duration-300">
+          <div className="relative w-full max-w-3xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-in slide-in-from-bottom-8 duration-500">
+            {/* CLOSE BUTTON */}
+            <button
+              onClick={() => setShowCreate(false)}
+              className="absolute top-6 right-6 z-10 bg-[#F5F6FA] hover:bg-red-50 text-[#2D3436] hover:text-red-500 w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all"
+            >
+              ✕
+            </button>
+
+            {/* CREATE TASK CARD CONTENT */}
+            <div className="max-h-[90vh] overflow-y-auto p-2">
+                <CreateTask
+                applicationId={applicationId}
+                onSuccess={() => {
+                    setShowCreate(false);
+                    fetchTasks();
+                }}
+                />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

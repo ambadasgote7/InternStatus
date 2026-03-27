@@ -22,7 +22,7 @@ import studentRoutes from "./modules/student/student.routes.js";
 import taskSubmissionRoutes from "./modules/taskSubmissions/taskSubmission.routes.js";
 import progressLogRoutes from "./modules/progressLogs/progressLog.routes.js";
 import internshipReportRoutes from "./modules/internshipReports/internshipReport.routes.js";
-
+import dashboardRoutes from "./modules/dashboard/dashboard.routes.js";
 
 
 const app = express();
@@ -72,6 +72,7 @@ app.use("/api/students", studentRoutes);
 app.use("/api/task-submissions", taskSubmissionRoutes);
 app.use("/api/progress", progressLogRoutes);
 app.use("/api/reports", internshipReportRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 /* ---------------------------------------
    404 HANDLER
