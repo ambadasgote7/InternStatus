@@ -34,6 +34,16 @@ export default function CollegeRegister() {
     fetchColleges();
   }, []);
 
+  // ✅ Auto-hide success message after 2 seconds
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess("");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
@@ -78,7 +88,6 @@ export default function CollegeRegister() {
       setLoading(true);
 
       const formData = new FormData();
-
       formData.append("requesterName", form.requesterName);
       formData.append("requesterEmail", form.requesterEmail);
       formData.append("requesterPhone", form.requesterPhone);
@@ -105,9 +114,7 @@ export default function CollegeRegister() {
         },
       });
 
-      setSuccess(
-        "Request submitted successfully. Please wait for admin approval.",
-      );
+      setSuccess("Request submitted successfully. Please wait for admin approval.");
       setForm({
         requesterName: "",
         requesterEmail: "",
@@ -128,32 +135,37 @@ export default function CollegeRegister() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f9f9f9] p-4 md:p-6 font-sans text-[#333]">
-      <div className="w-full max-w-xl bg-[#fff] p-6 md:p-10 rounded-[20px] shadow-sm border border-[#e5e5e5] box-border">
-        <header className="mb-8 border-b border-[#e5e5e5] pb-4">
-          <h2 className="text-[24px] font-black m-0 tracking-tight text-[#333] text-center">
+    <div className="min-h-screen flex items-center justify-center bg-[#FFFFFF] p-4 md:p-8 font-['Nunito'] text-[#2D3436]">
+      <div className="w-full max-w-2xl bg-white p-8 md:p-12 rounded-[40px] shadow-2xl shadow-[#6C5CE7]/10 border border-[#F5F6FA] animate-in fade-in zoom-in duration-500">
+        
+        <header className="mb-10 text-center">
+          <h2 className="text-[32px] font-black tracking-tight text-[#2D3436]">
             College Registration
           </h2>
-          <p className="text-[13px] font-bold text-[#333] opacity-60 m-0 mt-1 uppercase tracking-widest text-center">
-            Request Institutional Access
+          <div className="flex justify-center mt-2">
+            <div className="h-1.5 w-12 bg-[#6C5CE7] rounded-full"></div>
+          </div>
+          <p className="text-[12px] font-black text-[#6C5CE7] mt-4 uppercase tracking-[0.2em] opacity-80">
+            Institutional Access Request
           </p>
         </header>
 
         {error && (
-          <div className="mb-5 px-4 py-3 text-[12px] font-bold text-[#cc0000] bg-[#fff] border border-[#cc0000] rounded-[14px] text-center uppercase tracking-widest">
+          <div className="mb-6 px-6 py-4 text-[13px] font-bold text-red-600 bg-red-50 border border-red-100 rounded-[20px] text-center animate-bounce">
             {error}
           </div>
         )}
+        
         {success && (
-          <div className="mb-5 px-4 py-3 text-[12px] font-bold text-[#008000] bg-[#fff] border border-[#008000] rounded-[14px] text-center uppercase tracking-widest">
+          <div className="mb-6 px-6 py-4 text-[13px] font-bold text-[#6C5CE7] bg-[#6C5CE7]/5 border border-[#6C5CE7]/20 rounded-[20px] text-center animate-in slide-in-from-top duration-300">
             {success}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="group flex flex-col gap-2">
+              <label className="text-[12px] font-black text-[#2D3436] opacity-50 uppercase tracking-widest ml-1">
                 Your Name
               </label>
               <input
@@ -162,11 +174,11 @@ export default function CollegeRegister() {
                 value={form.requesterName}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+                className="w-full px-5 py-4 text-[14px] font-bold text-[#2D3436] bg-[#F5F6FA] border-2 border-transparent rounded-[20px] outline-none focus:border-[#6C5CE7] focus:bg-white transition-all"
               />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+            <div className="group flex flex-col gap-2">
+              <label className="text-[12px] font-black text-[#2D3436] opacity-50 uppercase tracking-widest ml-1">
                 Official Email
               </label>
               <input
@@ -176,13 +188,13 @@ export default function CollegeRegister() {
                 value={form.requesterEmail}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+                className="w-full px-5 py-4 text-[14px] font-bold text-[#2D3436] bg-[#F5F6FA] border-2 border-transparent rounded-[20px] outline-none focus:border-[#6C5CE7] focus:bg-white transition-all"
               />
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+          <div className="group flex flex-col gap-2">
+            <label className="text-[12px] font-black text-[#2D3436] opacity-50 uppercase tracking-widest ml-1">
               Phone Number
             </label>
             <input
@@ -191,35 +203,36 @@ export default function CollegeRegister() {
               value={form.requesterPhone}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+              className="w-full px-5 py-4 text-[14px] font-bold text-[#2D3436] bg-[#F5F6FA] border-2 border-transparent rounded-[20px] outline-none focus:border-[#6C5CE7] focus:bg-white transition-all"
             />
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+          <div className="group flex flex-col gap-2">
+            <label className="text-[12px] font-black text-[#2D3436] opacity-50 uppercase tracking-widest ml-1">
               Select Institution
             </label>
-            <select
-              name="selectedCollege"
-              value={form.selectedCollege}
-              onChange={handleChange}
-              className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none cursor-pointer appearance-none"
-            >
-              <option value="" disabled>
-                Select College
-              </option>
-              {colleges.map((col) => (
-                <option key={col._id} value={col._id}>
-                  {col.name}
-                </option>
-              ))}
-              <option value="other">Other (Not Listed)</option>
-            </select>
+            <div className="relative">
+              <select
+                name="selectedCollege"
+                value={form.selectedCollege}
+                onChange={handleChange}
+                className="w-full px-5 py-4 text-[14px] font-bold text-[#2D3436] bg-[#F5F6FA] border-2 border-transparent rounded-[20px] outline-none focus:border-[#6C5CE7] focus:bg-white transition-all cursor-pointer appearance-none"
+              >
+                <option value="" disabled>Select College</option>
+                {colleges.map((col) => (
+                  <option key={col._id} value={col._id}>{col.name}</option>
+                ))}
+                <option value="other">Other (Not Listed)</option>
+              </select>
+              <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-[#6C5CE7]">
+                ▼
+              </div>
+            </div>
           </div>
 
           {isOther && (
-            <div className="flex flex-col gap-1.5 p-4 bg-[#f9f9f9] border border-dashed border-[#333] rounded-[14px]">
-              <label className="text-[11px] font-bold text-[#333] uppercase tracking-widest">
+            <div className="flex flex-col gap-2 p-6 bg-[#F5F6FA] border-2 border-dashed border-[#6C5CE7]/30 rounded-[24px] animate-in fade-in slide-in-from-top duration-500">
+              <label className="text-[12px] font-black text-[#6C5CE7] uppercase tracking-widest">
                 New Institution Name
               </label>
               <input
@@ -228,13 +241,13 @@ export default function CollegeRegister() {
                 value={form.collegeName}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+                className="w-full px-5 py-4 text-[14px] font-bold text-[#2D3436] bg-white border-2 border-transparent rounded-[18px] outline-none focus:border-[#6C5CE7] transition-all"
               />
             </div>
           )}
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+          <div className="group flex flex-col gap-2">
+            <label className="text-[12px] font-black text-[#2D3436] opacity-50 uppercase tracking-widest ml-1">
               Address
             </label>
             <input
@@ -243,13 +256,13 @@ export default function CollegeRegister() {
               value={form.location}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+              className="w-full px-5 py-4 text-[14px] font-bold text-[#2D3436] bg-[#F5F6FA] border-2 border-transparent rounded-[20px] outline-none focus:border-[#6C5CE7] focus:bg-white transition-all"
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="group flex flex-col gap-2">
+              <label className="text-[12px] font-black text-[#2D3436] opacity-50 uppercase tracking-widest ml-1">
                 Website
               </label>
               <input
@@ -257,12 +270,12 @@ export default function CollegeRegister() {
                 placeholder="https://college.edu"
                 value={form.website}
                 onChange={handleChange}
-                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+                className="w-full px-5 py-4 text-[14px] font-bold text-[#2D3436] bg-[#F5F6FA] border-2 border-transparent rounded-[20px] outline-none focus:border-[#6C5CE7] focus:bg-white transition-all"
               />
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+            <div className="group flex flex-col gap-2">
+              <label className="text-[12px] font-black text-[#2D3436] opacity-50 uppercase tracking-widest ml-1">
                 Domain
               </label>
               <input
@@ -270,13 +283,13 @@ export default function CollegeRegister() {
                 placeholder="college.edu"
                 value={form.emailDomain}
                 onChange={handleChange}
-                className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
+                className="w-full px-5 py-4 text-[14px] font-bold text-[#2D3436] bg-[#F5F6FA] border-2 border-transparent rounded-[20px] outline-none focus:border-[#6C5CE7] focus:bg-white transition-all"
               />
             </div>
           </div>
 
-          <div className="flex flex-col gap-2 p-5 bg-[#f9f9f9] border border-dashed border-[#e5e5e5] rounded-[14px] text-center">
-            <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+          <div className="flex flex-col gap-3 p-6 bg-[#F5F6FA] border-2 border-dashed border-[#F5F6FA] rounded-[24px] text-center hover:border-[#6C5CE7]/30 transition-colors">
+            <label className="text-[12px] font-black text-[#2D3436] opacity-50 uppercase tracking-widest">
               Verification Document
             </label>
             <input
@@ -284,16 +297,23 @@ export default function CollegeRegister() {
               name="verificationDocument"
               onChange={handleChange}
               required
-              className="block w-full text-[11px] text-[#333] font-bold file:mr-4 file:py-2 file:px-4 file:rounded-[10px] file:border-none file:text-[10px] file:font-black file:uppercase file:bg-[#111] file:text-[#fff] cursor-pointer"
+              className="block w-full text-[12px] text-[#2D3436] font-bold 
+              file:mr-4 file:py-2.5 file:px-6 file:rounded-[12px] file:border-none 
+              file:text-[11px] file:font-black file:uppercase file:bg-[#6C5CE7] 
+              file:text-white file:cursor-pointer hover:file:bg-[#2D3436] transition-all"
             />
           </div>
 
-          <div className="pt-6 border-t border-[#e5e5e5] mt-2">
+          <div className="pt-6 border-t border-[#F5F6FA]">
             <button
               disabled={loading}
-              className="w-full py-3.5 text-[12px] font-black text-[#fff] bg-[#111] border-none rounded-[14px] cursor-pointer transition-opacity hover:opacity-80 disabled:opacity-30 uppercase tracking-widest flex items-center justify-center gap-2 outline-none"
+              className="w-full py-5 text-[14px] font-black text-white bg-[#6C5CE7] rounded-[22px] shadow-xl shadow-[#6C5CE7]/20 hover:shadow-[#6C5CE7]/40 hover:-translate-y-1 transition-all active:translate-y-0 disabled:opacity-50 uppercase tracking-widest flex items-center justify-center gap-3"
             >
-              {loading ? "Processing..." : "Submit Registration"}
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                "Submit Registration"
+              )}
             </button>
           </div>
         </form>

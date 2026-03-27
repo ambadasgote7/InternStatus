@@ -12,6 +12,16 @@ export default function CollegeProfile() {
     fetchCollege();
   }, []);
 
+  // ✅ Auto-hide success message after 2 seconds
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess("");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
   const fetchCollege = async () => {
     try {
       const res = await API.get("/college/profile");
@@ -28,11 +38,30 @@ export default function CollegeProfile() {
     setCollege((prev) => ({ ...prev, [name]: value }));
   };
 
+  const validate = () => {
+    if (!college.name?.trim()) return "College name is required";
+    if (college.emailDomain && !/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(college.emailDomain)) {
+      return "Invalid email domain (e.g. mit.edu)";
+    }
+    if (college.website && !/^https?:\/\/.+/.test(college.website)) {
+      return "Website must start with http:// or https://";
+    }
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setError("");
     setSuccess("");
+
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
+      setSaving(false);
+      return;
+    }
+
     try {
       const res = await API.patch("/college/profile", {
         name: college.name,
@@ -40,7 +69,9 @@ export default function CollegeProfile() {
         phone: college.phone,
         address: college.address,
         description: college.description,
+        emailDomain: college.emailDomain,
       });
+
       setCollege(res.data.data);
       setSuccess("Profile updated successfully!");
     } catch {
@@ -52,27 +83,13 @@ export default function CollegeProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f9f9f9] flex items-center justify-center">
-        <p className="text-[14px] font-bold text-[#333] animate-pulse">
-          Loading Profile...
-        </p>
+      <div className="min-h-screen bg-[#FFFFFF] flex items-center justify-center font-['Nunito']">
+        <div className="w-10 h-10 border-4 border-[#6C5CE7] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  if (!college) {
-    return (
-      <div className="min-h-screen bg-[#f9f9f9] flex items-center justify-center p-4">
-        <div className="bg-[#fff] border-2 border-dashed border-[#e5e5e5] rounded-[20px] p-10 text-center">
-          <p className="text-[13px] font-bold text-[#333] opacity-60">
-            No data found.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  const abbr = (college.name || "C")
+  const abbr = (college?.name || "C")
     .split(" ")
     .map((w) => w[0])
     .slice(0, 2)
@@ -80,186 +97,137 @@ export default function CollegeProfile() {
     .toUpperCase();
 
   return (
-    <div className="min-h-screen bg-[#f9f9f9] text-[#333] font-sans pb-10">
-      <div className="max-w-6xl mx-auto w-full p-4 md:p-6 flex flex-col md:flex-row gap-5">
-        <aside className="w-full md:w-[300px] flex-shrink-0 bg-[#fff] p-6 rounded-[20px] shadow-sm border border-[#e5e5e5] h-max flex flex-col gap-4">
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-20 h-20 bg-[#f9f9f9] border border-[#e5e5e5] rounded-full flex items-center justify-center text-[24px] font-black text-[#333]">
+    <div className="min-h-screen bg-[#FFFFFF] text-[#2D3436] font-['Nunito'] pb-12 transition-all">
+      <div className="max-w-6xl mx-auto p-4 md:p-8 flex flex-col lg:flex-row gap-8 items-start">
+        
+        {/* Sidebar: FIXED/STICKY CARD */}
+        <aside className="w-full lg:w-[320px] lg:sticky lg:top-8 bg-[#F5F6FA] p-8 rounded-[32px] border border-[#F5F6FA] shadow-sm flex flex-col gap-6 animate-in slide-in-from-left duration-700">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-24 h-24 bg-[#6C5CE7] rounded-[24px] shadow-lg shadow-[#6C5CE7]/20 flex items-center justify-center text-[32px] font-black text-white">
               {abbr}
             </div>
 
             <div className="text-center">
-              <h2 className="text-[18px] font-black text-[#333] m-0 mb-1 leading-tight">
-                {college.name || "College"}
+              <h2 className="text-[19px] font-extrabold text-[#2D3436] leading-tight">
+                {college.name || "College Name"}
               </h2>
               {college.website && (
-                <a
-                  className="text-[13px] font-bold text-[#111] underline hover:opacity-70 transition-opacity"
-                  href={college.website}
-                  target="_blank"
-                  rel="noreferrer"
-                >
+                <p className="text-[12px] font-bold text-[#6C5CE7] mt-1 break-all opacity-80">
                   {college.website.replace(/^https?:\/\//, "")}
-                </a>
+                </p>
               )}
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 pt-4 border-t border-[#e5e5e5]">
-            <div className="flex flex-col">
-              <span className="text-[11px] font-bold text-[#333] opacity-50 uppercase tracking-widest">
-                Phone
-              </span>
-              <span className="text-[13px] font-bold text-[#333]">
-                {college.phone || "—"}
-              </span>
+          <div className="space-y-5 pt-6 border-t border-[#2D3436]/5">
+            <div>
+              <label className="text-[10px] font-black text-[#6C5CE7] uppercase tracking-widest block mb-1">Phone</label>
+              <p className="text-[13px] font-bold">{college.phone || "—"}</p>
             </div>
-            <div className="flex flex-col">
-              <span className="text-[11px] font-bold text-[#333] opacity-50 uppercase tracking-widest">
-                Address
-              </span>
-              <span className="text-[13px] font-bold text-[#333] leading-snug">
-                {college.address || "—"}
-              </span>
+            <div>
+              <label className="text-[10px] font-black text-[#6C5CE7] uppercase tracking-widest block mb-1">Address</label>
+              <p className="text-[13px] font-bold leading-relaxed">{college.address || "—"}</p>
+            </div>
+            <div>
+              <label className="text-[10px] font-black text-[#6C5CE7] uppercase tracking-widest block mb-1">Domain</label>
+              <p className="text-[13px] font-bold">{college.emailDomain || "—"}</p>
             </div>
           </div>
-
-          {college.description && (
-            <div className="pt-4 border-t border-[#e5e5e5] flex flex-col gap-1">
-              <span className="text-[11px] font-bold text-[#333] opacity-50 uppercase tracking-widest">
-                About
-              </span>
-              <p className="text-[13px] text-[#333] leading-snug m-0 opacity-80">
-                {college.description}
-              </p>
-            </div>
-          )}
         </aside>
 
-        <main className="flex-1 bg-[#fff] p-6 md:p-8 rounded-[20px] shadow-sm border border-[#e5e5e5]">
-          <header className="mb-6 border-b border-[#e5e5e5] pb-4">
-            <h1 className="text-[23px] font-black text-[#333] m-0 tracking-tight leading-tight">
-              College Profile
-            </h1>
-            <p className="text-[13px] font-bold text-[#333] opacity-60 m-0 mt-1 uppercase tracking-widest">
-              Update institutional records
-            </p>
+        {/* Main Content */}
+        <main className="flex-1 bg-white p-6 md:p-10 rounded-[32px] border border-[#F5F6FA] shadow-xl shadow-[#2D3436]/5">
+          <header className="mb-10">
+            <h1 className="text-[28px] font-black text-[#2D3436]">Institution Profile</h1>
+            <div className="h-1.5 w-12 bg-[#6C5CE7] rounded-full mt-3"></div>
           </header>
 
-          <form
-            className="flex flex-col gap-6"
-            onSubmit={handleSubmit}
-            noValidate
-          >
+          <form onSubmit={handleSubmit} className="space-y-7">
             {error && (
-              <div className="px-4 py-3 text-[13px] font-bold text-[#cc0000] bg-[#fff] border border-[#cc0000] rounded-[14px]">
+              <div className="p-4 text-[14px] font-bold text-red-600 bg-red-50 rounded-[18px] border border-red-100 animate-pulse">
                 {error}
               </div>
             )}
+
+            {/* ✅ SUCCESS POPUP WITH FADE-OUT ANIMATION */}
             {success && (
-              <div className="px-4 py-3 text-[13px] font-bold text-[#008000] bg-[#fff] border border-[#008000] rounded-[14px]">
+              <div className="p-4 text-[14px] font-bold text-green-600 bg-green-50 rounded-[18px] border border-green-100 animate-in fade-in zoom-in duration-300">
                 {success}
               </div>
             )}
 
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1.5">
-                <label
-                  className="text-[13px] font-bold text-[#333]"
-                  htmlFor="name"
-                >
-                  College Name
-                </label>
+            <div className="space-y-6">
+              <div className="group">
+                <label className="text-[13px] font-black mb-2 block group-focus-within:text-[#6C5CE7] transition-colors">Full College Name</label>
                 <input
-                  id="name"
-                  className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
                   name="name"
                   value={college.name || ""}
                   onChange={handleChange}
-                  placeholder="e.g. MIT College of Engineering"
-                  required
+                  className="w-full p-4 bg-[#F5F6FA] border-2 border-transparent rounded-[20px] outline-none focus:border-[#6C5CE7] focus:bg-white transition-all font-bold text-[#2D3436]"
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label
-                    className="text-[13px] font-bold text-[#333]"
-                    htmlFor="website"
-                  >
-                    Website
-                  </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="group">
+                  <label className="text-[13px] font-black mb-2 block group-focus-within:text-[#6C5CE7]">Website URL</label>
                   <input
-                    id="website"
-                    className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
                     name="website"
                     value={college.website || ""}
                     onChange={handleChange}
-                    placeholder="https://yourcollege.edu"
-                    type="url"
+                    className="w-full p-4 bg-[#F5F6FA] border-2 border-transparent rounded-[20px] outline-none focus:border-[#6C5CE7] focus:bg-white transition-all font-bold"
                   />
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label
-                    className="text-[13px] font-bold text-[#333]"
-                    htmlFor="phone"
-                  >
-                    Phone
-                  </label>
+                <div className="group">
+                  <label className="text-[13px] font-black mb-2 block group-focus-within:text-[#6C5CE7]">Contact Number</label>
                   <input
-                    id="phone"
-                    className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
                     name="phone"
                     value={college.phone || ""}
                     onChange={handleChange}
-                    placeholder="+91 98765 43210"
+                    className="w-full p-4 bg-[#F5F6FA] border-2 border-transparent rounded-[20px] outline-none focus:border-[#6C5CE7] focus:bg-white transition-all font-bold"
                   />
                 </div>
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label
-                  className="text-[13px] font-bold text-[#333]"
-                  htmlFor="address"
-                >
-                  Address
-                </label>
+              <div className="group">
+                <label className="text-[13px] font-black mb-2 block group-focus-within:text-[#6C5CE7]">Authorised Email Domain</label>
                 <input
-                  id="address"
-                  className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none"
-                  name="address"
-                  value={college.address || ""}
+                  name="emailDomain"
+                  value={college.emailDomain || ""}
                   onChange={handleChange}
-                  placeholder="Full physical address"
+                  placeholder="e.g. nbnscoe.edu.in"
+                  className="w-full p-4 bg-[#F5F6FA] border-2 border-transparent rounded-[20px] outline-none focus:border-[#6C5CE7] focus:bg-white transition-all font-bold"
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label
-                  className="text-[13px] font-bold text-[#333]"
-                  htmlFor="description"
-                >
-                  Description
-                </label>
+              <div className="group">
+                <label className="text-[13px] font-black mb-2 block group-focus-within:text-[#6C5CE7]">Physical Address</label>
+                <input
+                  name="address"
+                  value={college.address || ""}
+                  onChange={handleChange}
+                  className="w-full p-4 bg-[#F5F6FA] border-2 border-transparent rounded-[20px] outline-none focus:border-[#6C5CE7] focus:bg-white transition-all font-bold"
+                />
+              </div>
+
+              <div className="group">
+                <label className="text-[13px] font-black mb-2 block group-focus-within:text-[#6C5CE7]">Institutional Description</label>
                 <textarea
-                  id="description"
-                  className="w-full px-4 py-3 text-[13px] text-[#333] bg-[#fff] border border-[#333] rounded-[14px] outline-none resize-y"
                   name="description"
-                  rows={4}
                   value={college.description || ""}
                   onChange={handleChange}
-                  placeholder="Write a brief description of your institution…"
+                  rows={6}
+                  className="w-full p-5 bg-[#F5F6FA] border-2 border-transparent rounded-[24px] outline-none focus:border-[#6C5CE7] focus:bg-white transition-all font-bold resize-none leading-relaxed"
                 />
               </div>
             </div>
 
-            <div className="pt-4 border-t border-[#f9f9f9] flex justify-end">
+            <div className="pt-6">
               <button
-                className="w-full md:w-auto px-8 py-3 text-[14px] font-bold text-[#fff] bg-[#111] border-none rounded-[14px] cursor-pointer hover:opacity-80 transition-opacity disabled:opacity-50 uppercase tracking-widest"
                 type="submit"
                 disabled={saving}
+                className="w-full md:w-auto px-12 py-4 bg-[#6C5CE7] text-white rounded-[22px] font-black text-[16px] shadow-xl shadow-[#6C5CE7]/20 hover:shadow-[#6C5CE7]/40 hover:-translate-y-1 transition-all disabled:opacity-50 active:translate-y-0"
               >
-                {saving ? "Saving…" : "Save Changes"}
+                {saving ? "Updating Profile..." : "Confirm & Save Changes"}
               </button>
             </div>
           </form>

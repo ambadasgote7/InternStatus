@@ -8,7 +8,6 @@ const CompanyDashboard = () => {
   const [mentors, setMentors] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [view, setView] = useState("all");
-
   const [selectedIntern, setSelectedIntern] = useState(null);
 
   const tableRef = useRef(null);
@@ -23,11 +22,10 @@ const CompanyDashboard = () => {
       ]);
 
       const internData = internsRes.data.data || [];
-
       setData(dashboardRes.data.data);
       setInterns(internData);
       setMentors(mentorsRes.data.data);
-      setFiltered(internData); // default
+      setFiltered(internData);
     } catch (err) {
       console.error(err);
     }
@@ -40,49 +38,26 @@ const CompanyDashboard = () => {
   // ================= FILTER =================
   const handleView = (type) => {
     setView(type);
-
     let result = interns;
-
-    if (type === "all") {
-      result = interns;
-    } else if (type === "applications") {
-      result = interns.filter((i) => ["applied", "pending"].includes(i.status));
-    } else if (type === "interns") {
-      result = interns.filter((i) => ["ongoing"].includes(i.status));
-    } else if (type === "completed") {
-      result = interns.filter((i) => i.status === "completed");
-    } else if (type === "certificates") {
-      result = interns.filter((i) => i.certificateUrl);
-    }
+    if (type === "all") result = interns;
+    else if (type === "applications") result = interns.filter((i) => ["applied", "pending"].includes(i.status));
+    else if (type === "interns") result = interns.filter((i) => ["ongoing"].includes(i.status));
+    else if (type === "completed") result = interns.filter((i) => i.status === "completed");
+    else if (type === "certificates") result = interns.filter((i) => i.certificateUrl);
 
     setFiltered(result);
-
     setTimeout(() => {
       tableRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 100);
   };
 
-  // ================= CERTIFICATE =================
-  const issueCertificate = async (id, file) => {
-    try {
-      const formData = new FormData();
-      formData.append("certificate", file);
-
-      await API.post(`/company/applications/${id}/certificate`, formData);
-
-      alert("Certificate issued successfully");
-      fetchData();
-    } catch (err) {
-      alert("Error issuing certificate");
-    }
-  };
-
+  // ================= LOADING STATE =================
   if (!data) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#f9f9f9]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-[#e5e5e5] border-t-[#111] rounded-full animate-spin"></div>
-          <p className="text-[#111] font-bold tracking-widest uppercase text-[10px] animate-pulse m-0">
+      <div className="flex items-center justify-center min-h-screen bg-[#FFFFFF] font-['Nunito']">
+        <div className="flex flex-col items-center gap-4 animate-in fade-in duration-700">
+          <div className="w-12 h-12 border-4 border-[#F5F6FA] border-t-[#6C5CE7] rounded-full animate-spin"></div>
+          <p className="text-[#2D3436] font-bold tracking-widest uppercase text-xs animate-pulse">
             Initializing Dashboard...
           </p>
         </div>
@@ -90,321 +65,179 @@ const CompanyDashboard = () => {
     );
   }
 
-  const cardBase =
-    "bg-[#fff] border p-6 rounded-[24px] shadow-sm transition-all duration-300 cursor-pointer flex flex-col gap-2 hover:border-[#111] hover:-translate-y-1 hover:shadow-md";
+  const cardBase = "bg-[#FFFFFF] border p-6 rounded-[24px] transition-all duration-300 cursor-pointer flex flex-col gap-2 hover:-translate-y-2";
 
   return (
-    <div className="min-h-screen bg-[#f9f9f9] text-[#111] font-sans pb-12">
-      <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
+    <div className="min-h-screen bg-[#FFFFFF] text-[#2D3436] font-['Nunito'] pb-12 transition-colors duration-500">
+      <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-10">
+        
         {/* HEADER */}
-        <header className="border-b border-[#e5e5e5] pb-6">
-          <div className="text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-[0.2em] mb-2">
-            Overview
+        <header className="border-b border-[#F5F6FA] pb-8 animate-in slide-in-from-top duration-700">
+          <div className="text-[12px] font-extrabold text-[#6C5CE7] opacity-80 uppercase tracking-[0.3em] mb-3">
+            Corporate Analytics
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-[#111] m-0 tracking-tighter uppercase">
-            Company Dashboard
+          <h1 className="text-4xl md:text-5xl font-black text-[#2D3436] m-0 tracking-tight uppercase">
+            Company <span className="text-[#6C5CE7]">Dashboard</span>
           </h1>
         </header>
 
-        {/* ================= CARDS ================= */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-          <div
-            className={`${cardBase} ${view === "all" ? "border-[#111] shadow-md -translate-y-1" : "border-[#e5e5e5]"}`}
-            onClick={() => handleView("all")}
-          >
-            <p className="text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-[0.15em] m-0">
-              Total Postings
-            </p>
-            <h2 className="text-[32px] font-black text-[#111] m-0 leading-none">
-              {data.totalInternships}
-            </h2>
-          </div>
-
-          <div
-            className={`${cardBase} ${view === "applications" ? "border-[#111] shadow-md -translate-y-1" : "border-[#e5e5e5]"}`}
-            onClick={() => handleView("applications")}
-          >
-            <p className="text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-[0.15em] m-0">
-              Applications
-            </p>
-            <h2 className="text-[32px] font-black text-[#111] m-0 leading-none">
-              {data.totalApplications}
-            </h2>
-          </div>
-
-          <div
-            className={`${cardBase} ${view === "interns" ? "border-[#111] shadow-md -translate-y-1" : "border-[#e5e5e5]"}`}
-            onClick={() => handleView("interns")}
-          >
-            <p className="text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-[0.15em] m-0">
-              Active Interns
-            </p>
-            <h2 className="text-[32px] font-black text-[#1d4ed8] m-0 leading-none">
-              {data.totalInterns}
-            </h2>
-          </div>
-
-          <div
-            className={`${cardBase} ${view === "mentors" ? "border-[#111] shadow-md -translate-y-1" : "border-[#e5e5e5]"}`}
-            onClick={() => {
-              setView("mentors");
-              setTimeout(
-                () =>
-                  tableRef.current?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start",
-                  }),
-                100,
-              );
-            }}
-          >
-            <p className="text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-[0.15em] m-0">
-              Mentors
-            </p>
-            <h2 className="text-[32px] font-black text-[#111] m-0 leading-none">
-              {data.totalMentors}
-            </h2>
-          </div>
-
-          <div
-            className={`${cardBase} ${view === "completed" ? "border-[#111] shadow-md -translate-y-1" : "border-[#e5e5e5]"}`}
-            onClick={() => handleView("completed")}
-          >
-            <p className="text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-[0.15em] m-0">
-              Completed
-            </p>
-            <h2 className="text-[32px] font-black text-[#166534] m-0 leading-none">
-              {data.completedInternships}
-            </h2>
-          </div>
-
-          <div
-            className={`${cardBase} ${view === "certificates" ? "border-[#111] shadow-md -translate-y-1" : "border-[#e5e5e5]"}`}
-            onClick={() => handleView("certificates")}
-          >
-            <p className="text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-[0.15em] m-0">
-              Certificates
-            </p>
-            <h2 className="text-[32px] font-black text-[#111] m-0 leading-none">
-              {data.certificatesIssued}
-            </h2>
-          </div>
+        {/* ================= STATS CARDS ================= */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+          {[
+            { label: "Total Postings", key: "totalInternships", type: "all", color: "#2D3436" },
+            { label: "Applications", key: "totalApplications", type: "applications", color: "#2D3436" },
+            { label: "Active Interns", key: "totalInterns", type: "interns", color: "#1d4ed8" },
+            { label: "Mentors", key: "totalMentors", type: "mentors", color: "#2D3436" },
+            { label: "Completed", key: "completedInternships", type: "completed", color: "#166534" },
+            { label: "Certificates", key: "certificatesIssued", type: "certificates", color: "#6C5CE7" },
+          ].map((stat, idx) => (
+            <div
+              key={stat.type}
+              style={{ animationDelay: `${idx * 100}ms` }}
+              className={`${cardBase} animate-in zoom-in-95 duration-500 ${
+                view === stat.type 
+                ? "border-[#6C5CE7] shadow-[0_10px_25px_-5px_rgba(108,92,231,0.2)] ring-1 ring-[#6C5CE7]" 
+                : "border-[#F5F6FA] bg-[#F5F6FA]/50 hover:bg-[#FFFFFF] hover:shadow-xl hover:border-[#6C5CE7]/30"
+              }`}
+              onClick={() => stat.type === "mentors" ? (setView("mentors"), setTimeout(() => tableRef.current?.scrollIntoView({ behavior: "smooth" }), 100)) : handleView(stat.type)}
+            >
+              <p className="text-[10px] font-bold text-[#2D3436] opacity-50 uppercase tracking-[0.15em] m-0">
+                {stat.label}
+              </p>
+              <h2 className="text-[34px] font-black m-0 leading-none tracking-tighter" style={{ color: stat.color }}>
+                {stat.type === "mentors" ? data.totalMentors : (stat.type === "all" ? data.totalInternships : data[stat.key])}
+              </h2>
+            </div>
+          ))}
         </div>
 
-        {/* ================= TABLE ================= */}
+        {/* ================= TABLE SECTION ================= */}
         <div
           ref={tableRef}
-          className="bg-[#fff] border border-[#e5e5e5] p-8 rounded-[24px] shadow-sm scroll-mt-6"
+          className="bg-[#FFFFFF] border border-[#F5F6FA] p-6 md:p-10 rounded-[32px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] scroll-mt-10 animate-in fade-in slide-in-from-bottom-5 duration-1000"
         >
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-[12px] font-black text-[#111] uppercase tracking-widest border-l-4 border-[#111] pl-3 m-0">
-              {view === "all" ? "All Interns" : view} Data
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            <h2 className="text-[14px] font-black text-[#2D3436] uppercase tracking-[0.2em] border-l-4 border-[#6C5CE7] pl-4 m-0">
+              {view === "all" ? "Master Database" : `${view} Overview`}
             </h2>
-            <div className="text-[10px] font-bold bg-[#f9f9f9] border border-[#e5e5e5] px-3 py-1.5 rounded-[8px] uppercase tracking-widest text-[#555]">
-              Viewing: {view}
+            <div className="text-[11px] font-bold bg-[#F5F6FA] text-[#6C5CE7] border border-[#6C5CE7]/10 px-4 py-2 rounded-full uppercase tracking-widest shadow-sm">
+              Current View: <span className="text-[#2D3436]">{view}</span>
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-[14px] border border-[#e5e5e5]">
-            {view === "mentors" ? (
-              <table className="w-full text-left border-collapse whitespace-nowrap">
-                <thead className="bg-[#f9f9f9] border-b border-[#e5e5e5]">
-                  <tr>
-                    <th className="px-6 py-4 text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
-                      Name
-                    </th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
-                      Email
-                    </th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
-                      Department
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#e5e5e5]">
-                  {mentors.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan="3"
-                        className="px-6 py-12 text-center text-[12px] font-bold text-[#999] uppercase tracking-widest"
-                      >
-                        No Mentors Found
-                      </td>
-                    </tr>
+          <div className="overflow-x-auto rounded-[20px] border border-[#F5F6FA]">
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-[#F5F6FA] border-b border-[#F5F6FA]">
+                <tr>
+                  {view === "mentors" ? (
+                    <>
+                      {["Name", "Email", "Department"].map(h => (
+                        <th key={h} className="px-8 py-5 text-[11px] font-extrabold text-[#2D3436] opacity-60 uppercase tracking-widest">{h}</th>
+                      ))}
+                    </>
                   ) : (
-                    mentors.map((m) => (
-                      <tr
-                        key={m._id}
-                        className="hover:bg-[#fcfcfc] transition-colors group"
-                      >
-                        <td className="px-6 py-4 text-[13px] font-black text-[#111]">
-                          {m.fullName || "—"}
-                        </td>
-                        <td className="px-6 py-4 text-[13px] font-medium text-[#555]">
-                          {m.user?.email || "—"}
-                        </td>
-                        <td className="px-6 py-4 text-[13px] font-bold text-[#111]">
-                          {m.department || "N/A"}
-                        </td>
-                      </tr>
-                    ))
+                    <>
+                      {["Student", "Internship", "Status", "Certificate"].map((h, i) => (
+                        <th key={h} className={`px-8 py-5 text-[11px] font-extrabold text-[#2D3436] opacity-60 uppercase tracking-widest ${i === 3 ? "text-right" : ""}`}>{h}</th>
+                      ))}
+                    </>
                   )}
-                </tbody>
-              </table>
-            ) : (
-              <table className="w-full text-left border-collapse whitespace-nowrap">
-                <thead className="bg-[#f9f9f9] border-b border-[#e5e5e5]">
-                  <tr>
-                    <th className="px-6 py-4 text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
-                      Student
-                    </th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
-                      Internship
-                    </th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
-                      Status
-                    </th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-[#333] opacity-60 uppercase tracking-widest text-right">
-                      Certificate
-                    </th>
-                  </tr>
-                </thead>
+                </tr>
+              </thead>
 
-                <tbody className="divide-y divide-[#e5e5e5]">
-                  {filtered.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan="4"
-                        className="px-6 py-12 text-center text-[12px] font-bold text-[#999] uppercase tracking-widest"
-                      >
-                        No Data Found
-                      </td>
+              <tbody className="divide-y divide-[#F5F6FA]">
+                {(view === "mentors" ? mentors : filtered).length === 0 ? (
+                  <tr>
+                    <td colSpan="100%" className="px-8 py-20 text-center text-[13px] font-bold text-[#2D3436] opacity-30 uppercase tracking-[0.2em]">
+                      No records found in this category
+                    </td>
+                  </tr>
+                ) : (
+                  (view === "mentors" ? mentors : filtered).map((item, idx) => (
+                    <tr
+                      key={item._id || idx}
+                      onClick={() => view !== "mentors" && setSelectedIntern(item)}
+                      className={`transition-all duration-200 hover:bg-[#F5F6FA]/40 group ${view !== "mentors" ? "cursor-pointer" : ""}`}
+                    >
+                      {view === "mentors" ? (
+                        <>
+                          <td className="px-8 py-5 text-[14px] font-black text-[#2D3436] group-hover:text-[#6C5CE7]">{item.fullName || "—"}</td>
+                          <td className="px-8 py-5 text-[14px] font-medium text-[#2D3436]/70">{item.user?.email || "—"}</td>
+                          <td className="px-8 py-5 text-[14px] font-bold text-[#2D3436]">{item.department || "N/A"}</td>
+                        </>
+                      ) : (
+                        <>
+                          <td className="px-8 py-5 text-[14px] font-black text-[#2D3436] group-hover:text-[#6C5CE7] transition-colors">{item.student?.fullName || item.studentName || "—"}</td>
+                          <td className="px-8 py-5 text-[14px] font-medium text-[#2D3436]/70">{item.internship?.title || item.internshipTitle || "—"}</td>
+                          <td className="px-8 py-5">
+                            <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter border ${
+                              item.status === "completed" ? "bg-[#f0fdf4] text-[#166534] border-[#bbf7d0]" :
+                              item.status === "ongoing" ? "bg-[#eff6ff] text-[#1d4ed8] border-[#bfdbfe]" :
+                              "bg-[#fef2f2] text-[#991b1b] border-[#fecaca]"
+                            }`}>
+                              {item.status}
+                            </span>
+                          </td>
+                          <td className="px-8 py-5 text-right">
+                            <span className={`text-[11px] font-black uppercase tracking-widest ${item.certificateUrl ? "text-[#166534]" : "text-[#2D3436] opacity-30"}`}>
+                              {item.certificateUrl ? "● Issued" : "Pending"}
+                            </span>
+                          </td>
+                        </>
+                      )}
                     </tr>
-                  ) : (
-                    filtered.map((i) => (
-                      <tr
-                        key={i.applicationId || i._id}
-                        className="hover:bg-[#fcfcfc] cursor-pointer transition-colors group"
-                        onClick={() => setSelectedIntern(i)}
-                      >
-                        <td className="px-6 py-4 text-[13px] font-black text-[#111] group-hover:underline">
-                          {i.student?.fullName || i.studentName || "—"}
-                        </td>
-                        <td className="px-6 py-4 text-[13px] font-medium text-[#555]">
-                          {i.internship?.title || i.internshipTitle || "—"}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span
-                            className={`inline-block px-2.5 py-1 rounded-[6px] text-[9px] font-bold uppercase tracking-widest border ${
-                              i.status === "completed"
-                                ? "bg-[#f0fdf4] text-[#166534] border-[#bbf7d0]"
-                                : i.status === "ongoing"
-                                  ? "bg-[#eff6ff] text-[#1d4ed8] border-[#bfdbfe]"
-                                  : i.status === "pending" ||
-                                      i.status === "applied"
-                                    ? "bg-[#fef2f2] text-[#991b1b] border-[#fecaca]"
-                                    : "bg-[#f9f9f9] text-[#555] border-[#e5e5e5]"
-                            }`}
-                          >
-                            {i.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <span
-                            className={`text-[10px] font-black uppercase tracking-widest ${i.certificateUrl ? "text-[#166534]" : "text-[#999]"}`}
-                          >
-                            {i.certificateUrl ? "Issued" : "Not Issued"}
-                          </span>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            )}
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
       {/* ================= MODAL ================= */}
       {selectedIntern && (
-        <div className="fixed inset-0 bg-[#111]/40 backdrop-blur-sm flex justify-center items-center z-50 p-4">
-          <div className="bg-[#fff] p-8 rounded-[24px] w-full max-w-md shadow-2xl border border-[#e5e5e5]">
-            <div className="flex justify-between items-start border-b border-[#e5e5e5] pb-4 mb-6">
-              <h2 className="text-[18px] font-black text-[#111] m-0 uppercase tracking-tighter">
-                Intern Details
+        <div className="fixed inset-0 bg-[#2D3436]/60 backdrop-blur-md flex justify-center items-center z-50 p-4 animate-in fade-in duration-300">
+          <div className="bg-[#FFFFFF] p-10 rounded-[40px] w-full max-w-md shadow-2xl border border-[#F5F6FA] animate-in zoom-in-95 slide-in-from-bottom-10 duration-500">
+            <div className="flex justify-between items-start border-b border-[#F5F6FA] pb-6 mb-8">
+              <h2 className="text-2xl font-black text-[#2D3436] m-0 uppercase tracking-tighter">
+                Profile <span className="text-[#6C5CE7]">Brief</span>
               </h2>
               <button
                 onClick={() => setSelectedIntern(null)}
-                className="text-[10px] font-bold text-[#999] hover:text-[#111] uppercase tracking-widest bg-transparent border-none cursor-pointer outline-none"
+                className="p-2 hover:bg-[#F5F6FA] rounded-full transition-colors group"
               >
-                Close
+                <svg className="w-5 h-5 text-[#2D3436]/40 group-hover:text-[#6C5CE7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
 
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-[#999] uppercase tracking-widest">
-                  Name
-                </span>
-                <span className="text-[14px] font-black text-[#111]">
-                  {selectedIntern.student?.fullName ||
-                    selectedIntern.studentName ||
-                    "—"}
-                </span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-[#999] uppercase tracking-widest">
-                  Email
-                </span>
-                <span className="text-[13px] font-medium text-[#555] break-all">
-                  {selectedIntern.student?.email ||
-                    selectedIntern.studentEmail ||
-                    "—"}
-                </span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-[#999] uppercase tracking-widest">
-                  Status
-                </span>
-                <span
-                  className={`text-[12px] font-black uppercase tracking-widest ${
-                    selectedIntern.status === "completed"
-                      ? "text-[#166534]"
-                      : selectedIntern.status === "ongoing"
-                        ? "text-[#1d4ed8]"
-                        : "text-[#b45309]"
-                  }`}
-                >
-                  {selectedIntern.status}
-                </span>
-              </div>
+            <div className="space-y-6">
+              {[
+                { label: "Full Name", value: selectedIntern.student?.fullName || selectedIntern.studentName, bold: true },
+                { label: "Official Email", value: selectedIntern.student?.email || selectedIntern.studentEmail, bold: false },
+                { label: "Status", value: selectedIntern.status, isStatus: true }
+              ].map((field, i) => (
+                <div key={i} className="flex flex-col">
+                  <span className="text-[10px] font-extrabold text-[#6C5CE7] uppercase tracking-[0.2em] mb-1">{field.label}</span>
+                  <span className={`text-[15px] ${field.bold ? "font-black text-[#2D3436]" : "font-semibold text-[#2D3436]/70"} ${field.isStatus ? "uppercase tracking-widest text-[#1d4ed8]" : ""}`}>
+                    {field.value || "—"}
+                  </span>
+                </div>
+              ))}
 
               {selectedIntern.certificateUrl && (
-                <div className="flex flex-col mt-2">
-                  <span className="text-[10px] font-bold text-[#999] uppercase tracking-widest mb-1">
-                    Certificate
-                  </span>
+                <div className="pt-4 border-t border-[#F5F6FA]">
                   <a
                     href={selectedIntern.certificateUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-2 text-[11px] font-black text-[#111] uppercase tracking-[0.15em] hover:underline transition-all group/link"
+                    className="flex items-center justify-center gap-3 w-full bg-[#F5F6FA] text-[#6C5CE7] font-black text-[12px] uppercase tracking-widest px-6 py-4 rounded-[18px] hover:bg-[#6C5CE7] hover:text-[#FFFFFF] transition-all duration-300 shadow-sm"
                   >
-                    <svg
-                      className="w-4 h-4 transition-transform group-hover/link:-translate-y-0.5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    View Certificate
+                    Verify Certificate
                   </a>
                 </div>
               )}
@@ -412,9 +245,9 @@ const CompanyDashboard = () => {
 
             <button
               onClick={() => setSelectedIntern(null)}
-              className="mt-8 w-full bg-[#111] text-[#fff] font-black text-[10px] uppercase tracking-[0.15em] px-4 py-3.5 rounded-[12px] hover:bg-[#333] transition-colors outline-none cursor-pointer border-none"
+              className="mt-8 w-full bg-[#2D3436] text-[#FFFFFF] font-black text-[11px] uppercase tracking-[0.2em] px-4 py-4 rounded-[20px] hover:bg-[#6C5CE7] hover:shadow-lg hover:shadow-[#6C5CE7]/30 transition-all duration-300 shadow-md"
             >
-              Dismiss
+              Close Record
             </button>
           </div>
         </div>

@@ -258,7 +258,8 @@ export const updateCollegeProfileService = async (
     "website",
     "phone",
     "address",
-    "description"
+    "description",
+    "emailDomain",
   ];
 
   allowedFields.forEach((field) => {

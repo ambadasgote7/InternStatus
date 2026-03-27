@@ -120,6 +120,7 @@ function AppContent() {
     initAuth();
   }, [dispatch]);
 
+
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center">
@@ -163,7 +164,6 @@ function AppContent() {
             <Route path="/faculty/students" element={<FacultyStudents />} />
             <Route path="/faculty/invite-student" element={<InviteStudent />} />
              <Route path="/faculty/students/:studentId" element={<StudentDetails />} />
-              <Route path="/academic-internship-track/:applicationId" element={<AcademicInternshipTrack />} />
             <Route path="faculty/credits" element={<CreditManagement />} />
           </Route>
         </Route>
@@ -208,11 +208,30 @@ function AppContent() {
             <Route path="/college/invite-faculty" element={<InviteFaculty />} />
             <Route path="/college/invite-student" element={<InviteStudent />} />
             <Route path="/college/courses" element={<Courses />} />
-            <Route path="/academic-internship-track/:applicationId" element={<AcademicInternshipTrack />} />
             <Route path="/student/internships" element={<StudentInternships />} />
             <Route path="college/credits" element={<CreditManagement />} />
           </Route>
         </Route>
+
+       <Route element={<ProtectedRoute role={["college", "faculty"]} />}>
+
+  {/* COLLEGE */}
+  <Route element={<CollegeLayout />}>
+    <Route
+      path="/academic-internship-track/:applicationId"
+      element={<AcademicInternshipTrack />}
+    />
+  </Route>
+
+  {/* FACULTY */}
+  <Route element={<FacultyLayout />}>
+    <Route
+      path="/academic-internship-track/:applicationId"
+      element={<AcademicInternshipTrack />}
+    />
+  </Route>
+
+</Route>
 
         {/* ADMIN */}
         <Route element={<ProtectedRoute role="admin" />}>

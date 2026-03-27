@@ -24,93 +24,107 @@ export default function StudentInternships() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f9f9f9] flex items-center justify-center">
-        <p className="text-[14px] font-bold text-[#333] animate-pulse">
-          Loading Your Internships...
-        </p>
+      <div className="min-h-screen bg-white flex items-center justify-center font-['Nunito']">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-[#6C5CE7]/20 border-t-[#6C5CE7] rounded-full animate-spin"></div>
+          <p className="text-[14px] font-black text-[#2D3436] animate-pulse uppercase tracking-[0.3em]">
+            Loading Your Journey...
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f9f9f9] text-[#333] font-sans pb-10">
-      <main className="max-w-7xl mx-auto w-full px-4 md:px-6 py-6 flex flex-col gap-6">
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#e5e5e5] pb-4">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-[23px] font-black text-[#333] m-0 tracking-tight leading-tight">
-              My Internships
+    <div className="min-h-screen bg-[#FFFFFF] text-[#2D3436] font-['Nunito'] pb-16">
+      <main className="max-w-7xl mx-auto w-full px-4 md:px-8 py-10 flex flex-col gap-10">
+        
+        {/* Header Section */}
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-[#F5F6FA] pb-8 animate-in fade-in slide-in-from-top-5 duration-700">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-[32px] md:text-[40px] font-black text-[#2D3436] m-0 tracking-tight leading-tight">
+              My <span className="text-[#6C5CE7]">Internships</span>
             </h1>
-            <p className="text-[13px] font-bold text-[#333] opacity-60 m-0 uppercase tracking-widest">
+            <p className="text-[12px] font-black text-[#2D3436] opacity-40 m-0 uppercase tracking-[0.25em]">
               Professional Engagement Track
             </p>
+          </div>
+          
+          <div className="hidden md:block">
+             <div className="px-6 py-3 bg-[#F5F6FA] rounded-2xl text-[11px] font-black uppercase tracking-widest text-[#6C5CE7]">
+               {internships.length} Active Records
+             </div>
           </div>
         </header>
 
         {!internships.length ? (
-          <div className="bg-[#fff] border-2 border-dashed border-[#e5e5e5] rounded-[20px] p-10 text-center">
-            <p className="text-[13px] font-bold text-[#333] opacity-60 m-0">
-              No internship records found in your profile.
+          <div className="bg-white border-4 border-dashed border-[#F5F6FA] rounded-[40px] p-20 text-center animate-in fade-in zoom-in duration-500">
+            <div className="text-5xl mb-6 opacity-20">📂</div>
+            <p className="text-[14px] font-black text-[#2D3436] opacity-40 m-0 uppercase tracking-widest leading-loose">
+              No internship records found <br /> in your professional profile.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {internships.map((internship) => {
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {internships.map((internship, index) => {
               const isCompleted = internship.status === "completed";
               const isOngoing = internship.status === "ongoing";
 
               return (
                 <div
                   key={internship._id}
-                  className="bg-[#fff] border border-[#e5e5e5] rounded-[20px] p-5 shadow-sm hover:border-[#333] transition-colors flex flex-col justify-between"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                  className="bg-white border-2 border-[#F5F6FA] rounded-[35px] p-7 shadow-sm hover:shadow-2xl hover:shadow-[#6C5CE7]/10 hover:border-[#6C5CE7]/30 transition-all duration-500 flex flex-col justify-between group animate-in fade-in slide-in-from-bottom-8"
                 >
-                  <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-6">
                     <div className="flex justify-between items-start">
                       <span
-                        className={`px-2.5 py-1 rounded-[10px] text-[9px] font-black uppercase tracking-widest border ${
+                        className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border-2 transition-colors ${
                           isOngoing
-                            ? "bg-[#111] text-[#fff] border-[#111]"
-                            : "bg-[#f9f9f9] text-[#333] border-[#e5e5e5]"
+                            ? "bg-[#6C5CE7] text-white border-[#6C5CE7] shadow-lg shadow-[#6C5CE7]/20"
+                            : "bg-[#F5F6FA] text-[#2D3436] border-[#F5F6FA] opacity-60"
                         }`}
                       >
                         {internship.status}
                       </span>
+                      <div className="w-10 h-10 bg-[#F5F6FA] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6C5CE7" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
+                      </div>
                     </div>
 
                     <div>
-                      <h2 className="text-[17px] font-black text-[#333] m-0 leading-tight">
+                      <h2 className="text-[20px] font-black text-[#2D3436] m-0 leading-tight group-hover:text-[#6C5CE7] transition-colors duration-300">
                         {internship.internship?.title}
                       </h2>
 
-                      <div className="mt-4 flex flex-col gap-2.5">
-                        <div className="flex flex-col">
-                          <span className="text-[10px] font-bold text-[#333] opacity-40 uppercase tracking-widest">
+                      <div className="mt-8 flex flex-col gap-5">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[9px] font-black text-[#2D3436] opacity-30 uppercase tracking-[0.25em]">
                             Organization
                           </span>
-                          <span className="text-[13px] font-bold text-[#333]">
+                          <span className="text-[14px] font-bold text-[#2D3436]">
                             {internship.company?.name}
                           </span>
                         </div>
 
-                        <div className="flex flex-col">
-                          <span className="text-[10px] font-bold text-[#333] opacity-40 uppercase tracking-widest">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[9px] font-black text-[#2D3436] opacity-30 uppercase tracking-[0.25em]">
                             Mentor
                           </span>
-                          <span className="text-[13px] font-bold text-[#333]">
-                            {internship.mentor?.fullName ||
-                              "Awaiting Assignment"}
+                          <span className="text-[14px] font-bold text-[#2D3436] flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#6C5CE7]"></div>
+                            {internship.mentor?.fullName || "Awaiting Assignment"}
                           </span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-[#f9f9f9]">
+                  <div className="mt-10 pt-6 border-t border-[#F5F6FA]">
                     {isOngoing && (
                       <button
-                        onClick={() =>
-                          navigate(`/student/task/${internship.currentTaskId}`)
-                        }
-                        className="w-full py-2.5 bg-[#111] text-[#fff] text-[11px] font-bold rounded-[14px] hover:opacity-80 transition-opacity cursor-pointer uppercase tracking-widest border-none"
+                        onClick={() => navigate(`/student/task/${internship.currentTaskId}`)}
+                        className="w-full py-4 bg-[#2D3436] text-white text-[11px] font-black rounded-2xl hover:bg-[#6C5CE7] shadow-lg hover:shadow-[#6C5CE7]/30 transition-all duration-300 cursor-pointer uppercase tracking-[0.2em] border-none outline-none"
                       >
                         Track Current Task
                       </button>
@@ -118,10 +132,8 @@ export default function StudentInternships() {
 
                     {isCompleted && (
                       <button
-                        onClick={() =>
-                          navigate(`/student/academic/${internship._id}`)
-                        }
-                        className="w-full py-2.5 bg-[#f9f9f9] border border-[#333] text-[#333] text-[11px] font-bold rounded-[14px] hover:bg-[#333] hover:text-[#fff] transition-all cursor-pointer uppercase tracking-widest"
+                        onClick={() => navigate(`/student/academic/${internship._id}`)}
+                        className="w-full py-4 bg-white border-2 border-[#2D3436] text-[#2D3436] text-[11px] font-black rounded-2xl hover:bg-[#2D3436] hover:text-white transition-all duration-300 cursor-pointer uppercase tracking-[0.2em]"
                       >
                         View Full Summary
                       </button>

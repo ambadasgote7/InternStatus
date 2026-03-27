@@ -17,7 +17,7 @@ const StatusBadge = ({ status }) => {
 
   return (
     <span
-      className={`px-2.5 py-1 rounded-[10px] text-[9px] font-black uppercase tracking-widest border ${cls}`}
+      className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest border transition-all duration-300 ${cls}`}
     >
       {status ? status : "UNKNOWN"}
     </span>
@@ -98,10 +98,30 @@ export default function CollegeStudents() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setEditForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    
+    setEditForm((prev) => {
+      let updatedForm = { ...prev, [name]: value };
+
+      // Logic: If Course Name changes, reset specialization and recalculate end year
+      if (name === "courseName") {
+        const selectedCourseObj = courses.find((c) => c.name === value);
+        updatedForm.specialization = ""; // Reset specialization on course change
+        
+        if (selectedCourseObj && prev.courseStartYear) {
+          updatedForm.courseEndYear = parseInt(prev.courseStartYear) + parseInt(selectedCourseObj.durationYears);
+        }
+      }
+
+      // Logic: If Start Year changes, recalculate end year based on selected course duration
+      if (name === "courseStartYear") {
+        const selectedCourseObj = courses.find((c) => c.name === prev.courseName);
+        if (selectedCourseObj && value) {
+          updatedForm.courseEndYear = parseInt(value) + parseInt(selectedCourseObj.durationYears);
+        }
+      }
+
+      return updatedForm;
+    });
   };
 
   const handleUpdate = async () => {
@@ -131,6 +151,9 @@ export default function CollegeStudents() {
     }
   };
 
+  // Helper for dynamic UI selections in Modal
+  const currentSelectedCourse = courses.find(c => c.name === editForm.courseName);
+
   // Extract unique values for filters
   const uniqueCourses = [
     "ALL",
@@ -141,17 +164,15 @@ export default function CollegeStudents() {
     ...new Set(students.map((s) => s.status).filter(Boolean)),
   ];
 
-  // ✅ ADDED: Derive specializations from selected course via courses API data
-  const selectedCourse = courses.find(
+  const selectedFilterCourse = courses.find(
     (c) => c.name?.trim().toLowerCase() === filterCourse.trim().toLowerCase()
   );
-  const courseSpecializations = selectedCourse?.specializations || [];
+  const filterSpecializations = selectedFilterCourse?.specializations || [];
   const uniqueSpecializations = [
     "ALL",
-    ...new Set(courseSpecializations.filter(Boolean)),
+    ...new Set(filterSpecializations.filter(Boolean)),
   ];
 
-  // Apply Filters
   const filteredStudents = students.filter((s) => {
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
@@ -161,7 +182,6 @@ export default function CollegeStudents() {
     const matchesCourse =
       filterCourse === "ALL" || s.courseName === filterCourse;
     const matchesStatus = filterStatus === "ALL" || s.status === filterStatus;
-    // ✅ ADDED: Course-dependent specialization match logic
     const matchesSpecialization =
       filterSpecialization === "ALL" || s.specialization === filterSpecialization;
 
@@ -170,47 +190,55 @@ export default function CollegeStudents() {
 
   if (loading) {
     return (
-      <div className="h-full bg-[#f9f9f9] flex items-center justify-center font-sans">
-        <p className="text-[14px] font-bold text-[#333] animate-pulse m-0">
-          Syncing Student Records...
-        </p>
+      <div className="h-screen bg-[#F5F6FA] flex items-center justify-center font-['Nunito']">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-[#6C5CE7]/20 border-t-[#6C5CE7] rounded-full animate-spin"></div>
+          <p className="text-[14px] font-bold text-[#2D3436] animate-pulse">
+            Syncing Student Records...
+          </p>
+        </div>
       </div>
     );
   }
 
+  console.log(filteredStudents);
+
   return (
-    <div className="h-full bg-[#f9f9f9] text-[#333] font-sans overflow-hidden">
-      <main className="max-w-7xl mx-auto w-full px-4 md:px-6 py-6 flex flex-col gap-6 h-full overflow-y-auto no-scrollbar">
+    <div className="min-h-screen bg-[#F5F6FA] text-[#2D3436] font-['Nunito'] overflow-hidden">
+      <main className="max-w-7xl mx-auto w-full px-4 md:px-8 py-8 flex flex-col gap-8 h-screen overflow-y-auto no-scrollbar animate-in fade-in duration-700">
+        
         {/* Header */}
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#e5e5e5] pb-4 flex-shrink-0">
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#e5e5e5]/50 pb-6 flex-shrink-0">
           <div className="flex flex-col gap-1">
-            <h1 className="text-[23px] font-black text-[#333] m-0 tracking-tight leading-tight">
-              College Students
+            <h1 className="text-[28px] font-black text-[#2D3436] m-0 tracking-tight leading-tight">
+              College <span className="text-[#6C5CE7]">Students</span>
             </h1>
-            <p className="text-[13px] font-bold text-[#333] opacity-60 m-0 uppercase tracking-widest">
-              Student Directory & Roster
+            <p className="text-[12px] font-bold text-[#6C5CE7] opacity-80 m-0 uppercase tracking-[0.2em]">
+              Academic Directory Management
             </p>
           </div>
         </header>
 
         {/* Filters Bar */}
         {students.length > 0 && (
-          <div className="flex flex-col md:flex-row gap-4 flex-shrink-0">
-            <input
-              type="text"
-              placeholder="Search by Name or PRN..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 px-4 py-3 text-[13px] bg-[#fff] border border-[#e5e5e5] rounded-[14px] outline-none focus:border-[#333] transition-colors shadow-sm"
-            />
-            {/* ✅ MODIFIED: Course dropdown now also resets specialization on change */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-shrink-0">
+            <div className="relative group">
+              <input
+                type="text"
+                placeholder="Search by Name or PRN..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-5 py-3.5 text-[14px] bg-[#FFFFFF] border border-[#e5e5e5] rounded-2xl outline-none focus:border-[#6C5CE7] focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all shadow-sm group-hover:border-[#6C5CE7]/50"
+              />
+            </div>
+            
             <select
               value={filterCourse}
               onChange={(e) => {
                 setFilterCourse(e.target.value);
                 setFilterSpecialization("ALL");
               }}
-              className="w-full md:w-56 px-4 py-3 text-[11px] font-bold text-[#333] bg-[#fff] border border-[#e5e5e5] rounded-[14px] outline-none focus:border-[#333] transition-colors appearance-none uppercase tracking-widest shadow-sm"
+              className="w-full px-5 py-3.5 text-[12px] font-bold text-[#2D3436] bg-[#FFFFFF] border border-[#e5e5e5] rounded-2xl outline-none focus:border-[#6C5CE7] transition-all appearance-none uppercase tracking-wider shadow-sm cursor-pointer"
             >
               {uniqueCourses.map((course) => (
                 <option key={course} value={course}>
@@ -218,23 +246,24 @@ export default function CollegeStudents() {
                 </option>
               ))}
             </select>
-            {/* ✅ ADDED: Course-dependent specialization dropdown, disabled when no course selected */}
+
             <select
               value={filterSpecialization}
               onChange={(e) => setFilterSpecialization(e.target.value)}
               disabled={filterCourse === "ALL"}
-              className="w-full md:w-56 px-4 py-3 text-[11px] font-bold text-[#333] bg-[#fff] border border-[#e5e5e5] rounded-[14px] outline-none focus:border-[#333] transition-colors appearance-none uppercase tracking-widest shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full px-5 py-3.5 text-[12px] font-bold text-[#2D3436] bg-[#FFFFFF] border border-[#e5e5e5] rounded-2xl outline-none focus:border-[#6C5CE7] transition-all appearance-none uppercase tracking-wider shadow-sm disabled:opacity-50 disabled:bg-[#f1f1f1] cursor-pointer"
             >
               {uniqueSpecializations.map((spec) => (
                 <option key={spec} value={spec}>
-                  {spec === "ALL" ? "All Specializations" : spec}
+                  {spec === "ALL" ? "Specializations" : spec}
                 </option>
               ))}
             </select>
+
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full md:w-48 px-4 py-3 text-[11px] font-bold text-[#333] bg-[#fff] border border-[#e5e5e5] rounded-[14px] outline-none focus:border-[#333] transition-colors appearance-none uppercase tracking-widest shadow-sm"
+              className="w-full px-5 py-3.5 text-[12px] font-bold text-[#2D3436] bg-[#FFFFFF] border border-[#e5e5e5] rounded-2xl outline-none focus:border-[#6C5CE7] transition-all appearance-none uppercase tracking-wider shadow-sm cursor-pointer"
             >
               {uniqueStatuses.map((status) => (
                 <option key={status} value={status}>
@@ -245,184 +274,231 @@ export default function CollegeStudents() {
           </div>
         )}
 
-        {/* Data Handling */}
-        {students.length === 0 ? (
-          <div className="bg-[#fff] border-2 border-dashed border-[#e5e5e5] rounded-[20px] p-20 text-center flex-shrink-0">
-            <p className="text-[13px] font-bold text-[#333] opacity-40 m-0 uppercase tracking-widest">
-              No registered students found.
-            </p>
-          </div>
-        ) : filteredStudents.length === 0 ? (
-          <div className="bg-[#fff] border border-[#e5e5e5] rounded-[20px] p-20 text-center flex-shrink-0">
-            <p className="text-[13px] font-bold text-[#333] opacity-40 m-0 uppercase tracking-widest">
-              No students match your current filters.
-            </p>
-            <button
-              onClick={() => {
-                setSearchTerm("");
-                setFilterCourse("ALL");
-                setFilterStatus("ALL");
-                // ✅ ADDED: Reset specialization filter
-                setFilterSpecialization("ALL");
-              }}
-              className="mt-4 px-4 py-2 bg-[#f9f9f9] border border-[#e5e5e5] text-[#333] text-[10px] font-black uppercase tracking-widest rounded-[10px] hover:border-[#333] transition-colors cursor-pointer"
-            >
-              Clear Filters
-            </button>
-          </div>
-        ) : (
-          <div className="bg-[#fff] border border-[#e5e5e5] rounded-[20px] shadow-sm overflow-hidden flex-shrink-0">
-            <div className="overflow-x-auto no-scrollbar">
-              <table className="w-full text-left border-collapse whitespace-nowrap">
-                <thead className="bg-[#f9f9f9] border-b border-[#e5e5e5]">
-                  <tr>
-                    <th className="p-5 text-[10px] font-bold text-[#333] opacity-40 uppercase tracking-widest">
-                      Name & Email
-                    </th>
-                    <th className="p-5 text-[10px] font-bold text-[#333] opacity-40 uppercase tracking-widest">
-                      Course / Spec
-                    </th>
-                    <th className="p-5 text-[10px] font-bold text-[#333] opacity-40 uppercase tracking-widest">
-                      PRN / Year
-                    </th>
-                    <th className="p-5 text-[10px] font-bold text-[#333] opacity-40 uppercase tracking-widest text-center">
-                      Status
-                    </th>
-                    <th className="p-5 text-[10px] font-bold text-[#333] opacity-40 uppercase tracking-widest text-right">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredStudents.map((s) => (
-                    <tr
-                      key={s._id}
-                      className="border-b border-[#e5e5e5] last:border-none hover:bg-[#fafafa] transition-colors"
-                    >
-                      {/* Name & Email Column */}
-                      <td className="p-5 align-middle">
-                        <div className="flex flex-col">
-                          <span className="text-[15px] font-black text-[#333] m-0 leading-tight">
-                            {s.fullName}
-                          </span>
-                          <span className="text-[12px] font-bold text-[#333] opacity-50 mt-1">
-                            {s.email || "—"}
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* Course / Spec Column */}
-                      <td className="p-5 align-middle">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[13px] font-black text-[#333] leading-tight">
-                            {s.courseName || "—"}
-                          </span>
-                          <span className="text-[11px] font-bold text-[#333] opacity-50 uppercase tracking-widest">
-                            {s.specialization || "—"}
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* PRN / Year Column */}
-                      <td className="p-5 align-middle">
-                        <div className="flex flex-col gap-1.5 items-start">
-                          <span className="px-2 py-1 rounded-[6px] text-[10px] font-mono font-black tracking-widest bg-[#f9f9f9] border border-[#e5e5e5]">
-                            PRN: {s.prn || "—"}
-                          </span>
-                          <span className="text-[11px] font-bold opacity-50 uppercase tracking-widest ml-1">
-                            Year: {s.Year || "—"}
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* Status Column */}
-                      <td className="p-5 align-middle text-center">
-                        <StatusBadge status={s.status} />
-                      </td>
-
-                      {/* Actions Column */}
-                      <td className="p-5 align-middle text-right">
-                        <div className="flex gap-2 justify-end">
-                          <button
-                            onClick={() =>
-                              navigate(`/college/students/${s._id}`)
-                            }
-                            className="px-4 py-2 bg-[#f9f9f9] border border-[#e5e5e5] text-[#333] text-[10px] font-black uppercase tracking-widest rounded-[10px] hover:border-[#333] transition-colors cursor-pointer"
-                          >
-                            View
-                          </button>
-                          <button
-                            onClick={() => openEdit(s)}
-                            className="px-4 py-2 bg-[#111] border border-[#111] text-[#fff] text-[10px] font-black uppercase tracking-widest rounded-[10px] hover:opacity-80 transition-opacity cursor-pointer"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleRemove(s._id)}
-                            className="px-4 py-2 bg-[#fff] border border-[#cc0000] text-[#cc0000] text-[10px] font-black uppercase tracking-widest rounded-[10px] hover:bg-[#cc0000] hover:text-[#fff] transition-colors cursor-pointer"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {/* Content Area */}
+        <div className="flex-1">
+          {students.length === 0 ? (
+            <div className="bg-[#FFFFFF] border-2 border-dashed border-[#e5e5e5] rounded-3xl p-20 text-center animate-pulse">
+              <p className="text-[13px] font-bold text-[#2D3436] opacity-40 m-0 uppercase tracking-widest">
+                No registered students found.
+              </p>
             </div>
-          </div>
-        )}
+          ) : filteredStudents.length === 0 ? (
+            <div className="bg-[#FFFFFF] border border-[#e5e5e5] rounded-3xl p-20 text-center shadow-sm">
+              <p className="text-[13px] font-bold text-[#2D3436] opacity-40 m-0 uppercase tracking-widest">
+                No students match your criteria.
+              </p>
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  setFilterCourse("ALL");
+                  setFilterStatus("ALL");
+                  setFilterSpecialization("ALL");
+                }}
+                className="mt-6 px-6 py-3 bg-[#6C5CE7] text-[#FFFFFF] text-[11px] font-black uppercase tracking-widest rounded-xl hover:shadow-lg hover:shadow-[#6C5CE7]/30 transition-all cursor-pointer transform hover:-translate-y-0.5"
+              >
+                Clear All Filters
+              </button>
+            </div>
+          ) : (
+            <div className="bg-[#FFFFFF] border border-[#e5e5e5] rounded-3xl shadow-sm overflow-hidden mb-10 transition-all duration-500 hover:shadow-md">
+              <div className="overflow-x-auto no-scrollbar">
+                <table className="w-full text-left border-collapse">
+                  <thead className="bg-[#F5F6FA] border-b border-[#e5e5e5]">
+                    <tr>
+                      <th className="p-6 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.15em]">Student Details</th>
+                      <th className="p-6 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.15em]">Academic Path</th>
+                      <th className="p-6 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.15em]">ID / Year</th>
+                      <th className="p-6 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.15em] text-center">Status</th>
+                      <th className="p-6 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.15em] text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#F5F6FA]">
+                    {filteredStudents.map((s, idx) => (
+                      <tr
+                        key={s._id}
+                        style={{ animationDelay: `${idx * 50}ms` }}
+                        className="group hover:bg-[#F5F6FA]/50 transition-colors animate-in fade-in slide-in-from-bottom-2 duration-500"
+                      >
+                        <td className="p-6 whitespace-nowrap">
+                          <div className="flex flex-col">
+                            <span className="text-[16px] font-extrabold text-[#2D3436] group-hover:text-[#6C5CE7] transition-colors leading-tight">
+                              {s.fullName}
+                            </span>
+                            <span className="text-[12px] font-bold text-[#2D3436] opacity-40 mt-1">
+                              {s.user?.email || "—"}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-6 whitespace-nowrap">
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[13px] font-extrabold text-[#2D3436]">
+                              {s.courseName || "—"}
+                            </span>
+                            <span className="text-[10px] font-bold text-[#6C5CE7] uppercase tracking-wider">
+                              {s.specialization || "—"}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-6 whitespace-nowrap">
+                          <div className="flex flex-col gap-1.5">
+                            <span className="inline-block px-2 py-0.5 rounded bg-[#F5F6FA] text-[11px] font-mono font-bold text-[#2D3436] border border-[#e5e5e5]">
+                              {s.prn || "—"}
+                            </span>
+                            <span className="text-[11px] font-bold opacity-40 uppercase tracking-widest ml-1">
+                              Year {s.Year || "—"}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-6 text-center">
+                          <StatusBadge status={s.status} />
+                        </td>
+                        <td className="p-6 text-right whitespace-nowrap">
+                          <div className="flex gap-2 justify-end">
+                            <button
+                              onClick={() => navigate(`/college/students/${s._id}`)}
+                              className="px-4 py-2 bg-[#FFFFFF] border border-[#e5e5e5] text-[#2D3436] text-[10px] font-black uppercase tracking-widest rounded-xl hover:border-[#6C5CE7] hover:text-[#6C5CE7] transition-all cursor-pointer"
+                            >
+                              View
+                            </button>
+                            <button
+                              onClick={() => openEdit(s)}
+                              className="px-4 py-2 bg-[#6C5CE7] text-[#FFFFFF] text-[10px] font-black uppercase tracking-widest rounded-xl hover:shadow-lg hover:shadow-[#6C5CE7]/30 transition-all cursor-pointer"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleRemove(s._id)}
+                              className="p-2 text-[#cc0000] hover:bg-[#cc0000]/10 rounded-xl transition-colors cursor-pointer"
+                              title="Remove Student"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
       </main>
 
       {/* Edit Student Modal */}
       {editingStudent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#333]/40 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-[#fff] rounded-[20px] shadow-sm border border-[#e5e5e5] flex flex-col max-h-[90vh]">
-            <header className="px-6 py-4 border-b border-[#f9f9f9] flex justify-between items-center">
-              <h3 className="text-[18px] font-black text-[#333] m-0 tracking-tight">
-                Edit Student Details
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2D3436]/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="w-full max-w-md bg-[#FFFFFF] rounded-3xl shadow-2xl border border-[#FFFFFF] flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300">
+            <header className="px-8 py-6 border-b border-[#F5F6FA] flex justify-between items-center">
+              <h3 className="text-[20px] font-black text-[#2D3436] m-0 tracking-tight">
+                Update <span className="text-[#6C5CE7]">Profile</span>
               </h3>
               <button
                 onClick={closeEdit}
-                className="text-[11px] font-bold text-[#333] opacity-50 uppercase tracking-widest bg-transparent border-none cursor-pointer hover:opacity-100 p-0"
+                className="p-2 hover:bg-[#F5F6FA] rounded-full transition-colors cursor-pointer"
               >
-                Close
+                <svg className="w-5 h-5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </header>
 
-            <div className="p-6 flex flex-col gap-4 overflow-y-auto no-scrollbar">
+            <div className="p-8 flex flex-col gap-5 overflow-y-auto no-scrollbar">
+              
+              {/* Dropdown for Course */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-black text-[#2D3436] opacity-40 uppercase tracking-[0.1em] ml-1">
+                  Course Name
+                </label>
+                <select
+                  name="courseName"
+                  value={editForm.courseName}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 text-[14px] font-bold text-[#2D3436] bg-[#F5F6FA] border border-[#e5e5e5] rounded-xl outline-none focus:border-[#6C5CE7] cursor-pointer"
+                >
+                  <option value="">Select Course</option>
+                  {courses.map(course => (
+                    <option key={course._id} value={course.name}>{course.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Dropdown for Specialization */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-black text-[#2D3436] opacity-40 uppercase tracking-[0.1em] ml-1">
+                  Specialization
+                </label>
+                <select
+                  name="specialization"
+                  value={editForm.specialization}
+                  onChange={handleChange}
+                  disabled={!editForm.courseName}
+                  className="w-full px-4 py-3 text-[14px] font-bold text-[#2D3436] bg-[#F5F6FA] border border-[#e5e5e5] rounded-xl outline-none focus:border-[#6C5CE7] cursor-pointer disabled:opacity-50"
+                >
+                  <option value="">Select Specialization</option>
+                  {currentSelectedCourse?.specializations?.map(spec => (
+                    <option key={spec} value={spec}>{spec}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                 <div className="flex flex-col gap-1.5">
+                    <label className="text-[11px] font-black text-[#2D3436] opacity-40 uppercase tracking-[0.1em] ml-1">
+                      Start Year
+                    </label>
+                    <input
+                      type="number"
+                      name="courseStartYear"
+                      value={editForm.courseStartYear}
+                      onChange={handleChange}
+                      placeholder="e.g. 2022"
+                      className="w-full px-4 py-3 text-[14px] font-bold text-[#2D3436] bg-[#F5F6FA] border border-[#e5e5e5] rounded-xl outline-none focus:border-[#6C5CE7]"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[11px] font-black text-[#2D3436] opacity-40 uppercase tracking-[0.1em] ml-1">
+                      End Year (Auto)
+                    </label>
+                    <input
+                      type="text"
+                      name="courseEndYear"
+                      value={editForm.courseEndYear}
+                      readOnly
+                      className="w-full px-4 py-3 text-[14px] font-bold text-[#2D3436] bg-[#F5F6FA] border border-[#e5e5e5] rounded-xl outline-none opacity-70"
+                    />
+                  </div>
+              </div>
+
               {[
-                { label: "Course Name", name: "courseName" },
-                { label: "Specialization", name: "specialization" },
-                { label: "Start Year", name: "courseStartYear" },
-                { label: "End Year", name: "courseEndYear" },
                 { label: "Current Year", name: "Year" },
                 { label: "PRN Number", name: "prn" },
                 { label: "ABC ID", name: "abcId" },
               ].map((field) => (
                 <div key={field.name} className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
+                  <label className="text-[11px] font-black text-[#2D3436] opacity-40 uppercase tracking-[0.1em] ml-1">
                     {field.label}
                   </label>
                   <input
                     name={field.name}
                     value={editForm[field.name]}
                     onChange={handleChange}
-                    placeholder={`Enter ${field.label.toLowerCase()}`}
-                    className="w-full px-4 py-2.5 text-[13px] font-bold text-[#333] bg-[#f9f9f9] border border-[#e5e5e5] rounded-[10px] outline-none focus:border-[#333]"
+                    className="w-full px-4 py-3 text-[14px] font-bold text-[#2D3436] bg-[#F5F6FA] border border-[#e5e5e5] rounded-xl outline-none focus:border-[#6C5CE7]"
                   />
                 </div>
               ))}
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-bold text-[#333] opacity-60 uppercase tracking-widest">
-                  Account Status
+                <label className="text-[11px] font-black text-[#2D3436] opacity-40 uppercase tracking-[0.1em] ml-1">
+                  Status
                 </label>
                 <select
                   name="status"
                   value={editForm.status}
                   onChange={handleChange}
-                  className="w-full px-4 py-2.5 text-[13px] font-bold text-[#333] bg-[#f9f9f9] border border-[#e5e5e5] rounded-[10px] outline-none focus:border-[#333] appearance-none cursor-pointer"
+                  className="w-full px-4 py-3 text-[14px] font-bold text-[#2D3436] bg-[#F5F6FA] border border-[#e5e5e5] rounded-xl outline-none focus:border-[#6C5CE7] cursor-pointer appearance-none"
                 >
                   <option value="active">Active</option>
                   <option value="suspended">Suspended</option>
@@ -431,19 +507,19 @@ export default function CollegeStudents() {
               </div>
             </div>
 
-            <footer className="px-6 py-4 border-t border-[#f9f9f9] flex justify-end gap-2">
+            <footer className="px-8 py-6 border-t border-[#F5F6FA] flex justify-end gap-3">
               <button
                 onClick={closeEdit}
-                className="px-5 py-2 text-[11px] font-black text-[#333] bg-[#f9f9f9] border border-[#e5e5e5] rounded-[10px] hover:border-[#333] transition-colors cursor-pointer uppercase tracking-widest"
+                className="px-6 py-3 text-[11px] font-black text-[#2D3436] bg-[#FFFFFF] border border-[#e5e5e5] rounded-xl hover:border-[#2D3436] transition-all cursor-pointer uppercase tracking-widest"
               >
                 Cancel
               </button>
               <button
                 onClick={handleUpdate}
                 disabled={saving}
-                className="px-6 py-2 text-[11px] font-black text-[#fff] bg-[#111] border-none rounded-[10px] hover:opacity-80 transition-opacity disabled:opacity-50 cursor-pointer uppercase tracking-widest"
+                className="px-8 py-3 text-[11px] font-black text-[#FFFFFF] bg-[#6C5CE7] border-none rounded-xl hover:shadow-lg hover:shadow-[#6C5CE7]/30 transition-all disabled:opacity-50 cursor-pointer uppercase tracking-widest"
               >
-                {saving ? "Saving..." : "Save Changes"}
+                {saving ? "Processing..." : "Commit Changes"}
               </button>
             </footer>
           </div>
