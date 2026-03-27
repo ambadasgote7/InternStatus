@@ -9,10 +9,10 @@ const StatusBadge = ({ status }) => {
   const isOpen = status === "open";
   return (
     <span
-      className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] border-2 transition-all duration-300 ${
+      className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.15em] border-2 transition-all duration-300 ${
         isOpen
-          ? "bg-[#f9f9f9] border-[#008000] text-[#008000] shadow-[0_4px_12px_rgba(0,128,0,0.1)]"
-          : "bg-[#fff] border-[#cc0000] text-[#cc0000] shadow-[0_4px_12px_rgba(204,0,0,0.1)]"
+          ? "bg-[#F5F6FA] border-[#008000] text-[#008000] shadow-[0_4px_10px_rgba(0,128,0,0.1)]"
+          : "bg-[#FFFFFF] border-[#cc0000] text-[#cc0000] shadow-[0_4px_10px_rgba(204,0,0,0.1)]"
       }`}
     >
       {status ? status : "UNKNOWN"}
@@ -29,7 +29,6 @@ export default function CompanyInternships() {
   const [error, setError] = useState("");
   const [loadingId, setLoadingId] = useState(null);
 
-  // UI States
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [expandedId, setExpandedId] = useState(null);
@@ -69,7 +68,6 @@ export default function CompanyInternships() {
     setExpandedId(expandedId === id ? null : id);
   };
 
-  // Filter Logic
   const filteredData = data.filter((item) => {
     const matchesSearch = (item.title || "")
       .toLowerCase()
@@ -87,218 +85,187 @@ export default function CompanyInternships() {
   if (loading) {
     return (
       <div className="h-screen bg-[#FFFFFF] flex flex-col items-center justify-center font-['Nunito']">
-        <div className="w-10 h-10 border-4 border-[#6C5CE7]/20 border-t-[#6C5CE7] rounded-full animate-spin mb-4" />
-        <p className="text-[14px] font-black text-[#2D3436] tracking-[0.2em] uppercase animate-pulse">
-          Syncing Internships...
+        <div className="w-12 h-12 border-[5px] border-[#F5F6FA] border-t-[#6C5CE7] rounded-full animate-spin mb-6" />
+        <p className="text-[12px] font-black text-[#2D3436] tracking-[0.4em] uppercase opacity-40">
+          Loading Console
         </p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FFFFFF] text-[#2D3436] font-['Nunito'] pb-12 transition-all">
-      <main className="max-w-7xl mx-auto w-full px-4 md:px-8 py-10 flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="min-h-screen bg-[#FFFFFF] text-[#2D3436] font-['Nunito'] pb-20 transition-all">
+      <main className="max-w-7xl mx-auto w-full px-4 md:px-8 py-12 flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-6 duration-1000">
         
-        {/* Header */}
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-[#F5F6FA] pb-8">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-[32px] font-black text-[#2D3436] m-0 tracking-tight leading-none">
-              My Internships
+        {/* Header Section */}
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b-2 border-[#F5F6FA] pb-10">
+          <div className="flex flex-col gap-3">
+            <h1 className="text-[40px] font-black text-[#2D3436] m-0 tracking-tighter leading-tight">
+              Company <span className="text-[#6C5CE7]">Dashboard</span>
             </h1>
-            <p className="text-[12px] font-black text-[#6C5CE7] m-0 uppercase tracking-[0.25em] opacity-80">
-              Internship Posting Management
-            </p>
+            <div className="flex items-center gap-3">
+              <span className="w-10 h-[2px] bg-[#6C5CE7]"></span>
+              <p className="text-[11px] font-black text-[#6C5CE7] m-0 uppercase tracking-[0.3em] opacity-90">
+                Active Internship Portfolios
+              </p>
+            </div>
           </div>
-          <div className="inline-flex items-center gap-3 text-[12px] font-black text-[#2D3436] bg-[#F5F6FA] px-5 py-3 rounded-2xl border border-transparent hover:border-[#6C5CE7]/20 transition-all uppercase tracking-widest shadow-sm">
-            Total Postings: <span className="text-[#6C5CE7]">{data.length}</span>
+          <div className="flex items-center gap-4 bg-[#F5F6FA] p-2 rounded-[24px] border border-[#F5F6FA]">
+             <div className="bg-white px-6 py-4 rounded-[20px] shadow-sm">
+                <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-1">Live Listings</p>
+                <p className="text-[22px] font-black text-[#6C5CE7] leading-none">{data.length}</p>
+             </div>
           </div>
         </header>
 
-        {/* Error State */}
         {error && (
-          <div className="px-6 py-4 text-[12px] font-black text-[#cc0000] bg-[#cc0000]/5 border-2 border-[#cc0000]/20 rounded-2xl uppercase tracking-widest text-center animate-shake">
+          <div className="px-6 py-5 text-[12px] font-black text-[#cc0000] bg-[#cc0000]/5 border-2 border-[#cc0000]/10 rounded-3xl uppercase tracking-widest text-center animate-bounce">
             {error}
           </div>
         )}
 
-        {/* Filters Bar */}
+        {/* Dynamic Filters */}
         {data.length > 0 && (
-          <div className="flex flex-col md:flex-row gap-4 animate-in fade-in slide-in-from-left-4 duration-500 delay-150">
+          <div className="flex flex-col lg:flex-row gap-5 animate-in fade-in slide-in-from-left-8 duration-700">
             <div className="relative flex-1 group">
               <input
                 type="text"
-                placeholder="Search by internship title..."
+                placeholder="Filter by position title..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 text-[14px] text-[#2D3436] bg-[#F5F6FA] border-2 border-transparent rounded-[20px] outline-none transition-all group-focus-within:bg-white group-focus-within:border-[#6C5CE7]/30 group-focus-within:shadow-[0_10px_30px_rgba(108,92,231,0.06)]"
+                className="w-full pl-14 pr-6 py-5 text-[15px] font-bold text-[#2D3436] bg-[#F5F6FA] border-2 border-transparent rounded-[24px] outline-none transition-all group-hover:bg-[#F5F6FA]/80 focus:bg-white focus:border-[#6C5CE7]/40 focus:shadow-[0_20px_40px_rgba(108,92,231,0.08)]"
               />
-              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#2D3436] opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <svg className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-[#2D3436] opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
             
-            <div className="relative w-full md:w-64 group">
+            <div className="relative w-full lg:w-72 group">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-5 py-4 text-[12px] font-black text-[#2D3436] bg-[#F5F6FA] border-2 border-transparent rounded-[20px] outline-none transition-all group-focus-within:bg-white group-focus-within:border-[#6C5CE7]/30 appearance-none uppercase tracking-widest cursor-pointer"
+                className="w-full px-8 py-5 text-[11px] font-black text-[#2D3436] bg-[#F5F6FA] border-2 border-transparent rounded-[24px] outline-none transition-all focus:bg-white focus:border-[#6C5CE7]/40 appearance-none uppercase tracking-[0.2em] cursor-pointer shadow-sm"
               >
                 {uniqueStatuses.map((status) => (
                   <option key={status} value={status}>
-                    {status === "ALL" ? "All Statuses" : status}
+                    {status === "ALL" ? "View All Statuses" : status}
                   </option>
                 ))}
               </select>
-              <svg className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#2D3436] opacity-30 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" strokeWidth="3"/></svg>
+              <svg className="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-[#2D3436] opacity-30 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" strokeWidth="3"/></svg>
             </div>
           </div>
         )}
 
-        {/* Data Handling */}
+        {/* Table/Data Area */}
         {data.length === 0 && !error ? (
-          <div className="bg-[#FFFFFF] border-4 border-dashed border-[#F5F6FA] rounded-[40px] p-24 text-center">
-            <div className="w-20 h-20 bg-[#F5F6FA] rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-10 h-10 text-[#6C5CE7] opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeWidth="2.5" strokeLinecap="round"/></svg>
+          <div className="bg-[#FFFFFF] border-4 border-dashed border-[#F5F6FA] rounded-[60px] p-32 text-center transition-all hover:border-[#6C5CE7]/20">
+            <div className="w-24 h-24 bg-[#F5F6FA] rounded-[32px] flex items-center justify-center mx-auto mb-8 rotate-12 group hover:rotate-0 transition-transform duration-500">
+              <svg className="w-12 h-12 text-[#6C5CE7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeWidth="3" strokeLinecap="round"/></svg>
             </div>
-            <p className="text-[14px] font-black text-[#2D3436] opacity-40 m-0 uppercase tracking-[0.3em]">
-              No internships posted yet.
+            <p className="text-[14px] font-black text-[#2D3436] opacity-30 m-0 uppercase tracking-[0.4em]">
+              Empty Portfolio. Post your first internship.
             </p>
           </div>
         ) : filteredData.length === 0 ? (
-          <div className="bg-[#FFFFFF] border border-[#F5F6FA] rounded-[32px] p-20 text-center shadow-sm">
-            <p className="text-[13px] font-black text-[#2D3436] opacity-30 m-0 uppercase tracking-widest mb-6">
-              No results match your criteria.
+          <div className="bg-white border-2 border-[#F5F6FA] rounded-[40px] p-24 text-center">
+            <p className="text-[13px] font-black text-[#2D3436] opacity-40 m-0 uppercase tracking-[0.2em] mb-8">
+              No matches in your current view.
             </p>
             <button
-              onClick={() => {
-                setSearchTerm("");
-                setStatusFilter("ALL");
-              }}
-              className="px-8 py-3 bg-[#6C5CE7] text-white text-[11px] font-black uppercase tracking-widest rounded-2xl hover:shadow-[0_15px_30px_rgba(108,92,231,0.3)] transition-all cursor-pointer active:scale-95"
+              onClick={() => { setSearchTerm(""); setStatusFilter("ALL"); }}
+              className="px-10 py-4 bg-[#6C5CE7] text-white text-[11px] font-black uppercase tracking-widest rounded-[20px] hover:shadow-[0_20px_40px_rgba(108,92,231,0.4)] transition-all active:scale-95"
             >
-              Reset Filters
+              Clear All Filters
             </button>
           </div>
         ) : (
-          <div className="bg-[#FFFFFF] border border-[#F5F6FA] rounded-[32px] shadow-[0_30px_60px_rgba(108,92,231,0.04)] overflow-hidden">
+          <div className="bg-[#FFFFFF] border-2 border-[#F5F6FA] rounded-[40px] shadow-[0_40px_100px_rgba(45,52,54,0.03)] overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-[#F5F6FA]/50">
-                    <th className="p-6 text-[11px] font-black text-[#2D3436] opacity-40 uppercase tracking-[0.2em] whitespace-nowrap">
-                      Internship Opportunity
-                    </th>
-                    <th className="p-6 text-[11px] font-black text-[#2D3436] opacity-40 uppercase tracking-[0.2em] whitespace-nowrap">
-                      Closing Date
-                    </th>
-                    <th className="p-6 text-[11px] font-black text-[#2D3436] opacity-40 uppercase tracking-[0.2em] whitespace-nowrap">
-                      Current Status
-                    </th>
-                    <th className="p-6 text-[11px] font-black text-[#2D3436] opacity-40 uppercase tracking-[0.2em] text-right whitespace-nowrap">
-                      Management
-                    </th>
+                  <tr className="bg-[#F5F6FA]/40">
+                    <th className="p-8 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.25em]">Internship Title</th>
+                    <th className="p-8 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.25em]">Deadline</th>
+                    <th className="p-8 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.25em]">Status</th>
+                    <th className="p-8 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.25em] text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#F5F6FA]">
-                  {filteredData.map((item) => {
+                <tbody className="divide-y-2 divide-[#F5F6FA]">
+                  {filteredData.map((item, index) => {
                     const isExpanded = expandedId === item._id;
                     const isOpen = item.status === "open";
 
                     return (
                       <React.Fragment key={item._id}>
-                        {/* Main Row */}
-                        <tr
-                          className={`transition-all duration-300 hover:bg-[#F5F6FA]/30 ${isExpanded ? "bg-[#F5F6FA]/40 shadow-inner" : ""}`}
-                        >
-                          <td className="p-6 align-middle">
-                            <span className="text-[16px] font-black text-[#2D3436] tracking-tight block group-hover:text-[#6C5CE7] transition-colors">
+                        <tr className={`group transition-all duration-500 ${isExpanded ? "bg-[#6C5CE7]/[0.02]" : "hover:bg-[#F5F6FA]/50"}`}>
+                          <td className="p-8 align-middle">
+                            <span className="text-[18px] font-black text-[#2D3436] tracking-tight block group-hover:text-[#6C5CE7] transition-colors duration-300">
                               {item.title}
                             </span>
                           </td>
-                          <td className="p-6 align-middle whitespace-nowrap">
-                            <span className="text-[13px] font-black text-[#2D3436]/80 bg-[#F5F6FA] px-3 py-1 rounded-lg">
-                              {item.applicationDeadline
-                                ? new Date(item.applicationDeadline).toLocaleDateString("en-IN", {
-                                    day: "2-digit",
-                                    month: "short",
-                                    year: "numeric",
-                                  })
-                                : "—"}
+                          <td className="p-8 align-middle">
+                            <span className="inline-flex items-center gap-2 text-[13px] font-bold text-[#2D3436] bg-[#F5F6FA] px-4 py-2 rounded-xl group-hover:bg-white transition-colors border border-transparent group-hover:border-[#6C5CE7]/10">
+                              <svg className="w-4 h-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" strokeWidth="2"/></svg>
+                              {item.applicationDeadline ? new Date(item.applicationDeadline).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
                             </span>
                           </td>
-                          <td className="p-6 align-middle whitespace-nowrap">
+                          <td className="p-8 align-middle">
                             <StatusBadge status={item.status} />
                           </td>
-                          <td className="p-6 align-middle text-right whitespace-nowrap">
+                          <td className="p-8 align-middle text-right">
                             <div className="flex justify-end gap-3">
                               <button
                                 onClick={() => navigate(`/company/internship/${item._id}/applicants`)}
-                                className="px-5 py-2.5 bg-[#2D3436] text-[#FFFFFF] text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-[#6C5CE7] transition-all cursor-pointer shadow-md active:scale-95"
+                                className="px-6 py-3 bg-[#2D3436] text-[#FFFFFF] text-[10px] font-black uppercase tracking-widest rounded-[16px] hover:bg-[#6C5CE7] transition-all duration-300 shadow-lg active:scale-95"
                               >
-                                View Applicants
+                                Applicants
                               </button>
                               <button
                                 onClick={() => toggleExpand(item._id)}
-                                className={`px-5 py-2.5 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all cursor-pointer active:scale-95 border-2 ${
-                                  isExpanded 
-                                    ? "bg-[#6C5CE7] text-white border-[#6C5CE7]" 
-                                    : "bg-white text-[#2D3436] border-[#F5F6FA] hover:border-[#6C5CE7]/30 shadow-sm"
-                                }`}
+                                className={`w-12 h-12 flex items-center justify-center rounded-[16px] border-2 transition-all duration-300 ${isExpanded ? "bg-[#6C5CE7] border-[#6C5CE7] text-white rotate-180" : "bg-white border-[#F5F6FA] text-[#2D3436] hover:border-[#6C5CE7]/40 shadow-sm"}`}
                               >
-                                {isExpanded ? "Minimize" : "Actions"}
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
                               </button>
                             </div>
                           </td>
                         </tr>
 
-                        {/* Expanded Info Drawer */}
                         {isExpanded && (
-                          <tr className="bg-[#F5F6FA]/20 animate-in slide-in-from-top-4 duration-500">
-                            <td colSpan={4} className="p-8">
-                              <div className="bg-white rounded-3xl p-6 border border-[#F5F6FA] shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-                                {/* Left Stats */}
-                                <div className="flex gap-12">
-                                  <div className="flex flex-col gap-1">
-                                    <span className="text-[10px] font-black text-[#6C5CE7] uppercase tracking-widest">
-                                      Open Positions
-                                    </span>
-                                    <span className="text-[20px] font-black text-[#2D3436]">
-                                      {item.positions}
-                                    </span>
+                          <tr>
+                            <td colSpan={4} className="p-0 border-none">
+                              <div className="bg-[#F5F6FA]/30 px-8 py-10 animate-in slide-in-from-top-4 duration-500 overflow-hidden">
+                                <div className="bg-white rounded-[32px] p-10 border border-[#F5F6FA] shadow-2xl flex flex-col md:flex-row justify-between items-center gap-10">
+                                  <div className="grid grid-cols-2 gap-12">
+                                    <div className="space-y-1">
+                                      <p className="text-[10px] font-black text-[#6C5CE7] uppercase tracking-widest opacity-60">Availability</p>
+                                      <p className="text-[24px] font-black text-[#2D3436]">{item.positions} <span className="text-[12px] opacity-30 font-bold uppercase ml-1 tracking-tighter">Slots</span></p>
+                                    </div>
+                                    <div className="space-y-1">
+                                      <p className="text-[10px] font-black text-[#6C5CE7] uppercase tracking-widest opacity-60">Max Intake</p>
+                                      <p className="text-[24px] font-black text-[#2D3436]">{item.maxApplicants} <span className="text-[12px] opacity-30 font-bold uppercase ml-1 tracking-tighter">Caps</span></p>
+                                    </div>
                                   </div>
-                                  <div className="flex flex-col gap-1">
-                                    <span className="text-[10px] font-black text-[#6C5CE7] uppercase tracking-widest">
-                                      Applicant Cap
-                                    </span>
-                                    <span className="text-[20px] font-black text-[#2D3436]">
-                                      {item.maxApplicants}
-                                    </span>
-                                  </div>
-                                </div>
 
-                                {/* Right Actions */}
-                                <div className="flex flex-wrap gap-3 w-full md:w-auto pt-6 md:pt-0 border-t border-[#F5F6FA] md:border-none">
-                                  <button
-                                    onClick={() => navigate(`/company/internship/${item._id}/edit`)}
-                                    className="flex-1 md:flex-none px-6 py-3 bg-white border-2 border-[#2D3436] text-[#2D3436] text-[11px] font-black uppercase tracking-widest rounded-2xl hover:bg-[#2D3436] hover:text-white transition-all cursor-pointer"
-                                  >
-                                    Edit Details
-                                  </button>
-                                  <button
-                                    disabled={loadingId === item._id}
-                                    onClick={() => toggleStatus(item._id, item.status)}
-                                    className={`flex-1 md:flex-none px-6 py-3 text-[11px] font-black uppercase tracking-widest rounded-2xl transition-all cursor-pointer disabled:opacity-50 border-2 ${
-                                      isOpen
-                                        ? "text-[#cc0000] bg-white border-[#cc0000] hover:bg-[#cc0000] hover:text-white shadow-[0_10px_20px_rgba(204,0,0,0.1)]"
-                                        : "text-[#008000] bg-white border-[#008000] hover:bg-[#008000] hover:text-white shadow-[0_10px_20px_rgba(0,128,0,0.1)]"
-                                    }`}
-                                  >
-                                    {loadingId === item._id ? (
-                                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mx-auto" />
-                                    ) : isOpen ? (
-                                      "Deactivate Posting"
-                                    ) : (
-                                      "Reactivate Posting"
-                                    )}
-                                  </button>
+                                  <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                                    <button
+                                      onClick={() => navigate(`/company/internship/${item._id}/edit`)}
+                                      className="px-10 py-4 bg-[#FFFFFF] border-2 border-[#2D3436] text-[#2D3436] text-[11px] font-black uppercase tracking-widest rounded-[20px] hover:bg-[#2D3436] hover:text-white transition-all duration-300 shadow-sm active:scale-95"
+                                    >
+                                      Edit Posting
+                                    </button>
+                                    <button
+                                      disabled={loadingId === item._id}
+                                      onClick={() => toggleStatus(item._id, item.status)}
+                                      className={`px-10 py-4 text-[11px] font-black uppercase tracking-widest rounded-[20px] transition-all duration-300 disabled:opacity-50 border-2 ${
+                                        isOpen
+                                          ? "text-[#cc0000] bg-white border-[#cc0000] hover:bg-[#cc0000] hover:text-white"
+                                          : "text-[#008000] bg-white border-[#008000] hover:bg-[#008000] hover:text-white"
+                                      }`}
+                                    >
+                                      {loadingId === item._id ? (
+                                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mx-auto" />
+                                      ) : isOpen ? "Archive Listing" : "Go Live"}
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
                             </td>
