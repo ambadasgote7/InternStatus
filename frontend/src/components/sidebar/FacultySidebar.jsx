@@ -18,12 +18,6 @@ export default function FacultySidebar() {
 
   return (
     <aside className="w-60 h-full bg-[#FFFFFF] border-r border-[#F5F6FA] flex flex-col flex-none z-10 overflow-hidden font-['Nunito'] shadow-sm transition-all duration-300">
-      <div className="h-16 flex items-center px-5 border-b border-[#F5F6FA] shrink-0 bg-[#FFFFFF]">
-        <h2 className="text-[20px] font-black m-0 tracking-tighter text-[#6C5CE7] transition-colors duration-300">
-          Faculty Menu
-        </h2>
-      </div>
-
       <nav className="flex-1 overflow-y-auto no-scrollbar p-4 flex flex-col gap-1.5">
         {showCore && (
           <>

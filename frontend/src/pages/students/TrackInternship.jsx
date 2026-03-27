@@ -298,7 +298,7 @@ export default function InternTaskConsole() {
                       <td className="p-6 md:px-8 md:py-6 align-middle whitespace-nowrap text-right">
                         <button
                           onClick={() =>
-                            navigate(`/student/intern/${task._id}/submit`)
+                            navigate(`/student/task/${task._id}`)
                           }
                           className="px-5 py-3 bg-[#FFFFFF] border-2 border-transparent text-[#2D3436] text-[10px] font-black uppercase tracking-widest rounded-[14px] hover:bg-[#6C5CE7] hover:text-[#FFFFFF] hover:shadow-md transition-all duration-300 cursor-pointer outline-none transform hover:-translate-y-0.5 active:scale-95 shadow-sm"
                         >

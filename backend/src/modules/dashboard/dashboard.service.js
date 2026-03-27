@@ -1256,8 +1256,7 @@ export const getCompanyDashboard = async (userId) => {
     })),
     actions: [
       { label: "View Applicants", route: "/company/company-internships" },
-      { label: "View Interns", route: "/company/interns" },
-      { label: "Track Intern", route: "/company/interns/:id/progress" }
+      { label: "View Interns", route: "/company/interns" }
     ]
   };
 };

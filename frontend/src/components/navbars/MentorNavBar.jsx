@@ -9,8 +9,17 @@ const MentorNavBar = () => {
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  const handleLogout = () => {
-    logoutUser(dispatch, navigate);
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsProfileOpen(false); // Close dropdown first
+
+    // Call the logout utility
+    try {
+      await logoutUser(dispatch, navigate);
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (
@@ -41,16 +50,14 @@ const MentorNavBar = () => {
               <Link
                 to="/mentor/profile"
                 onClick={() => setIsProfileOpen(false)}
-                className="px-4 py-3 text-[13px] font-bold text-[#2D3436] hover:bg-[#F5F6FA] hover:text-[#6C5CE7] transition-colors duration-200 no-underline border-b border-[#F5F6FA]"
+                className="block w-full px-4 py-3 text-[13px] font-bold text-[#2D3436] hover:bg-[#F5F6FA] hover:text-[#6C5CE7] transition-colors duration-200 no-underline border-b border-[#F5F6FA]"
               >
                 Profile
               </Link>
               <button
-                onClick={() => {
-                  setIsProfileOpen(false);
-                  handleLogout();
-                }}
-                className="px-4 py-3 text-[13px] font-bold text-[#cc0000] hover:bg-[#F5F6FA] transition-colors duration-200 text-left border-none bg-transparent cursor-pointer"
+                type="button"
+                onClick={handleLogout}
+                className="block w-full px-4 py-3 text-[13px] font-bold text-[#cc0000] hover:bg-[#F5F6FA] transition-colors duration-200 text-left border-none bg-transparent cursor-pointer outline-none"
               >
                 Logout
               </button>

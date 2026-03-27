@@ -52,7 +52,7 @@ export default function StudentCredits() {
         <main className="max-w-6xl mx-auto w-full px-4 md:px-8 py-8 md:py-10 flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#F5F6FA] pb-6">
             <div className="flex flex-col gap-2">
-              <h1 className="text-3xl md:text-5xl font-black text-[#2D3436] m-0 tracking-tighter leading-tight uppercase">
+              <h1 className="text-3xl md:text-3xl font-black text-[#2D3436] m-0 tracking-tighter leading-tight uppercase">
                 Academic Credits
               </h1>
               <p className="text-[13px] font-black text-[#6C5CE7] opacity-80 m-0 uppercase tracking-[0.2em]">

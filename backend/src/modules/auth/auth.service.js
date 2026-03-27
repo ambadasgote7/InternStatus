@@ -18,6 +18,7 @@ import MentorProfile from "../../models/MentorProfile.js";
 //
 
 export const loginService = async ({ email, password }) => {
+  console.log("🔥 LOGIN SERVICE CALLED");
   if (!email || !password) {
     throw new Error("Email and password are required");
   }
@@ -31,7 +32,18 @@ export const loginService = async ({ email, password }) => {
     throw new Error("Invalid credentials");
   }
 
-  // ✅ USER CHECK
+  const role = (user.role || "").trim().toLowerCase();
+
+  console.log("===== LOGIN DEBUG =====");
+  console.log({
+    email: normalizedEmail,
+    role: user.role,
+    normalizedRole: role,
+    referenceModel: user.referenceModel,
+  });
+  console.log("=======================");
+
+  // ✅ basic checks
   if (user.accountStatus !== "active") {
     throw new Error("Account is not active");
   }
@@ -44,9 +56,42 @@ export const loginService = async ({ email, password }) => {
     throw new Error("Password not set");
   }
 
+  // 🔐 password FIRST
+  const isMatch = await user.comparePassword(normalizedPassword);
+  if (!isMatch) {
+    throw new Error("Invalid credentials");
+  }
+
+  // 🚨🔥 ADMIN HARD EXIT (NO WAY TO FAIL AFTER THIS)
+  if (role === "admin") {
+    console.log("✅ ADMIN LOGIN");
+
+    await User.updateOne(
+      { _id: user._id },
+      { lastLoginAt: new Date() }
+    );
+
+    const token = generateToken(user);
+
+    const userObj = user.toObject();
+    delete userObj.password;
+
+    return {
+      token,
+      user: userObj,
+    };
+  }
+
+  // =========================
+  // 🔥 NON-ADMIN ONLY BELOW
+  // =========================
+
+  if (!user.referenceModel) {
+    throw new Error("Reference model missing");
+  }
+
   let org = null;
 
-  // 🔥 RESOLVE BASED ON referenceModel
   switch (user.referenceModel) {
     case "College":
       org = await College.findById(user.referenceId).select("status");
@@ -57,9 +102,7 @@ export const loginService = async ({ email, password }) => {
       break;
 
     case "StudentProfile": {
-      const student = await StudentProfile.findById(user.referenceId)
-        .select("college");
-
+      const student = await StudentProfile.findById(user.referenceId).select("college");
       if (!student) throw new Error("Student profile not found");
 
       org = await College.findById(student.college).select("status");
@@ -67,9 +110,7 @@ export const loginService = async ({ email, password }) => {
     }
 
     case "FacultyProfile": {
-      const faculty = await FacultyProfile.findById(user.referenceId)
-        .select("college");
-
+      const faculty = await FacultyProfile.findById(user.referenceId).select("college");
       if (!faculty) throw new Error("Faculty profile not found");
 
       org = await College.findById(faculty.college).select("status");
@@ -77,9 +118,7 @@ export const loginService = async ({ email, password }) => {
     }
 
     case "MentorProfile": {
-      const mentor = await MentorProfile.findById(user.referenceId)
-        .select("company");
-
+      const mentor = await MentorProfile.findById(user.referenceId).select("company");
       if (!mentor) throw new Error("Mentor profile not found");
 
       org = await Company.findById(mentor.company).select("status");
@@ -87,7 +126,8 @@ export const loginService = async ({ email, password }) => {
     }
 
     default:
-      throw new Error("Invalid reference model");
+      console.error("❌ BAD REF MODEL:", user.referenceModel);
+      throw new Error(`Invalid reference model: ${user.referenceModel}`);
   }
 
   if (!org) {
@@ -96,13 +136,6 @@ export const loginService = async ({ email, password }) => {
 
   if (org.status !== "active") {
     throw new Error("Organization is inactive. Access denied.");
-  }
-
-  // 🔐 PASSWORD CHECK
-  const isMatch = await user.comparePassword(normalizedPassword);
-
-  if (!isMatch) {
-    throw new Error("Invalid credentials");
   }
 
   await User.updateOne(
@@ -117,9 +150,10 @@ export const loginService = async ({ email, password }) => {
 
   return {
     token,
-    user: userObj
+    user: userObj,
   };
 };
+
 //
 // SET PASSWORD (ACCOUNT SETUP)
 //

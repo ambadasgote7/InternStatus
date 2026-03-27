@@ -11,6 +11,7 @@ import {
 import User from "../../models/User.js";
 
 /* EMAIL TRANSPORTER */
+console.log("🔥 AUTH CONTROLLER FILE LOADED");
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -25,32 +26,31 @@ const generateOTP = () => {
 };
 
 export const login = async (req, res) => {
+  console.log("🔥 LOGIN API CALLED", new Date().toISOString());
+
   try {
     const result = await loginService(req.body);
 
+    console.log("✅ RESPONSE SENT");
+
     res.cookie("token", result.token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // ✅ important
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: "/", // ✅ ensure global access
+      path: "/",
     });
 
     return res.status(200).json({
       message: "Login successful",
       data: result.user,
-      // ❌ REMOVE token from response if using cookies
     });
 
   } catch (err) {
-    console.error("LOGIN ERROR:", err.message);
-
-    return res.status(400).json({
-      message: err.message,
-    });
+    console.error("❌ LOGIN ERROR:", err.message);
+    return res.status(400).json({ message: err.message });
   }
 };
-
 
 /* SET PASSWORD */
 export const setPassword = async (req, res) => {

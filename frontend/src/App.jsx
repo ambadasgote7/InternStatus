@@ -95,6 +95,7 @@ import AdminUserDetails from "./pages/admin/users/AdminUserDetails";
 
 /* Protected */
 import ProtectedRoute from "./routes/ProtectedRoute";
+import StudentTaskDetails from "./pages/students/StudentTaskDetails";
 
 function AppContent() {
   const dispatch = useDispatch();
@@ -149,7 +150,7 @@ function AppContent() {
             <Route path="/student/internships/:id" element={<InternshipDetails />} />
             <Route path="/student/my-applications" element={<MyApplications />} />
             <Route path="/student/intern/:applicationId/track" element={<TrackInternship />} />
-            <Route path="/student/task/:taskId" element={<StudentTasks />} />
+            <Route path="/student/task/:taskId" element={<StudentTaskDetails />} />
             <Route path="/student/credits" element={<StudentCredits />} />
           </Route>
         </Route>
@@ -188,7 +189,7 @@ function AppContent() {
             <Route path="/company/mentors" element={<CompanyMentorList />} />
             <Route path="/company/invite-mentor" element={<InviteMentor />} />
             <Route path="/company/post-internship" element={<PostInternship />} />
-            <Route path="/company/internships" element={<CompanyInternships />} />
+            <Route path="/company/company-internships" element={<CompanyInternships />} />
             <Route path="/company/internship/:id/applicants" element={<InternshipApplicants />} />
             <Route path="/company/internship/:id/edit" element={<EditInternship />} />
             <Route path="/company/interns" element={<CompanyInterns />} />

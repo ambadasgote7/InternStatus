@@ -40,17 +40,6 @@ export default function AdminSidebar() {
 
   return (
     <aside className="w-60 h-screen top-0 bg-[#FFFFFF] border-r border-[#F5F6FA] flex flex-col flex-none z-50 overflow-hidden font-['Nunito'] shadow-sm transition-all duration-300">
-      <div className="h-16 flex items-center px-5 border-b border-[#F5F6FA] shrink-0 bg-[#FFFFFF]">
-        <div className="flex flex-col">
-          <h2 className="text-[20px] font-black m-0 tracking-tighter text-[#6C5CE7] transition-colors duration-300">
-            CORE ADMIN
-          </h2>
-          <span className="text-[10px] font-bold text-[#2D3436] opacity-60 uppercase tracking-[0.2em] mt-0.5">
-            Command Center
-          </span>
-        </div>
-      </div>
-
       <nav className="flex-1 overflow-y-auto no-scrollbar p-4 flex flex-col gap-1.5">
         <NavLink to="/admin/dashboard" className={linkClass}>
           <span className="text-[13px] font-bold">Dashboard</span>
