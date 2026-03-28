@@ -216,7 +216,7 @@ export default function BrowseInternships() {
                       className="p-3 bg-[#F5F6FA] text-[#2D3436] rounded-xl hover:bg-[#2D3436] hover:text-white transition-all active:scale-95"
                       title="View Details"
                     >
-                      <Briefcase className="w-4 h-4" />
+                      <span className="text-[11px] font-black uppercase tracking-widest">View Details</span>
                     </button>
                     <button
                       disabled={item.alreadyApplied || loadingId === item._id}
