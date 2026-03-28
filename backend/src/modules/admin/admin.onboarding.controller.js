@@ -1,7 +1,8 @@
 import {
   getPendingOnboardingsService,
   getVerifiedOnboardingsService,
-  getOnboardingDetailsService
+  getOnboardingDetailsService,
+  updateOnboardingStatusService
 } from "./admin.onboarding.service.js";
 
 
@@ -12,26 +13,46 @@ import {
 
 export const getPending = async (req, res) => {
   try {
+    // 🔥 Extract ALL query params safely
+    const {
+      type = "all",
+      search = "",
+      page = 1,
+      limit = 10,
+      sortField = "createdAt",
+      sortOrder = "desc",
+    } = req.query;
 
-    const { type } = req.query;
+    // 🔥 Normalize params (important)
+    const params = {
+      type,
+      search,
+      page: Number(page),
+      limit: Number(limit),
+      sortField,
+      sortOrder,
+    };
 
-    const data = await getPendingOnboardingsService(type);
+    // 🔍 Debug (remove later)
+    // console.log("Pending Params:", params);
 
-    res.status(200).json({
+    const data = await getPendingOnboardingsService(params);
+
+    return res.status(200).json({
       success: true,
       message: "Pending onboarding fetched",
-      data
+      data,
     });
 
   } catch (err) {
     console.error("Get Pending Error:", err);
-    res.status(500).json({
+
+    return res.status(500).json({
       success: false,
-      message: err.message || "Server error"
+      message: err.message || "Server error",
     });
   }
 };
-
 
 
 /* =====================================================
@@ -92,6 +113,33 @@ export const getDetails = async (req, res) => {
     res.status(500).json({
       success: false,
       message: err.message || "Server error"
+    });
+  }
+};
+
+
+export const updateOnboardingStatus = async (req, res) => {
+  try {
+    const { type, id } = req.params;
+    const { status, rejectionReason } = req.body;
+
+    const data = await updateOnboardingStatusService(
+      type,
+      id,
+      { status, rejectionReason },
+      req.user?._id
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: `Onboarding ${status} successfully`,
+      data,
+    });
+  } catch (err) {
+    console.error("Update Status Error:", err);
+    return res.status(400).json({
+      success: false,
+      message: err.message,
     });
   }
 };

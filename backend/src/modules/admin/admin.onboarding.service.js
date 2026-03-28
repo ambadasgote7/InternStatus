@@ -29,7 +29,7 @@ const buildMatch = (status, search) => {
 };
 
 /* =========================================================
-   🔹 VERIFIED ONBOARDINGS (UNIFIED)
+   🔹 VERIFIED / PENDING (UNIFIED)
 ========================================================= */
 export const getVerifiedOnboardingsService = async ({
   type = "all",
@@ -38,8 +38,10 @@ export const getVerifiedOnboardingsService = async ({
   search = "",
   sortField = "createdAt",
   sortOrder = "desc",
+  status = "approved", // ✅ dynamic
 }) => {
-  const match = buildMatch("approved", search);
+  // ✅ FIXED: USE status (NOT HARDCODED)
+  const match = buildMatch(status, search);
 
   const sort = {
     [sortField]: sortOrder === "asc" ? 1 : -1,
@@ -47,69 +49,44 @@ export const getVerifiedOnboardingsService = async ({
 
   const skip = (page - 1) * limit;
 
-  /* ---------------- COLLEGE PIPELINE ---------------- */
-  const collegePipeline = [
-    { $match: match },
+  const pipeline = [
+    /* -------- COLLEGE -------- */
+    {
+      $match: match,
+    },
     {
       $addFields: {
         type: "college",
         name: "$collegeName",
       },
     },
-  ];
 
-  /* ---------------- COMPANY PIPELINE ---------------- */
-  const companyPipeline = [
-    { $match: match },
+    /* -------- UNION COMPANY -------- */
     {
-      $addFields: {
-        type: "company",
-        name: "$companyName",
+      $unionWith: {
+        coll: CompanyOnboarding.collection.name,
+        pipeline: [
+          { $match: match },
+          {
+            $addFields: {
+              type: "company",
+              name: "$companyName",
+            },
+          },
+        ],
       },
     },
   ];
 
-  /* ---------------- MERGE ---------------- */
-  const pipeline = [
-  /* -------- COLLEGE FIRST -------- */
-  {
-    $match: match,
-  },
-  {
-    $addFields: {
-      type: "college",
-      name: "$collegeName",
-    },
-  },
-
-  /* -------- THEN UNION COMPANY -------- */
-  {
-    $unionWith: {
-      coll: CompanyOnboarding.collection.name, // 🔥 IMPORTANT
-      pipeline: [
-        { $match: match },
-        {
-          $addFields: {
-            type: "company",   // ✅ THIS FIXES EVERYTHING
-            name: "$companyName",
-          },
-        },
-      ],
-    },
-  },
-];
-
-  /* ---------------- FILTER TYPE ---------------- */
+  /* -------- FILTER TYPE -------- */
   if (type !== "all") {
-    pipeline.push({
-      $match: { type },
-    });
+    pipeline.push({ $match: { type } });
   }
 
-  /* ---------------- SORT ---------------- */
+  /* -------- SORT -------- */
   pipeline.push({ $sort: sort });
 
-  /* ---------------- PAGINATION ---------------- */
+  /* -------- PAGINATION -------- */
   pipeline.push({
     $facet: {
       data: [{ $skip: skip }, { $limit: limit }],
@@ -126,8 +103,14 @@ export const getVerifiedOnboardingsService = async ({
     data,
     counts: {
       all: total,
-      college: type === "company" ? 0 : await CollegeOnboarding.countDocuments(match),
-      company: type === "college" ? 0 : await CompanyOnboarding.countDocuments(match),
+      college:
+        type === "company"
+          ? 0
+          : await CollegeOnboarding.countDocuments(match),
+      company:
+        type === "college"
+          ? 0
+          : await CompanyOnboarding.countDocuments(match),
     },
     pagination: {
       page,
@@ -139,21 +122,14 @@ export const getVerifiedOnboardingsService = async ({
 };
 
 /* =========================================================
-   🔹 PENDING (SAME LOGIC)
+   🔹 PENDING
 ========================================================= */
-export const getPendingOnboardingsService = async (params) => {
+export const getPendingOnboardingsService = async (params = {}) => {
   return getVerifiedOnboardingsService({
     ...params,
-    search: params.search,
-    type: params.type,
-    page: params.page,
-    limit: params.limit,
-    sortField: params.sortField,
-    sortOrder: params.sortOrder,
-    status: "pending",
+    status: "pending", // ✅ now actually works
   });
 };
-
 /* =========================================================
    🔹 DETAILS (UNCHANGED)
 ========================================================= */
@@ -180,3 +156,47 @@ export const getOnboardingDetailsService = async (type, id) => {
 
   throw new Error("Invalid type");
 };
+
+
+export const updateOnboardingStatusService = async (
+  type,
+  id,
+  { status, rejectionReason },
+  adminId
+) => {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new Error("Invalid ID");
+  }
+
+  if (!["approved", "rejected"].includes(status)) {
+    throw new Error("Invalid status");
+  }
+
+  const Model =
+    type === "college"
+      ? CollegeOnboarding
+      : type === "company"
+      ? CompanyOnboarding
+      : null;
+
+  if (!Model) throw new Error("Invalid type");
+
+  const onboarding = await Model.findById(id);
+  if (!onboarding) throw new Error("Onboarding not found");
+
+  onboarding.status = status;
+
+  if (status === "rejected") {
+    onboarding.rejectionReason = rejectionReason || "Not specified";
+  } else {
+    onboarding.rejectionReason = undefined;
+  }
+
+  onboarding.reviewedBy = adminId;
+  onboarding.reviewedAt = new Date();
+
+  await onboarding.save();
+
+  return onboarding;
+};
+

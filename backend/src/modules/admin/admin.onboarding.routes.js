@@ -26,4 +26,11 @@ router.get(
   controller.getDetails
 );
 
+router.put(
+  "/:type/:id/status",
+  authenticate,
+  authorizeRoles("admin"),
+  controller.updateOnboardingStatus
+);
+
 export default router;
