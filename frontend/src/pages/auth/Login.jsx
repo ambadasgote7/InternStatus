@@ -142,17 +142,6 @@ export default function Login() {
           </p>
         </div>
 
-        <div className="mt-2 text-center">
-          <p className="text-[13px] font-bold text-[#2D3436] opacity-80 m-0">
-            Don't have an account?{" "}
-            <Link
-              to="/signup"
-              className="text-[#6C5CE7] hover:opacity-80 no-underline font-black transition-opacity"
-            >
-              Sign up
-            </Link>
-          </p>
-        </div>
       </div>
     </div>
   );
