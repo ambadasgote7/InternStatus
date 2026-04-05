@@ -13,6 +13,7 @@ import {
   getCompanyDashboard,
   getCompanyInternships, // ✅ ADD THIS
   getCompanyApplications,
+  getCompanyList,
 } from "./company.controller.js";
 
 import { authenticate } from "../../middleware/auth.js";
@@ -20,6 +21,11 @@ import { authorizeRoles } from "../../middleware/role.js";
 import { upload } from "../../middleware/upload.js";
 
 const router = express.Router();
+
+router.get(
+  "/list",
+  getCompanyList
+);
 
 router.get(
   "/profile",

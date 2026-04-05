@@ -182,3 +182,4 @@ export const removeFacultyFromCollege = async (req, res, next) => {
     next(err);
   }
 };
+

@@ -351,9 +351,7 @@ export const issueCertificateService = async ({
   return application;
 };
 
-/*
-  ================= GET CERTIFICATE =================
-*/
+
 export const getCertificateService = async ({ applicationId, user }) => {
   const application = await Application.findById(applicationId).select(
     "certificateUrl student faculty company",
@@ -432,4 +430,15 @@ export const getCompanyDashboardService = async (user) => {
     completedInternships: completed || 0,
     certificatesIssued: certificatesIssued || 0,
   };
+};
+
+
+export const getCompanyListService = async () => {
+
+  const companies = await Company.find(
+    { status: "active" },
+    "_id name"
+  ).sort({ name: 1 });
+
+  return companies;
 };

@@ -9,7 +9,8 @@ import {
   getInternProgressService,
   getCertificateService,
   issueCertificateService,
-  getCompanyDashboardService, // ✅ ADD THIS
+  getCompanyDashboardService,
+  getCompanyListService, // ✅ ADD THIS
 } from "./company.service.js";
 
 export const getCompanyProfile = async (req, res, next) => {
@@ -250,5 +251,22 @@ export const getCompanyApplications = async (req, res) => {
       success: false,
       message: err.message,
     });
+  }
+};
+
+
+
+export const getCompanyList = async (req, res, next) => {
+  try {
+
+    const companies = await getCompanyListService();
+
+    res.status(200).json({
+      success: true,
+      data: companies
+    });
+
+  } catch (err) {
+    next(err);
   }
 };

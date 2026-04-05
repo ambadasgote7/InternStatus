@@ -437,3 +437,5 @@ export const removeFacultyFromCollegeService = async (
 
   return { success: true };
 };
+
+
