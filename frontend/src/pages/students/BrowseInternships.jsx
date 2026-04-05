@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import API from "../../api/api";
 import { useNavigate } from "react-router-dom";
+<<<<<<< HEAD
 import { Search, Filter, ChevronDown, MapPin, Calendar, CreditCard, Briefcase, Clock } from "lucide-react";
+=======
+import { Search, Filter, ChevronDown } from "lucide-react";
+>>>>>>> c58615c (final year commit)
 
 export default function BrowseInternships() {
   const [data, setData] = useState([]);
@@ -10,8 +14,13 @@ export default function BrowseInternships() {
 
   // Filter States
   const [searchTerm, setSearchTerm] = useState("");
+<<<<<<< HEAD
   const [statusFilter, setStatusFilter] = useState("ALL"); 
   const [dateFilter, setDateFilter] = useState("ALL"); // ALL, TODAY, 3_DAYS, 7_DAYS, 15_DAYS, 1_MONTH
+=======
+  const [statusFilter, setStatusFilter] = useState("ALL"); // ALL, APPLIED, NOT_APPLIED
+  const [companyFilter, setCompanyFilter] = useState("ALL");
+>>>>>>> c58615c (final year commit)
 
   const fetchData = async () => {
     try {
@@ -30,7 +39,11 @@ export default function BrowseInternships() {
     try {
       setLoadingId(id);
       await API.post(`/applications/apply/${id}`);
+<<<<<<< HEAD
       await fetchData(); 
+=======
+      await fetchData(); // Refresh data to update the "alreadyApplied" status
+>>>>>>> c58615c (final year commit)
     } catch (err) {
       alert(err.response?.data?.message);
     } finally {
@@ -40,8 +53,17 @@ export default function BrowseInternships() {
 
   // --- Filtering Logic ---
   const filteredData = data.filter((item) => {
+<<<<<<< HEAD
     const titleMatch = (item.title || "").toLowerCase().includes(searchTerm.toLowerCase());
     const companyMatchText = (item.company?.name || "").toLowerCase().includes(searchTerm.toLowerCase());
+=======
+    const titleMatch = (item.title || "")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const companyMatchText = (item.company?.name || "")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+>>>>>>> c58615c (final year commit)
     const matchesSearch = titleMatch || companyMatchText;
 
     const matchesStatus =
@@ -49,6 +71,7 @@ export default function BrowseInternships() {
       (statusFilter === "APPLIED" && item.alreadyApplied) ||
       (statusFilter === "NOT_APPLIED" && !item.alreadyApplied);
 
+<<<<<<< HEAD
     // Date Filtering Logic
     let matchesDate = true;
     if (dateFilter !== "ALL") {
@@ -74,12 +97,34 @@ export default function BrowseInternships() {
         <header className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-4 duration-700">
           <h2 className="text-4xl font-extrabold tracking-tight text-[#2D3436]">
             Browse <span className="text-[#6C5CE7]">Internships</span>
+=======
+    const matchesCompany =
+      companyFilter === "ALL" || item.company?.name === companyFilter;
+
+    return matchesSearch && matchesStatus && matchesCompany;
+  });
+
+  // Extract unique companies for the dropdown
+  const uniqueCompanies = [
+    "ALL",
+    ...new Set(data.map((i) => i.company?.name).filter(Boolean)),
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#FFFFFF] p-4 md:p-8 lg:p-10 font-['Nunito'] text-[#2D3436] transition-all duration-500 selection:bg-[#6C5CE7]/20 selection:text-[#6C5CE7]">
+      <main className="max-w-7xl mx-auto w-full flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        {/* Header */}
+        <header className="flex flex-col gap-3 border-b border-[#F5F6FA] pb-8">
+          <h2 className="text-3xl md:text-3xl font-black m-0 tracking-tighter text-[#2D3436] uppercase leading-tight">
+            Browse Internships
+>>>>>>> c58615c (final year commit)
           </h2>
           <p className="text-[#2D3436]/60 font-medium italic">
             "Your future begins with a single application."
           </p>
         </header>
 
+<<<<<<< HEAD
         {/* Updated Filters Panel */}
         {data.length > 0 && (
           <div className="bg-[#FFFFFF] rounded-3xl p-5 flex flex-col lg:flex-row gap-4 shadow-sm border border-gray-100 animate-in fade-in slide-in-from-left-6 duration-700">
@@ -100,11 +145,40 @@ export default function BrowseInternships() {
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="w-full pl-12 pr-10 py-4 bg-[#F5F6FA] rounded-2xl outline-none appearance-none cursor-pointer font-bold text-sm text-[#2D3436]/80 hover:bg-[#F5F6FA]/80 transition-all uppercase tracking-wider"
+=======
+        {/* Dynamic Filters Section */}
+        {data.length > 0 && (
+          <div className="bg-[#FFFFFF] border border-[#F5F6FA] rounded-[24px] p-4 flex flex-col md:flex-row gap-4 shadow-sm relative z-10 animate-in fade-in slide-in-from-left-8 duration-700">
+            {/* Search Bar */}
+            <div className="relative flex-1 group">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-[#F5F6FA] rounded-[10px] flex items-center justify-center group-focus-within:bg-[#6C5CE7]/10 transition-colors">
+                <Search className="w-4 h-4 text-[#2D3436] opacity-40 group-focus-within:text-[#6C5CE7] group-focus-within:opacity-100 transition-colors" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search by title or organization..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-16 pr-6 py-4 text-[13px] font-bold text-[#2D3436] bg-[#FFFFFF] border-2 border-transparent rounded-[16px] outline-none transition-all focus:bg-[#F5F6FA] focus:border-[#6C5CE7]/30 placeholder-[#2D3436] placeholder-opacity-30"
+              />
+            </div>
+
+            {/* Status Filter */}
+            <div className="relative w-full md:w-48 group">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-[#F5F6FA] rounded-[10px] flex items-center justify-center group-focus-within:bg-[#6C5CE7]/10 transition-colors pointer-events-none">
+                <Filter className="w-4 h-4 text-[#2D3436] opacity-40 group-focus-within:text-[#6C5CE7] group-focus-within:opacity-100 transition-colors" />
+              </div>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full pl-16 pr-10 py-4 text-[11px] font-black text-[#2D3436] bg-[#FFFFFF] border-2 border-transparent rounded-[16px] outline-none transition-all focus:bg-[#F5F6FA] focus:border-[#6C5CE7]/30 appearance-none uppercase tracking-widest cursor-pointer hover:bg-[#F5F6FA]/50"
+>>>>>>> c58615c (final year commit)
               >
                 <option value="ALL">All Status</option>
                 <option value="NOT_APPLIED">Not Applied</option>
                 <option value="APPLIED">Applied</option>
               </select>
+<<<<<<< HEAD
               <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#2D3436]/30 pointer-events-none" />
             </div>
 
@@ -124,10 +198,30 @@ export default function BrowseInternships() {
                 <option value="1_MONTH">Past Month</option>
               </select>
               <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#2D3436]/30 pointer-events-none" />
+=======
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#2D3436] opacity-30 pointer-events-none" />
+            </div>
+
+            {/* Company Filter */}
+            <div className="relative w-full md:w-56 group">
+              <select
+                value={companyFilter}
+                onChange={(e) => setCompanyFilter(e.target.value)}
+                className="w-full pl-6 pr-10 py-4 text-[11px] font-black text-[#2D3436] bg-[#FFFFFF] border-2 border-transparent rounded-[16px] outline-none transition-all focus:bg-[#F5F6FA] focus:border-[#6C5CE7]/30 appearance-none uppercase tracking-widest cursor-pointer hover:bg-[#F5F6FA]/50"
+              >
+                {uniqueCompanies.map((company) => (
+                  <option key={company} value={company}>
+                    {company === "ALL" ? "All Organizations" : company}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#2D3436] opacity-30 pointer-events-none" />
+>>>>>>> c58615c (final year commit)
             </div>
           </div>
         )}
 
+<<<<<<< HEAD
         {/* Grid Area */}
         {filteredData.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-[40px] shadow-sm flex flex-col items-center">
@@ -136,8 +230,36 @@ export default function BrowseInternships() {
              </div>
              <p className="font-bold text-[#2D3436]/50 uppercase tracking-widest mb-6 text-sm">No matches found</p>
              <button onClick={() => { setSearchTerm(""); setStatusFilter("ALL"); setDateFilter("ALL"); }} className="px-8 py-3 bg-[#6C5CE7] text-white rounded-xl font-bold uppercase text-[11px] tracking-widest hover:shadow-lg transition-all active:scale-95">Reset All Filters</button>
+=======
+        {/* Content Area */}
+        {data.length === 0 ? (
+          <div className="bg-[#F5F6FA] border-2 border-dashed border-[#6C5CE7]/20 rounded-[32px] p-20 text-center animate-in zoom-in duration-500">
+            <p className="text-[14px] font-black text-[#2D3436] opacity-40 m-0 uppercase tracking-[0.15em]">
+              No internships currently available
+            </p>
+>>>>>>> c58615c (final year commit)
+          </div>
+        ) : filteredData.length === 0 ? (
+          <div className="bg-[#FFFFFF] border border-[#F5F6FA] rounded-[32px] p-20 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center gap-6">
+            <div className="w-16 h-16 bg-[#F5F6FA] rounded-full flex items-center justify-center">
+              <Search className="w-6 h-6 text-[#2D3436] opacity-30" />
+            </div>
+            <p className="text-[12px] font-black text-[#2D3436] opacity-40 m-0 uppercase tracking-[0.2em]">
+              No matches found for your filters.
+            </p>
+            <button
+              onClick={() => {
+                setSearchTerm("");
+                setStatusFilter("ALL");
+                setCompanyFilter("ALL");
+              }}
+              className="px-8 py-4 bg-[#F5F6FA] text-[#2D3436] text-[10px] font-black uppercase tracking-widest rounded-[16px] hover:bg-[#2D3436] hover:text-[#FFFFFF] transition-all duration-300 shadow-sm active:scale-95 outline-none border-none cursor-pointer"
+            >
+              Clear Filters
+            </button>
           </div>
         ) : (
+<<<<<<< HEAD
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-1000">
             {filteredData.map((item, idx) => (
               <div 
@@ -215,6 +337,33 @@ export default function BrowseInternships() {
                       onClick={() => navigate(`/student/internships/${item._id}`)}
                       className="p-3 bg-[#F5F6FA] text-[#2D3436] rounded-xl hover:bg-[#2D3436] hover:text-white transition-all active:scale-95"
                       title="View Details"
+=======
+          <div className="bg-[#FFFFFF] border border-[#F5F6FA] rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden box-border hover:shadow-[0_20px_50px_rgba(0,0,0,0.06)] transition-all duration-500">
+            <div className="overflow-x-auto no-scrollbar">
+              <table className="w-full text-left border-collapse whitespace-nowrap">
+                <thead className="bg-[#F5F6FA] bg-opacity-50 border-b border-[#F5F6FA]">
+                  <tr>
+                    <th className="px-8 py-6 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.15em]">
+                      Opportunity Name
+                    </th>
+                    <th className="px-8 py-6 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.15em]">
+                      Organization
+                    </th>
+                    <th className="px-8 py-6 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.15em]">
+                      Deadline
+                    </th>
+                    <th className="px-8 py-6 text-[11px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.15em] text-right">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#F5F6FA]">
+                  {filteredData.map((item, idx) => (
+                    <tr
+                      key={item._id}
+                      style={{ animationDelay: `${idx * 50}ms` }}
+                      className="hover:bg-[#F5F6FA]/40 transition-colors duration-300 group animate-in fade-in fill-mode-both"
+>>>>>>> c58615c (final year commit)
                     >
                       <span className="text-[11px] font-black uppercase tracking-widest">View Details</span>
                     </button>

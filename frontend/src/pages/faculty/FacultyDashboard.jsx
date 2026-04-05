@@ -14,7 +14,10 @@ import {
   Activity,
   ChevronRight,
   Zap,
+<<<<<<< HEAD
   CheckCircle2, // ✅ ADD THIS
+=======
+>>>>>>> c58615c (final year commit)
 } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────

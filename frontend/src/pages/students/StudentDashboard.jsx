@@ -556,7 +556,21 @@ export default function StudentDashboard() {
                   )}
                 </span>
               </div>
+<<<<<<< HEAD
               
+=======
+              <div className="flex flex-col gap-1 text-right">
+                <span className="text-[#FFFFFF] opacity-50 text-[9px] font-black uppercase tracking-widest">
+                  Ending
+                </span>
+                <span className="text-[#FFFFFF] opacity-90 text-[12px] font-bold">
+                  {new Date(currentInternship.endDate).toLocaleDateString(
+                    "en-IN",
+                    { month: "short", year: "numeric" },
+                  )}
+                </span>
+              </div>
+>>>>>>> c58615c (final year commit)
             </div>
           </div>
         )}
