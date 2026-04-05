@@ -404,14 +404,14 @@ export default function StudentDashboard() {
   if (!data) return null;
 
   const {
-    kpi,
-    applicationPipeline,
-    currentInternship,
-    taskAnalytics,
-    recentActivity,
-    performance,
-    actionQueue,
-  } = data;
+  kpi = {},
+  applicationPipeline = {},
+  currentInternship = null,
+  taskAnalytics = {},
+  recentActivity = [],
+  performance = {},
+  actionQueue = [],
+} = data || {};
 
   return (
     <div className="min-h-screen bg-[#FFFFFF] text-[#2D3436] font-['Nunito'] pb-12 transition-colors duration-500 selection:bg-[#6C5CE7]/20 selection:text-[#6C5CE7]">
@@ -556,11 +556,8 @@ export default function StudentDashboard() {
                   )}
                 </span>
               </div>
-<<<<<<< HEAD
-              
-=======
               <div className="flex flex-col gap-1 text-right">
-                <span className="text-[#FFFFFF] opacity-50 text-[9px] font-black uppercase tracking-widest">
+                {/* <span className="text-[#FFFFFF] opacity-50 text-[9px] font-black uppercase tracking-widest">
                   Ending
                 </span>
                 <span className="text-[#FFFFFF] opacity-90 text-[12px] font-bold">
@@ -568,9 +565,8 @@ export default function StudentDashboard() {
                     "en-IN",
                     { month: "short", year: "numeric" },
                   )}
-                </span>
+                </span> */}
               </div>
->>>>>>> c58615c (final year commit)
             </div>
           </div>
         )}
