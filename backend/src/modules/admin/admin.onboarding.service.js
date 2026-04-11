@@ -38,55 +38,48 @@ export const getVerifiedOnboardingsService = async ({
   search = "",
   sortField = "createdAt",
   sortOrder = "desc",
-  status = "approved", // ✅ dynamic
-}) => {
-  // ✅ FIXED: USE status (NOT HARDCODED)
-  const match = buildMatch(status, search);
+  status = "approved",
+} = {}) => { // ✅ SAFETY (prevents crash if undefined)
+
+  const skip = (page - 1) * limit;
 
   const sort = {
     [sortField]: sortOrder === "asc" ? 1 : -1,
   };
 
-  const skip = (page - 1) * limit;
+  const match = buildMatch(status, search);
 
   const pipeline = [
-    /* -------- COLLEGE -------- */
-    {
-      $match: match,
-    },
     {
       $addFields: {
         type: "college",
         name: "$collegeName",
       },
     },
+    { $match: match },
 
-    /* -------- UNION COMPANY -------- */
     {
       $unionWith: {
         coll: CompanyOnboarding.collection.name,
         pipeline: [
-          { $match: match },
           {
             $addFields: {
               type: "company",
               name: "$companyName",
             },
           },
+          { $match: match },
         ],
       },
     },
   ];
 
-  /* -------- FILTER TYPE -------- */
   if (type !== "all") {
     pipeline.push({ $match: { type } });
   }
 
-  /* -------- SORT -------- */
   pipeline.push({ $sort: sort });
 
-  /* -------- PAGINATION -------- */
   pipeline.push({
     $facet: {
       data: [{ $skip: skip }, { $limit: limit }],
@@ -97,20 +90,19 @@ export const getVerifiedOnboardingsService = async ({
   const result = await CollegeOnboarding.aggregate(pipeline);
 
   const data = result[0]?.data || [];
-  const total = result[0]?.totalCount[0]?.count || 0;
+  const total = result[0]?.totalCount?.[0]?.count || 0;
+
+  const [collegeCount, companyCount] = await Promise.all([
+    CollegeOnboarding.countDocuments(match),
+    CompanyOnboarding.countDocuments(match),
+  ]);
 
   return {
     data,
     counts: {
-      all: total,
-      college:
-        type === "company"
-          ? 0
-          : await CollegeOnboarding.countDocuments(match),
-      company:
-        type === "college"
-          ? 0
-          : await CompanyOnboarding.countDocuments(match),
+      all: collegeCount + companyCount,
+      college: collegeCount,
+      company: companyCount,
     },
     pagination: {
       page,
@@ -120,6 +112,7 @@ export const getVerifiedOnboardingsService = async ({
     },
   };
 };
+
 
 /* =========================================================
    🔹 PENDING

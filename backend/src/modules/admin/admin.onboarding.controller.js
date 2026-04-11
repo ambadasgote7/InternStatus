@@ -59,25 +59,38 @@ export const getPending = async (req, res) => {
    GET VERIFIED
    GET /api/admin/onboarding/verified?type=college|company
 ===================================================== */
-
 export const getVerified = async (req, res) => {
   try {
+    const {
+      type = "all",
+      page = 1,
+      limit = 10,
+      search = "",
+      sortField = "createdAt",
+      sortOrder = "desc",
+    } = req.query;
 
-    const { type } = req.query;
-
-    const data = await getVerifiedOnboardingsService(type);
+    const data = await getVerifiedOnboardingsService({
+      type,
+      page: Number(page),
+      limit: Number(limit),
+      search,
+      sortField,
+      sortOrder,
+      status: "approved",
+    });
 
     res.status(200).json({
       success: true,
       message: "Verified onboarding fetched",
-      data
+      data,
     });
 
   } catch (err) {
     console.error("Get Verified Error:", err);
     res.status(500).json({
       success: false,
-      message: err.message || "Server error"
+      message: err.message || "Server error",
     });
   }
 };
