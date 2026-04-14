@@ -14,6 +14,8 @@ import {
   getCompanyInternships, // ✅ ADD THIS
   getCompanyApplications,
   getCompanyList,
+  issueOfferLetter,
+  getOfferLetter,
 } from "./company.controller.js";
 
 import { authenticate } from "../../middleware/auth.js";
@@ -100,6 +102,20 @@ router.post(
 );
 
 router.get("/applications/:id/certificate", authenticate, getCertificate);
+
+router.post(
+  "/applications/:id/offer-letter",
+  authenticate,
+  authorizeRoles("company"),
+  upload.single("offerLetter"),
+  issueOfferLetter
+);
+
+router.get(
+  "/applications/:id/offer-letter",
+  authenticate,
+  getOfferLetter
+);
 
 router.get(
   "/dashboard",

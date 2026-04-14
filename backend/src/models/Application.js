@@ -42,6 +42,7 @@ const applicationSchema = new mongoose.Schema(
         "shortlisted",
         "selected",
         "offer_accepted",
+        "offer_rejected",
         "rejected",
         "withdrawn",
         "ongoing",
@@ -90,6 +91,7 @@ mentorHistory: [
     offerAcceptedAt: Date,
     offerRejectedAt: Date,
     withdrawnAt: Date,
+    offerIssuedAt: Date,
 
     internshipStartDate: Date,
     internshipEndDate: Date,
@@ -107,6 +109,7 @@ mentorHistory: [
     facultyFeedback: String,
 
     certificateUrl: String,
+    offerLetterUrl: String,
 
     remarks: String
   },

@@ -250,6 +250,7 @@ export const getCompanyInternsService = async (user) => {
   return finalData;
 };
 
+
 export const assignMentorService = async (user, applicationId, mentorId) => {
   if (user.role !== "company") {
     throw new Error("Only company allowed");
@@ -441,4 +442,68 @@ export const getCompanyListService = async () => {
   ).sort({ name: 1 });
 
   return companies;
+};
+
+
+export const issueOfferLetterService = async ({
+  applicationId,
+  file,
+  user,
+}) => {
+  const application = await Application.findById(applicationId);
+
+  if (!application) {
+    throw new Error("Application not found");
+  }
+
+  // 🔒 Company ownership check
+  if (!application.company.equals(user.referenceId)) {
+    throw new Error("Unauthorized to issue offer for this application");
+  }
+
+  // 🔥 Business rule
+  if (application.status !== "selected") {
+    throw new Error("Candidate not selected");
+  }
+
+  // ❌ Prevent duplicate
+  if (application.offerLetterUrl) {
+    throw new Error("Offer letter already issued");
+  }
+
+  if (!file) {
+    throw new Error("Offer letter file is required");
+  }
+
+  // ☁️ Upload
+  const result = await uploadToCloudinary(file, "offerLetters");
+
+  application.offerLetterUrl = result.secure_url;
+  application.offerIssuedAt = new Date();
+
+  await application.save();
+
+  return application;
+};
+
+export const getOfferLetterService = async ({ applicationId, user }) => {
+  const application = await Application.findById(applicationId);
+
+  if (!application) {
+    throw new Error("Application not found");
+  }
+
+  // Allow student or company
+  if (
+    !application.student.equals(user.referenceId) &&
+    !application.company.equals(user.referenceId)
+  ) {
+    throw new Error("Unauthorized access");
+  }
+
+  if (!application.offerLetterUrl) {
+    throw new Error("Offer letter not issued yet");
+  }
+
+  return application.offerLetterUrl;
 };

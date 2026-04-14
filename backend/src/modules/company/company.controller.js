@@ -10,7 +10,9 @@ import {
   getCertificateService,
   issueCertificateService,
   getCompanyDashboardService,
-  getCompanyListService, // ✅ ADD THIS
+  getCompanyListService,
+  issueOfferLetterService,
+  getOfferLetterService, // ✅ ADD THIS
 } from "./company.service.js";
 
 export const getCompanyProfile = async (req, res, next) => {
@@ -268,5 +270,46 @@ export const getCompanyList = async (req, res, next) => {
 
   } catch (err) {
     next(err);
+  }
+};
+
+
+export const issueOfferLetter = async (req, res) => {
+  try {
+    const application = await issueOfferLetterService({
+      applicationId: req.params.id,
+      file: req.file,
+      user: req.user,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Offer letter issued successfully",
+      data: application,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getOfferLetter = async (req, res) => {
+  try {
+    const url = await getOfferLetterService({
+      applicationId: req.params.id,
+      user: req.user,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: { offerLetterUrl: url },
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
   }
 };

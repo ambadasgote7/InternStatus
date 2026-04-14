@@ -45,9 +45,12 @@ const ApplicationRow = ({
   const internship = app.internship || {};
   const isExpanded = expandedId === app._id;
 
-  // Logic Booleans
+  // ==========================================
+  // FIX 1: Updated Gating Logic
+  // ==========================================
   const canWithdraw = app.status === "applied" || app.status === "shortlisted";
-  const canAccept = app.status === "selected";
+  const canAccept = app.status === "selected" && app.offerLetterUrl;
+  const waitingOffer = app.status === "selected" && !app.offerLetterUrl;
   const waitingStart = app.status === "offer_accepted";
   const canTrack = app.status === "ongoing" || app.status === "completed";
 
@@ -101,12 +104,12 @@ const ApplicationRow = ({
         </td>
       </tr>
 
-      {/* Expanded Details Drawer (Compact & Space-Friendly) */}
+      {/* Expanded Details Drawer */}
       {isExpanded && (
         <tr className="bg-[#FFFFFF] border-b border-[#F5F6FA] shadow-inner animate-in fade-in slide-in-from-top-2 duration-300">
           <td colSpan={4} className="p-6 md:px-8 md:py-6">
             <div className="flex flex-col gap-6">
-              {/* Top Details - Compact Horizontal Flexbox */}
+              {/* Top Details */}
               <div className="flex flex-wrap items-center gap-x-12 gap-y-4 p-5 bg-[#F5F6FA] rounded-[20px] border border-transparent hover:border-[#6C5CE7]/10 transition-colors">
                 <div className="flex flex-col gap-1.5">
                   <span className="text-[10px] font-black text-[#2D3436] opacity-40 uppercase tracking-[0.15em]">
@@ -143,24 +146,44 @@ const ApplicationRow = ({
                     </a>
                   </div>
                 )}
+
+                {/* FIX 2: Show Offer Letter Link */}
+                {app.offerLetterUrl && (
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[10px] font-black text-[#2D3436] opacity-40 uppercase tracking-[0.15em]">
+                      Offer Letter
+                    </span>
+                    <a
+                      href={app.offerLetterUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[13px] font-black text-[#6C5CE7] underline decoration-[#6C5CE7]/30 underline-offset-4 hover:decoration-[#6C5CE7] transition-all"
+                    >
+                      View Offer Letter
+                    </a>
+                  </div>
+                )}
               </div>
 
-              {/* Action Buttons - Compact Row */}
+              {/* Action Buttons */}
               <div className="flex flex-wrap gap-3 pt-2">
+                {/* FIX 3: Waiting State Message */}
+                {waitingOffer && (
+                  <div className="px-6 py-3 bg-[#F5F6FA] border border-transparent rounded-[14px] flex items-center shadow-sm">
+                    <span className="text-[10px] font-black text-[#2D3436] opacity-50 uppercase tracking-[0.15em] flex items-center">
+                      <span className="w-2 h-2 rounded-full bg-amber-400 mr-2 animate-pulse"></span>
+                      Waiting for official offer letter
+                    </span>
+                  </div>
+                )}
+
                 {canWithdraw && (
                   <button
                     disabled={loadingId === app._id}
                     onClick={() => actionHandler(app._id, "withdraw")}
                     className="px-6 py-3 text-[10px] font-black text-rose-600 bg-rose-50 border border-rose-200 rounded-[14px] hover:bg-rose-100 hover:shadow-sm transition-all duration-300 disabled:opacity-50 disabled:transform-none uppercase tracking-widest cursor-pointer outline-none transform hover:-translate-y-0.5"
                   >
-                    {loadingId === app._id ? (
-                      <div className="flex items-center gap-2">
-                        <span className="w-3 h-3 border-2 border-rose-600/30 border-t-rose-600 rounded-full animate-spin"></span>
-                        Processing...
-                      </div>
-                    ) : (
-                      "Withdraw Submission"
-                    )}
+                    {loadingId === app._id ? "Processing..." : "Withdraw Submission"}
                   </button>
                 )}
 
@@ -180,14 +203,7 @@ const ApplicationRow = ({
                       onClick={() => actionHandler(app._id, "accept")}
                       className="px-6 py-3 text-[10px] font-black text-[#FFFFFF] bg-emerald-500 border-none rounded-[14px] hover:bg-emerald-600 hover:shadow-md transition-all duration-300 disabled:opacity-50 disabled:transform-none uppercase tracking-[0.15em] cursor-pointer outline-none transform hover:-translate-y-0.5 active:scale-95"
                     >
-                      {loadingId === app._id ? (
-                        <div className="flex items-center gap-2">
-                          <span className="w-3 h-3 border-2 border-[#FFFFFF]/30 border-t-[#FFFFFF] rounded-full animate-spin"></span>
-                          Processing...
-                        </div>
-                      ) : (
-                        "Confirm Offer"
-                      )}
+                      {loadingId === app._id ? "Processing..." : "Confirm Offer"}
                     </button>
 
                     <button
@@ -195,14 +211,7 @@ const ApplicationRow = ({
                       onClick={() => actionHandler(app._id, "decline")}
                       className="px-6 py-3 text-[10px] font-black text-rose-600 bg-rose-50 border border-rose-200 rounded-[14px] hover:bg-rose-100 hover:shadow-sm transition-all duration-300 disabled:opacity-50 disabled:transform-none uppercase tracking-widest cursor-pointer outline-none transform hover:-translate-y-0.5"
                     >
-                      {loadingId === app._id ? (
-                        <div className="flex items-center gap-2">
-                          <span className="w-3 h-3 border-2 border-rose-600/30 border-t-rose-600 rounded-full animate-spin"></span>
-                          Processing...
-                        </div>
-                      ) : (
-                        "Decline Offer"
-                      )}
+                      {loadingId === app._id ? "Processing..." : "Decline Offer"}
                     </button>
                   </>
                 )}
@@ -273,7 +282,7 @@ export default function MyApplications() {
           {/* Header Section */}
           <header className="flex flex-col md:flex-row justify-between md:items-end gap-6 border-b border-[#F5F6FA] pb-6">
             <div className="flex flex-col gap-2">
-              <h1 className="text-3xl md:text-3xl  font-black text-[#2D3436] m-0 tracking-tighter leading-tight uppercase">
+              <h1 className="text-3xl md:text-3xl font-black text-[#2D3436] m-0 tracking-tighter leading-tight uppercase">
                 My Applications
               </h1>
               <p className="text-[13px] font-black text-[#6C5CE7] opacity-80 m-0 uppercase tracking-[0.2em]">
@@ -281,8 +290,7 @@ export default function MyApplications() {
               </p>
             </div>
             <div className="text-[11px] font-black text-[#2D3436] bg-[#F5F6FA] border border-transparent px-5 py-3 rounded-[14px] uppercase tracking-widest shadow-sm">
-              Total Count:{" "}
-              <span className="text-[#6C5CE7] ml-1">{data.length}</span>
+              Total Count: <span className="text-[#6C5CE7] ml-1">{data.length}</span>
             </div>
           </header>
 

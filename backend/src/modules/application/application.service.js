@@ -394,20 +394,24 @@ export const updateApplicationStatusService = async (
 
 };
 
+
 export const offerDecisionService = async (
   user,
   applicationId,
   decision // "accept" | "decline"
 ) => {
 
+  // 🔒 Role check
   if (user.role !== "student") {
     throw new Error("Only student allowed");
   }
 
+  // 🆔 Validate ID
   if (!mongoose.Types.ObjectId.isValid(applicationId)) {
     throw new Error("Invalid application id");
   }
 
+  // 🔍 Fetch application
   const application = await Application.findOne({
     _id: applicationId,
     student: user.referenceId
@@ -417,33 +421,41 @@ export const offerDecisionService = async (
     throw new Error("Application not found");
   }
 
+  // 🚫 Must be selected
   if (application.status !== "selected") {
     throw new Error("Offer not available");
   }
 
+  // 🚫 Offer letter must exist
+  if (!application.offerLetterUrl) {
+    throw new Error("Offer letter not issued yet");
+  }
+
+  // 🚫 Prevent double action
+  if (application.offerAcceptedAt || application.offerRejectedAt) {
+    throw new Error("Offer already responded");
+  }
+
+  // 🚫 Validate decision
   if (!["accept", "decline"].includes(decision)) {
     throw new Error("Invalid decision");
   }
 
   /*
-    ACCEPT
+    ✅ ACCEPT
   */
   if (decision === "accept") {
-
     application.status = "offer_accepted";
     application.offerAcceptedAt = new Date();
-
   }
 
   /*
-    DECLINE
+    ❌ DECLINE
   */
-  if (decision === "decline") {
-
-    application.status = "withdrawn";
-    application.offerRejectedAt = new Date();
-
-  }
+ if (decision === "decline") {
+  application.status = "offer_rejected";
+  application.offerRejectedAt = new Date();
+}
 
   await application.save();
 
