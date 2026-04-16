@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../api/api";
+import { useSelector } from "react-redux";
 
 const AtRiskList = () => {
   const navigate = useNavigate();
@@ -9,8 +10,11 @@ const AtRiskList = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
+
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  const role = useSelector((state) => state.user?.role);
 
   // ---------------- FETCH DATA ----------------
   const fetchStudents = async () => {
@@ -127,7 +131,7 @@ const AtRiskList = () => {
                   {students.map((student, index) => (
                     <tr
                       key={student.id}
-                      onClick={() => navigate(`/college/at-risk/${student.id}`)}
+                      onClick={() => navigate(`${role === "college" ? "/college" : "/faculty"}/at-risk/${student.id}`)}
                       className="group cursor-pointer transition-all duration-300 hover:bg-[#F5F6FA]"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >

@@ -166,6 +166,7 @@ function AppContent() {
             <Route path="/faculty/credits" element={<CreditManagement />} />
             <Route path="/faculty/at-risk" element={<AtRiskList />} />
             <Route path="/faculty/at-risk/:studentId" element={<AtRiskStudent />} />
+            <Route path="/faculty/academic-internship-track/:applicationId" element={<AcademicInternshipTrack />} />
           </Route>
         </Route>
 
@@ -213,13 +214,14 @@ function AppContent() {
             <Route path="/college/credits" element={<CreditManagement />} />
             <Route path="/college/at-risk" element={<AtRiskList />} />
             <Route path="/college/at-risk/:studentId" element={<AtRiskStudent />} />
+            <Route path="college/academic-internship-track/:applicationId" element={<AcademicInternshipTrack />} />
           </Route>
         </Route>
 
         {/* SHARED TRACK */}
-        <Route element={<ProtectedRoute role={["college", "faculty"]} />}>
+        {/* <Route element={<ProtectedRoute role={["college", "faculty"]} />}>
           <Route path="/academic-internship-track/:applicationId" element={<AcademicInternshipTrack />} />
-        </Route>
+        </Route> */}
 
         {/* ADMIN */}
         <Route element={<ProtectedRoute role="admin" />}>

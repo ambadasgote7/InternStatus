@@ -225,7 +225,7 @@ const handleCreditsNavigate = () => {
       <div className="flex gap-2 flex-wrap w-full sm:w-auto">
         {type === "ongoing" && (
           <button
-            onClick={() => navigate(`/academic-internship-track/${app._id}`)}
+            onClick={() => navigate(`${user?.role === "college" ? "/college" : "/faculty"}/academic-internship-track/${app._id}`)}
             className="w-full sm:w-auto px-5 py-2 bg-[#6C5CE7] text-white text-[11px] font-black rounded-xl shadow-lg shadow-[#6C5CE7]/20 hover:bg-[#5a4bc4] transition-colors"
           >
             TRACK LIVE

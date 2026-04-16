@@ -119,7 +119,7 @@ export default function CompanyInternships() {
         <div className="bg-[#F5F6FA] border border-transparent rounded-[32px] p-8 md:p-10 flex flex-col md:flex-row md:items-center justify-between gap-8 shadow-sm">
           <div className="flex flex-col gap-2">
             <h1 className="text-[28px] md:text-4xl font-black text-[#2D3436] m-0 tracking-tighter uppercase leading-tight">
-              Company <span className="text-[#6C5CE7]">Dashboard</span>
+              Company <span className="text-[#6C5CE7]">Internships</span>
             </h1>
             <p className="text-[12px] font-black text-[#2D3436] opacity-40 uppercase tracking-[0.2em] m-0 flex items-center gap-2">
               <Activity className="w-4 h-4 text-[#6C5CE7]" />
