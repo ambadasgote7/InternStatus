@@ -450,7 +450,6 @@ export default function AdminUserDetails() {
         />
       )}
 
-      {/* ✅ Certificate Modal */}
       {showCertificateUrl && (
         <CertificateModal
           url={showCertificateUrl}
@@ -484,8 +483,6 @@ export default function AdminUserDetails() {
                   {user.email}
                 </p>
                 <div className="flex flex-wrap items-center gap-2 mt-1.5 text-[10px] font-black text-[#2D3436] opacity-50 uppercase tracking-widest">
-                  <span>ID: {user._id}</span>
-                  <span className="opacity-30">|</span>
                   <span>
                     Joined{" "}
                     {new Date(user.createdAt).toLocaleDateString("en-IN", {
@@ -700,7 +697,6 @@ export default function AdminUserDetails() {
             <div className="bg-[#FFFFFF] border border-[#F5F6FA] p-6 md:p-8 rounded-[24px] shadow-sm hover:shadow-md transition-shadow duration-300">
               <Section title="Account System Details">
                 <div className="flex flex-col">
-                  <InfoRow label="System ID" value={user._id} />
                   <InfoRow label="Email Address" value={user.email} />
                   <InfoRow label="Assigned Role" value={user.role} />
                   <InfoRow label="Account State" value={user.accountStatus} />
@@ -1285,7 +1281,6 @@ export default function AdminUserDetails() {
           </div>
         )}
 
-        {/* ✅ Students Tab for Faculty */}
         {tabs[activeTab] === "Students" && user.role === "faculty" && (
           <div className="bg-[#FFFFFF] border border-[#F5F6FA] rounded-[24px] shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden animate-fade-in-up">
             {!related?.students?.length ? (
@@ -1344,7 +1339,6 @@ export default function AdminUserDetails() {
           </div>
         )}
 
-        {/* ✅ Mentors Tab for Company */}
         {tabs[activeTab] === "Mentors" && user.role === "company" && (
           <div className="flex flex-col gap-5 animate-fade-in-up">
             {!related?.mentors?.length ? (
@@ -1381,7 +1375,6 @@ export default function AdminUserDetails() {
           </div>
         )}
 
-        {/* ✅ Internships Tab for Company */}
         {tabs[activeTab] === "Internships" && user.role === "company" && (
           <div className="flex flex-col gap-5 animate-fade-in-up">
             {!related?.internships?.length ? (
@@ -1397,7 +1390,6 @@ export default function AdminUserDetails() {
                   className="bg-[#FFFFFF] rounded-[24px] border border-[#F5F6FA] p-6 md:p-8 hover:border-[#6C5CE7] transition-all duration-300 shadow-sm hover:shadow-md"
                 >
                   <div className="flex flex-col gap-6">
-                    {/* Internship Header */}
                     <div className="flex flex-col md:flex-row items-start justify-between gap-4">
                       <div className="flex-1 flex flex-col gap-3">
                         <div className="flex items-center gap-3 flex-wrap">
@@ -1470,7 +1462,6 @@ export default function AdminUserDetails() {
                       </div>
                     </div>
 
-                    {/* ✅ Applicants List */}
                     {internship.applicants?.length > 0 && (
                       <div className="border-t border-[#F5F6FA] pt-6 mt-2">
                         <h4 className="text-[11px] font-black text-[#6C5CE7] uppercase tracking-widest mb-4">
@@ -1513,7 +1504,6 @@ export default function AdminUserDetails() {
           </div>
         )}
 
-        {/* ✅ Students Tab for College */}
         {tabs[activeTab] === "Students" && user.role === "college" && (
           <div className="bg-[#FFFFFF] border border-[#F5F6FA] rounded-[24px] shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden animate-fade-in-up">
             {!related?.students?.length ? (
@@ -1572,7 +1562,6 @@ export default function AdminUserDetails() {
           </div>
         )}
 
-        {/* ✅ Faculty Tab for College */}
         {tabs[activeTab] === "Faculty" && user.role === "college" && (
           <div className="bg-[#FFFFFF] border border-[#F5F6FA] rounded-[24px] shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden animate-fade-in-up">
             {!related?.faculty?.length ? (
@@ -1625,7 +1614,6 @@ export default function AdminUserDetails() {
           </div>
         )}
 
-        {/* ✅ Interns Tab for Mentor */}
         {tabs[activeTab] === "Interns" && user.role === "mentor" && (
           <div className="flex flex-col gap-5 animate-fade-in-up">
             {applications?.length === 0 ? (

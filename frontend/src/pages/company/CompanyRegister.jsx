@@ -7,6 +7,7 @@ export default function CompanyRegister() {
   const [form, setForm] = useState({
     requesterName: "",
     requesterEmail: "",
+    requesterPhone: "", // Added phone number field
     selectedCompany: "",
     companyName: "",
     city: "",
@@ -82,17 +83,20 @@ export default function CompanyRegister() {
 
       const formData = new FormData();
 
+      // Basic Details
       formData.append("requesterName", form.requesterName);
       formData.append("requesterEmail", form.requesterEmail);
+      formData.append("requesterPhone", form.requesterPhone); // Appending phone number
 
+      // Company Logic
       if (form.selectedCompany) {
         formData.append("selectedCompany", form.selectedCompany);
       }
-
       if (isOther) {
         formData.append("companyName", form.companyName);
       }
 
+      // Metadata
       formData.append("website", form.website);
       formData.append("emailDomain", form.emailDomain);
       formData.append("industry", form.industry);
@@ -105,7 +109,6 @@ export default function CompanyRegister() {
           country: form.country,
         },
       ];
-
       formData.append("locations", JSON.stringify(locations));
 
       if (form.verificationDocument) {
@@ -119,9 +122,12 @@ export default function CompanyRegister() {
       });
 
       setSuccess("Company request submitted. Please wait for admin approval.");
+      
+      // Reset Form
       setForm({
         requesterName: "",
         requesterEmail: "",
+        requesterPhone: "",
         selectedCompany: "",
         companyName: "",
         city: "",
@@ -144,7 +150,7 @@ export default function CompanyRegister() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FFFFFF] p-4 sm:p-6 md:p-10 font-['Nunito'] text-[#2D3436] selection:bg-[#6C5CE7]/20">
       
-      {/* Decorative background element for "Stunning Vibe" */}
+      {/* Top Accent Bar */}
       <div className="fixed top-0 left-0 w-full h-1 bg-[#6C5CE7]"></div>
       
       <div className="w-full max-w-3xl bg-white p-6 sm:p-10 md:p-14 rounded-[32px] shadow-[0_20px_50px_rgba(108,92,231,0.1)] border border-[#F5F6FA] animate-in fade-in slide-in-from-bottom-6 duration-700">
@@ -170,7 +176,8 @@ export default function CompanyRegister() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* User Details */}
+          
+          {/* Section 1: Requester Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col gap-2 group">
               <label className="text-[11px] font-black text-[#2D3436]/40 uppercase tracking-widest ml-1 group-focus-within:text-[#6C5CE7] transition-colors">
@@ -202,7 +209,23 @@ export default function CompanyRegister() {
             </div>
           </div>
 
-          {/* Company Selection */}
+          {/* New Row: Phone Number (Full Width or Grid) */}
+          <div className="flex flex-col gap-2 group">
+            <label className="text-[11px] font-black text-[#2D3436]/40 uppercase tracking-widest ml-1 group-focus-within:text-[#6C5CE7] transition-colors">
+              Phone Number
+            </label>
+            <input
+              name="requesterPhone"
+              type="tel"
+              placeholder="Ex: +91 9876543210"
+              value={form.requesterPhone}
+              onChange={handleChange}
+              required
+              className="w-full px-5 py-4 text-[14px] font-bold text-[#2D3436] bg-[#F5F6FA] border-2 border-transparent rounded-2xl outline-none focus:border-[#6C5CE7] focus:bg-white transition-all duration-300"
+            />
+          </div>
+
+          {/* Section 2: Company Selection */}
           <div className="flex flex-col gap-2 group">
             <label className="text-[11px] font-black text-[#2D3436]/40 uppercase tracking-widest ml-1 group-focus-within:text-[#6C5CE7] transition-colors">
               Select Company
@@ -242,7 +265,7 @@ export default function CompanyRegister() {
             </div>
           )}
 
-          {/* Address Grid */}
+          {/* Section 3: Address Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <div className="flex flex-col gap-2 group">
               <label className="text-[11px] font-black text-[#2D3436]/40 uppercase tracking-widest ml-1 group-focus-within:text-[#6C5CE7] transition-colors">
@@ -285,7 +308,7 @@ export default function CompanyRegister() {
             </div>
           </div>
 
-          {/* Online Presence */}
+          {/* Section 4: Online Presence */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="flex flex-col gap-2 group">
               <label className="text-[11px] font-black text-[#2D3436]/40 uppercase tracking-widest ml-1 group-focus-within:text-[#6C5CE7] transition-colors">
@@ -313,7 +336,7 @@ export default function CompanyRegister() {
             </div>
           </div>
 
-          {/* Industry Details */}
+          {/* Section 5: Industry Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="flex flex-col gap-2 group">
               <label className="text-[11px] font-black text-[#2D3436]/40 uppercase tracking-widest ml-1 group-focus-within:text-[#6C5CE7] transition-colors">
@@ -341,7 +364,7 @@ export default function CompanyRegister() {
             </div>
           </div>
 
-          {/* Upload Area */}
+          {/* Section 6: Upload Area */}
           <div className="flex flex-col gap-3 p-8 bg-[#F5F6FA] rounded-[24px] border-2 border-dashed border-[#6C5CE7]/10 hover:border-[#6C5CE7]/40 transition-all duration-300 group cursor-pointer text-center relative overflow-hidden">
             <label className="text-[11px] font-black text-[#2D3436]/40 uppercase tracking-widest group-hover:text-[#6C5CE7] transition-colors">
               Registration Document (PDF/Image)
@@ -361,9 +384,10 @@ export default function CompanyRegister() {
             </div>
           </div>
 
-          {/* Action Button */}
+          {/* Section 7: Action Button */}
           <div className="pt-6">
             <button
+              type="submit"
               disabled={loading}
               className="w-full py-5 text-sm font-black text-white bg-[#6C5CE7] rounded-2xl shadow-[0_12px_24px_-8px_rgba(108,92,231,0.5)] hover:shadow-[0_18px_32px_-8px_rgba(108,92,231,0.6)] hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 disabled:translate-y-0 transition-all duration-300 uppercase tracking-[0.2em] flex items-center justify-center gap-4"
             >

@@ -35,6 +35,7 @@ const companyOnboardingSchema = new mongoose.Schema(
 
     website: String,
 
+
     emailDomain: String,
 
     industry: String,

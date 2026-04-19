@@ -243,6 +243,7 @@ export const createCompanyOnboardingService = async ({ body, file }) => {
     requesterEmail,
     companyName,
     selectedCompany,
+    requesterPhone,
     locations,
     website,
     emailDomain,
@@ -255,6 +256,9 @@ export const createCompanyOnboardingService = async ({ body, file }) => {
 
   if (!companyName && !selectedCompany)
     throw new Error("Company selection required");
+
+  if (!requesterPhone)
+    throw new Error("Phone number required");
 
   if (!file)
     throw new Error("Verification document required");
@@ -293,6 +297,7 @@ export const createCompanyOnboardingService = async ({ body, file }) => {
     requesterEmail: email,
     companyName,
     selectedCompany: selectedCompany || null,
+    requesterPhone,
     locations: parsedLocations,
     website,
     emailDomain: emailDomain?.toLowerCase(),
