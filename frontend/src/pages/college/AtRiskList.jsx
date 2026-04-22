@@ -14,7 +14,7 @@ const AtRiskList = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const role = useSelector((state) => state.user?.role);
+  const role = useSelector((state) => state.user?.user?.role);
 
   // ---------------- FETCH DATA ----------------
   const fetchStudents = async () => {
@@ -40,7 +40,7 @@ const AtRiskList = () => {
 
   useEffect(() => {
     fetchStudents();
-  }, [page]);
+  }, [page, search]);
 
   // ---------------- SEARCH HANDLER ----------------
   const handleSearch = (e) => {
@@ -48,6 +48,7 @@ const AtRiskList = () => {
     setPage(1);
     fetchStudents();
   };
+
 
   // ---------------- UI ----------------
   return (

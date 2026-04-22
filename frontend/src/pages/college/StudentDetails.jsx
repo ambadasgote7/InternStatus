@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion"; // For the stunning vibe
+import { motion, AnimatePresence } from "framer-motion";
 import API from "../../api/api";
 import { useSelector } from "react-redux";
 
@@ -12,7 +12,7 @@ export default function StudentDetails() {
   const [stats, setStats] = useState(null);
   const [internships, setInternships] = useState([]);
   const [loading, setLoading] = useState(true);
- 
+
   useEffect(() => {
     if (studentId) fetchData();
   }, [studentId]);
@@ -54,6 +54,9 @@ export default function StudentDetails() {
 
   const ongoing = internships.filter((i) => i.status === "ongoing");
   const completed = internships.filter((i) => i.status === "completed");
+  
+  // Limiting skills to top 5 as requested
+  const displaySkills = student.skills?.slice(0, 5) || [];
 
   return (
     <div className="min-h-screen bg-[#FFFFFF] text-[#2D3436] font-['Nunito'] pb-16 transition-colors duration-300">
@@ -82,20 +85,74 @@ export default function StudentDetails() {
           </div>
         </div>
 
-        {/* PROFILE CARD */}
+        {/* COMPREHENSIVE PROFILE CARD */}
         <motion.div 
-          whileHover={{ y: -5 }}
-          className="bg-[#F5F6FA] rounded-[2.5rem] p-8 md:p-12 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-[0_20px_50px_rgba(108,92,231,0.05)] border border-white"
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-[#F5F6FA] rounded-[2.5rem] p-8 md:p-10 shadow-[0_20px_50px_rgba(108,92,231,0.05)] border border-white relative overflow-hidden"
         >
-          <div className="space-y-2">
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight text-[#2D3436]">{student.fullName}</h1>
-            <div className="flex items-center gap-3">
-               <span className="px-3 py-1 bg-white text-[#6C5CE7] text-[10px] font-black rounded-full shadow-sm">PRN: {student.prn}</span>
-               <span className="text-sm font-bold opacity-60">{student.courseName}</span>
-            </div>
+          {/* Background Decorative Element */}
+          <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+            <svg className="w-64 h-64" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/></svg>
           </div>
-          <div className="w-16 h-16 rounded-full bg-white border-4 border-[#6C5CE7]/20 flex items-center justify-center text-2xl shadow-inner">
-             🎓
+
+          <div className="relative z-10 flex flex-col lg:flex-row justify-between gap-8">
+            <div className="space-y-6 flex-1">
+              <div>
+                <h1 className="text-4xl md:text-5xl font-black tracking-tight text-[#2D3436] mb-2">{student.fullName}</h1>
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="px-3 py-1 bg-[#6C5CE7] text-white text-[10px] font-black rounded-full shadow-sm">PRN: {student.prn}</span>
+                  <span className="px-3 py-1 bg-white text-[#2D3436] text-[10px] font-black rounded-full shadow-sm border border-gray-100">{student.specialization || "General"}</span>
+                  <span className="text-sm font-bold opacity-60">{student.courseName} ({student.courseStartYear} - {student.courseEndYear})</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white/60 p-4 rounded-2xl border border-white">
+                  <p className="text-[9px] uppercase tracking-widest font-black text-[#6C5CE7] mb-1">Email Communication</p>
+                  <p className="text-sm font-bold">{student.user?.email}</p>
+                </div>
+                <div className="bg-white/60 p-4 rounded-2xl border border-white">
+                  <p className="text-[9px] uppercase tracking-widest font-black text-[#6C5CE7] mb-1">Status</p>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <p className="text-sm font-bold capitalize">{student.status}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* SKILLS CHIPS */}
+              <div>
+                <p className="text-[10px] uppercase tracking-widest font-black text-[#2D3436] opacity-40 mb-3">Core Proficiency (Top 5)</p>
+                <div className="flex flex-wrap gap-2">
+                  {displaySkills.length > 0 ? displaySkills.map((skill, i) => (
+                    <span key={i} className="px-4 py-1.5 bg-white text-[#6C5CE7] text-xs font-black rounded-xl shadow-sm border border-[#6C5CE7]/5">
+                      {skill}
+                    </span>
+                  )) : <span className="text-xs italic opacity-30">No skills listed</span>}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center lg:items-end justify-between gap-6">
+              <div className="w-24 h-24 rounded-3xl bg-white border-4 border-[#6C5CE7]/10 flex items-center justify-center text-4xl shadow-xl">
+                 🎓
+              </div>
+              
+              {student.resumeUrl && (
+                <motion.a
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  href={student.resumeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 px-8 py-4 bg-[#2D3436] text-white rounded-2xl font-black text-xs shadow-2xl hover:bg-black transition-all"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                  VIEW RESUME
+                </motion.a>
+              )}
+            </div>
           </div>
         </motion.div>
 
@@ -111,7 +168,7 @@ export default function StudentDetails() {
         )}
 
         {/* SECTIONS GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
           {/* ONGOING PLACEMENTS */}
           <Section title="Live Placements" icon="⚡">
@@ -191,34 +248,31 @@ function Empty() {
 function InternCard({ app, type }) {
   const navigate = useNavigate();
   const report = app.report || {};
-   const { user } = useSelector((state) => state.user);
+  const { user } = useSelector((state) => state.user);
 
-const handleCreditsNavigate = () => {
-  const role = user?.role;
-
-  const routeMap = {
-    faculty: "/faculty/credits",
-    college: "/college/credits",
+  const handleCreditsNavigate = () => {
+    const role = user?.role;
+    const routeMap = {
+      faculty: "/faculty/credits",
+      college: "/college/credits",
+    };
+    navigate(routeMap[role] || "/");
   };
-
-  navigate(routeMap[role] || "/");
-};
-
 
   const openReport = () => { if (report?.reportUrl) window.open(report.reportUrl, "_blank"); };
   const openCertificate = () => { if (app?.certificateUrl) window.open(app.certificateUrl, "_blank"); };
 
   return (
     <motion.div 
-      whileHover={{ scale: 1.02 }}
+      whileHover={{ scale: 1.01 }}
       className="bg-white border-2 border-transparent hover:border-[#6C5CE7]/10 rounded-[1.5rem] p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm transition-all duration-300"
     >
-      <div>
+      <div className="flex-1">
         <p className="text-[10px] text-[#6C5CE7] font-black uppercase tracking-wider mb-0.5">
-          {app.company?.name}
+          {app.company?.name || "Corporate Partner"}
         </p>
-        <h3 className="text-base font-black text-[#2D3436]">
-          {app.internship?.title}
+        <h3 className="text-base font-black text-[#2D3436] leading-tight">
+          {app.internship?.title || "Professional Internship"}
         </h3>
       </div>
 
@@ -226,7 +280,7 @@ const handleCreditsNavigate = () => {
         {type === "ongoing" && (
           <button
             onClick={() => navigate(`${user?.role === "college" ? "/college" : "/faculty"}/academic-internship-track/${app._id}`)}
-            className="w-full sm:w-auto px-5 py-2 bg-[#6C5CE7] text-white text-[11px] font-black rounded-xl shadow-lg shadow-[#6C5CE7]/20 hover:bg-[#5a4bc4] transition-colors"
+            className="w-full sm:w-auto px-5 py-2.5 bg-[#6C5CE7] text-white text-[11px] font-black rounded-xl shadow-lg shadow-[#6C5CE7]/20 hover:bg-[#5a4bc4] transition-colors"
           >
             TRACK LIVE
           </button>
@@ -235,7 +289,7 @@ const handleCreditsNavigate = () => {
         {type === "completed" && (
           <div className="flex gap-2 w-full sm:w-auto">
             {report?.reportUrl && (
-              <button onClick={openReport} className="flex-1 sm:flex-none px-4 py-2 border-2 border-[#F5F6FA] text-[#2D3436] text-[11px] font-black rounded-xl hover:border-[#6C5CE7] transition-all">
+              <button onClick={openReport} className="flex-1 sm:flex-none px-4 py-2.5 border-2 border-[#F5F6FA] text-[#2D3436] text-[11px] font-black rounded-xl hover:border-[#6C5CE7] transition-all">
                 REPORT
               </button>
             )}
@@ -244,12 +298,12 @@ const handleCreditsNavigate = () => {
               report?.status !== "faculty_approved" ? (
                 <button
                   onClick={handleCreditsNavigate}
-                  className="flex-1 sm:flex-none px-4 py-2 bg-[#2D3436] text-white text-[11px] font-black rounded-xl hover:bg-black transition-colors"
+                  className="flex-1 sm:flex-none px-4 py-2.5 bg-[#2D3436] text-white text-[11px] font-black rounded-xl hover:bg-black transition-colors"
                 >
                   CREDITS
                 </button>
               ) : (
-                <div className="px-4 py-2 bg-emerald-50 text-emerald-600 text-[11px] font-black rounded-xl border border-emerald-100 flex items-center gap-1">
+                <div className="px-4 py-2.5 bg-emerald-50 text-emerald-600 text-[11px] font-black rounded-xl border border-emerald-100 flex items-center gap-1">
                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293l-4 4a1 1 0 01-1.414 0l-2-2a1 1 0 111.414-1.414L9 10.586l3.293-3.293a1 1 0 011.414 1.414z"></path></svg>
                   VALIDATED
                 </div>
@@ -257,7 +311,7 @@ const handleCreditsNavigate = () => {
             )}
 
             {app?.certificateUrl && (
-              <button onClick={openCertificate} className="flex-1 sm:flex-none px-4 py-2 border-2 border-[#F5F6FA] text-[#2D3436] text-[11px] font-black rounded-xl hover:border-[#6C5CE7] transition-all">
+              <button onClick={openCertificate} className="flex-1 sm:flex-none px-4 py-2.5 border-2 border-[#F5F6FA] text-[#2D3436] text-[11px] font-black rounded-xl hover:border-[#6C5CE7] transition-all">
                 CERTIFICATE
               </button>
             )}

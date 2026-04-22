@@ -214,7 +214,7 @@ function AppContent() {
             <Route path="/college/credits" element={<CreditManagement />} />
             <Route path="/college/at-risk" element={<AtRiskList />} />
             <Route path="/college/at-risk/:studentId" element={<AtRiskStudent />} />
-            <Route path="college/academic-internship-track/:applicationId" element={<AcademicInternshipTrack />} />
+            <Route path="/college/academic-internship-track/:applicationId" element={<AcademicInternshipTrack />} />
           </Route>
         </Route>
 

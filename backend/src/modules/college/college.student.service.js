@@ -356,6 +356,9 @@ export const getAtRiskStudentsService = async ({
 
   const skip = (page - 1) * limit;
 
+  const thirteenDaysAgo = new Date();
+  thirteenDaysAgo.setDate(thirteenDaysAgo.getDate() - 13);
+
   const matchStage = {
     college: new mongoose.Types.ObjectId(collegeId),
     status: "active"
@@ -371,22 +374,51 @@ export const getAtRiskStudentsService = async ({
     {
       $lookup: {
         from: "applications",
-        let: { studentId: "$_id" },
-        pipeline: [
-          {
-            $match: {
-              $expr: { $eq: ["$student", "$$studentId"] }
-            }
-          },
-          { $limit: 1 } // ⚡ performance optimization
-        ],
-        as: "applications"
+        localField: "_id",
+        foreignField: "student",
+        as: "apps"
+      }
+    },
+
+    {
+      $addFields: {
+        noInternship: { $eq: [{ $size: "$apps" }, 0] },
+        oldestApp: { $min: "$apps.appliedAt" },
+        latestScore: { $max: "$apps.evaluationScore" }
+      }
+    },
+
+    {
+      $addFields: {
+        riskType: {
+          $switch: {
+            branches: [
+              {
+                case: { $eq: ["$noInternship", true] },
+                then: "NO_APPLICATION"
+              },
+              {
+                case: {
+                  $lt: ["$oldestApp", thirteenDaysAgo]
+                },
+                then: "INACTIVE"
+              },
+              {
+                case: {
+                  $lt: ["$latestScore", 5]
+                },
+                then: "LOW_SCORE"
+              }
+            ],
+            default: null
+          }
+        }
       }
     },
 
     {
       $match: {
-        applications: { $size: 0 }
+        riskType: { $ne: null }
       }
     },
 
@@ -402,6 +434,30 @@ export const getAtRiskStudentsService = async ({
     { $unwind: "$userData" },
 
     {
+      $addFields: {
+        reason: {
+          $switch: {
+            branches: [
+              {
+                case: { $eq: ["$riskType", "NO_APPLICATION"] },
+                then: "No internship applications"
+              },
+              {
+                case: { $eq: ["$riskType", "INACTIVE"] },
+                then: "No recent activity (13+ days)"
+              },
+              {
+                case: { $eq: ["$riskType", "LOW_SCORE"] },
+                then: "Low evaluation score"
+              }
+            ],
+            default: "At risk"
+          }
+        }
+      }
+    },
+
+    {
       $project: {
         _id: 0,
         id: "$_id",
@@ -410,7 +466,8 @@ export const getAtRiskStudentsService = async ({
         specialization: 1,
         courseName: 1,
         year: "$Year",
-        reason: { $literal: "No internship applications" }
+        riskType: 1,
+        reason: 1
       }
     },
 
@@ -446,81 +503,195 @@ export const getAtRiskStudentByIdService = async (studentId) => {
     throw new Error("Invalid studentId");
   }
 
+  const thirteenDaysAgo = new Date();
+  thirteenDaysAgo.setDate(thirteenDaysAgo.getDate() - 13);
+
   const student = await StudentProfile.findById(studentId)
     .populate("user", "email")
     .lean();
 
   if (!student) return null;
 
-  const exists = await Application.exists({
-    student: student._id
-  });
+  const apps = await Application.find({ student: student._id }).lean();
 
-  if (exists) return null;
+const noInternship = apps.length === 0;
 
-  return {
-    id: student._id,
-    name: student.fullName,
-    email: student.user?.email,
-    specialization: student.specialization,
-    courseName: student.courseName,
-    year: student.Year,
-    reason: "No internship applications"
-  };
+const latestScore = apps.length
+  ? Math.max(...apps.map(a => a.evaluationScore || 0))
+  : null;
+
+const completionPct = apps.length
+  ? Math.max(...apps.map(a => a.completionPct || 0))
+  : 0;
+
+const inactive =
+  apps.length &&
+  !apps.some(a => a.status === "ongoing" || a.status === "completed");
+
+let riskType = null;
+let reason = null;
+
+// ✅ ORDER MATTERS (don’t mess this up)
+if (noInternship) {
+  riskType = "NO_APPLICATION";
+  reason = "Not applied to any internship";
+}
+else if (latestScore !== null && latestScore < 5) {
+  riskType = "LOW_SCORE";
+  reason = `Low score (${latestScore})`;
+}
+else if (completionPct < 30) {   // 🔥 THIS WAS MISSING
+  riskType = "LOW_PROGRESS";
+  reason = `Low progress (${completionPct}%)`;
+}
+else if (inactive) {
+  riskType = "INACTIVE";
+  reason = "Inactive internship";
+}
+
+if (!riskType) return null;
+
+return {
+  id: student._id,
+  name: student.fullName,
+  email: student.user?.email,
+  riskType,
+  reason,
+  latestScore,
+  completionPct
+};
 };
 
 
-// ---------------- NOTIFY STUDENT ----------------
 export const notifyAtRiskStudentService = async ({
   studentId,
   message,
   user
 }) => {
-  // ✅ Validate input
+  // ---------------- VALIDATION ----------------
   if (!mongoose.Types.ObjectId.isValid(studentId)) {
     throw new Error("Invalid studentId");
   }
 
-  if (!user || !user._id) {
+  if (!user?._id) {
     throw new Error("Sender user missing");
   }
 
-  if (!message || message.trim().length < 5) {
-    throw new Error("Message too short");
-  }
-
-  // ✅ Fetch student + user email
+  // ---------------- FETCH STUDENT + APPLICATION DATA ----------------
   const student = await StudentProfile.findById(studentId)
     .populate("user", "email")
     .lean();
 
-  if (!student) {
-    throw new Error("Student not found");
+  if (!student) throw new Error("Student not found");
+  if (!student.user?.email) throw new Error("Student email not found");
+
+  const apps = await Application.find({ student: student._id }).lean();
+
+  // ---------------- CALCULATE RISK ----------------
+  const noInternship = apps.length === 0;
+
+  const oldestApp = apps.length
+    ? new Date(Math.min(...apps.map(a => new Date(a.appliedAt))))
+    : null;
+
+  const latestScore = apps.length
+    ? Math.max(...apps.map(a => a.evaluationScore || 0))
+    : null;
+
+  const completionPct = apps.length
+    ? Math.max(...apps.map(a => a.completionPct || 0))
+    : 0;
+
+  const inactive =
+    apps.length &&
+    !apps.some(a => a.status === "ongoing" || a.status === "completed");
+
+  let riskType = null;
+  let reason = null;
+
+  if (noInternship) {
+    riskType = "NO_APPLICATION";
+    reason = "Not applied to any internship";
+  } else if (latestScore !== null && latestScore < 5) {
+    riskType = "LOW_SCORE";
+    reason = `Low score (${latestScore})`;
+  } else if (completionPct < 30) {
+    riskType = "LOW_PROGRESS";
+    reason = `Low progress (${completionPct}%)`;
+  } else if (inactive) {
+    riskType = "INACTIVE";
+    reason = "Inactive internship";
   }
 
-  if (!student.user || !student.user._id) {
-    throw new Error("Student user not linked properly");
+  if (!riskType) {
+    throw new Error("Student is not at risk");
   }
 
-  if (!student.user.email) {
-    throw new Error("Student email not found");
-  }
+  // ---------------- MESSAGE GENERATOR ----------------
+  const getMessageByRisk = (riskType, data, customMessage) => {
+    if (customMessage?.trim().length >= 5) return customMessage;
 
-  // ✅ SEND EMAIL FIRST
+    switch (riskType) {
+      case "NO_APPLICATION":
+        return `You have not applied to any internships yet. Start applying immediately to stay on track.`;
+
+      case "INACTIVE": {
+        const daysInactive = data.oldestApp
+          ? Math.floor(
+              (Date.now() - new Date(data.oldestApp)) /
+                (1000 * 60 * 60 * 24)
+            )
+          : null;
+
+        return daysInactive
+          ? `You have been inactive for ${daysInactive} days. Resume applying immediately.`
+          : "You are currently inactive. Please resume your internship activity.";
+      }
+
+      case "LOW_SCORE":
+        return `Your recent evaluation score is ${data.latestScore}. Focus on improving your performance.`;
+
+      case "LOW_PROGRESS":
+        return `Your internship progress is only ${data.completionPct}%. Increase your activity and complete tasks regularly.`;
+
+      default:
+        return "You are at risk. Immediate action is required.";
+    }
+  };
+
+  const finalMessage = getMessageByRisk(
+    riskType,
+    { oldestApp, latestScore, completionPct },
+    message
+  );
+
+  // ---------------- EMAIL ----------------
+  const emailHtml = `
+    <div style="font-family: Arial, sans-serif;">
+      <p>Hi ${student.fullName},</p>
+
+      <p><strong>⚠️ Internship Alert</strong></p>
+
+      <p>${finalMessage}</p>
+
+      <p>
+        👉 <a href="https://your-app-link.com">Apply / Track Internships</a>
+      </p>
+
+      <p>Contact your faculty if you need help.</p>
+
+      <br/>
+      <p>— InternStatus Team</p>
+    </div>
+  `;
+
   await sendEmail({
     to: student.user.email,
-    subject: "Internship Application Reminder",
-    html: `
-      <p>Hi ${student.fullName},</p>
-      <p>${message}</p>
-      <br/>
-      <p><b>Please apply for internships as soon as possible.</b></p>
-      <br/>
-      <p>Regards,<br/>InternStatus</p>
-    `
+    subject: "⚠️ Internship Status Alert",
+    html: emailHtml
   });
 
-  // ✅ STORE NOTIFICATION (NO CRASH NOW)
+  // ---------------- STORE NOTIFICATION ----------------
   await Notification.create({
     recipient: student.user._id,
     recipientModel: "StudentProfile",
@@ -528,17 +699,28 @@ export const notifyAtRiskStudentService = async ({
     sender: user._id,
     senderRole: user.role,
 
-    title: "Internship Reminder",
-    message,
+    title: "Internship Alert",
+    message: finalMessage,
 
     type: "AT_RISK",
     referenceId: student._id,
     referenceModel: "StudentProfile",
+
+    meta: {
+      riskType,
+      reason,
+      latestScore,
+      completionPct
+    },
 
     channels: ["email", "in_app"],
     status: "sent",
     sentAt: new Date()
   });
 
-  return { success: true };
+  return {
+    success: true,
+    riskType,
+    message: finalMessage
+  };
 };

@@ -32,6 +32,7 @@ export default function FacultyStudents() {
     }
   };
 
+
   useEffect(() => {
     fetchStudents();
   }, []);
@@ -159,6 +160,7 @@ export default function FacultyStudents() {
                 </thead>
                 <tbody className="divide-y divide-[#F5F6FA]">
                   {students.map((s) => (
+                  
                     <tr
                       key={s._id}
                       className="hover:bg-[#F5F6FA]/40 transition-colors duration-300 group"
@@ -166,6 +168,11 @@ export default function FacultyStudents() {
                       <td className="px-8 py-5">
                         <div className="text-[14px] font-black text-[#2D3436] group-hover:text-[#6C5CE7] transition-colors duration-300">
                           {s.fullName}
+                          <br></br>
+                          <span className="text-[12px] font-bold text-[#6C5CE7] opacity-80 group-hover:text-[#2D3436] transition-colors">
+                            {s.user?.email || "—"}
+                          </span>
+                          
                         </div>
                       </td>
                       <td className="px-8 py-5">

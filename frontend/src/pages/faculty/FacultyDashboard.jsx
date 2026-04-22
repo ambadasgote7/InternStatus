@@ -410,7 +410,7 @@ export default function FacultyDashboard() {
                     className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-rose-50 border border-rose-200 rounded-[16px] px-5 py-4 cursor-pointer hover:bg-rose-100 hover:shadow-md transition-all duration-300 transform hover:-translate-y-0.5 animate-in fade-in fill-mode-both group"
                     onClick={() => {
                       const id = student.id || student.studentId;
-                      if (id) navigate(`/faculty/at-risk/${id}`);
+                      if (id) navigate(`/faculty/at-risk/${student.id}`);
                     }}
                   >
                     <div className="flex items-center gap-3">

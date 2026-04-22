@@ -1034,29 +1034,39 @@ const avgStudentScore = scores.length
   ? +(scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1)
   : null;
 
-  // ---------------- AT-RISK ----------------
-  const atRisk = allStudentStats
-    .filter((s) => {
-      if (!s.hasApplied) return true;
+ const atRisk = allStudentStats
+  .map((s) => {
+    let riskType = null;
+    let reason = null;
 
-      const lowScore = s.avgScore !== null && s.avgScore < 5;
-      const lowProgress = s.completionPct < 30;
-      const inactive =
-        s.status !== "ongoing" && s.status !== "completed";
+    if (!s.hasApplied) {
+      riskType = "NO_APPLICATION";
+      reason = "Not applied to any internship";
+    } else if (s.avgScore !== null && s.avgScore < 5) {
+      riskType = "LOW_SCORE";
+      reason = `Low performance (avg score: ${s.avgScore})`;
+    } else if (s.completionPct < 30) {
+      riskType = "LOW_PROGRESS";
+      reason = `Low progress (${s.completionPct}% completed)`;
+    } else if (
+      s.status !== "ongoing" &&
+      s.status !== "completed"
+    ) {
+      riskType = "INACTIVE";
+      reason = "Inactive internship status";
+    }
 
-      return lowScore || lowProgress || inactive;
-    })
-    .map((s) => ({
-      id: s.id,
-      studentId: s.studentId,
+    if (!riskType) return null;
+
+    return {
+      id: s.studentId, // ✅ ONLY ONE ID — FIXED
       name: s.name,
-      reason: !s.hasApplied
-        ? "Not applied to any internship"
-        : "Low performance / inactive"
-    }));
-
-   
-
+      riskType,
+      reason
+    };
+  })
+  .filter(Boolean);
+  
   // ---------------- CLEAN RECENT ACTIVITY ----------------
   const recentActivity = applications
     .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
